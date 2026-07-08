@@ -174,6 +174,9 @@
   .camera-modal video{ width:100%; border-radius:20px; background:#000; }
   #mode-btn-direct, #mode-btn-backend{ color:var(--text-lo); transition: background .2s var(--ease), color .2s var(--ease); }
   #mode-btn-direct.active-mode, #mode-btn-backend.active-mode{ background:var(--accent); color:#09090B; }
+  #settings-panel{ height:100vh; max-height:100vh; }
+  @media (min-width: 640px){ #settings-panel{ height:600px; max-height:85vh; } }
+  #tag-filters .tag-filter-btn{ background:transparent; color:var(--text-lo); transition: background .2s var(--ease), color .2s var(--ease); }
 </style>
 </head>
 <body class="antialiased">
@@ -355,23 +358,23 @@
 <!-- MESSAGE EDIT MODAL removed: inline editing used instead -->
 
 <!-- SETTINGS MODAL -->
-<div id="settings-modal" class="fixed inset-0 z-[100] modal-backdrop hidden items-center justify-center px-4" onclick="if(event.target===this) closeSettings()">
-  <div class="modal-panel glass rounded-3xl w-full max-w-3xl h-[600px] flex overflow-hidden" style="background:var(--bg-1);">
-    <div class="w-48 shrink-0 border-r p-3 space-y-1 overflow-y-auto" style="border-color:var(--border)">
-      <div class="px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
-      <button class="tab-btn active w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" onclick="switchTab('model')">Модель</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" onclick="switchTab('integrations')">Интеграции</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" onclick="switchTab('prompts')">Промпты</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" onclick="switchTab('changelog')">Что нового</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
+<div id="settings-modal" class="fixed inset-0 z-[100] modal-backdrop hidden items-center justify-center sm:px-4" onclick="if(event.target===this) closeSettings()">
+  <div class="modal-panel glass rounded-none sm:rounded-3xl w-full h-full sm:h-auto sm:w-full sm:max-w-3xl flex flex-col sm:flex-row overflow-hidden" style="background:var(--bg-1);" id="settings-panel">
+    <div class="shrink-0 border-b sm:border-b-0 sm:border-r flex sm:block gap-1 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto p-2 sm:p-3 sm:w-48 sm:space-y-1 pt-safe sm:pt-3" style="border-color:var(--border)">
+      <div class="hidden sm:block px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
+      <button class="tab-btn active shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" onclick="switchTab('model')">Модель</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" onclick="switchTab('integrations')">Интеграции</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" onclick="switchTab('prompts')">Промпты</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" onclick="switchTab('changelog')">Что нового</button>
+      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
     </div>
 
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0">
       <div class="flex items-center justify-between p-4 border-b" style="border-color:var(--border)">
         <div id="tab-title" class="font-medium text-sm">Общие</div>
         <button onclick="closeSettings()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-mid)"><i class="fa-solid fa-xmark"></i></button>

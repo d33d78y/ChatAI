@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nova</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  :root{
+    --bg-0:#09090B;
+    --bg-1:#111113;
+    --bg-2:#18181B;
+    --bg-3:#202024;
+    --accent:#f97316;
+    --accent-dim: rgba(249,115,22,0.15);
+    --border: rgba(255,255,255,0.07);
+    --text-hi: #f4f4f5;
+    --text-mid: #a1a1aa;
+    --text-lo: #71717a;
+    --ease: cubic-bezier(.16,.84,.44,1);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg-0);
+    color:var(--text-hi);
+    font-family:'Inter',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .font-display{font-family:'Space Grotesk',sans-serif;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:10px;}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15);}
+
+  .glass{
+    background: rgba(24,24,27,0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+  }
+
+  /* Sidebar */
+  #sidebar{
+    width:290px;
+    background:var(--bg-1);
+    border-right:1px solid var(--border);
+    transition: transform .45s var(--ease), opacity .3s var(--ease);
+  }
+  .history-item{
+    transition: background .25s var(--ease), transform .2s var(--ease);
+    border:1px solid transparent;
+  }
+  .history-item:hover{ background: rgba(255,255,255,0.04); }
+  .history-item.active{
+    background: linear-gradient(180deg, rgba(249,115,22,0.10), rgba(249,115,22,0.03));
+    border-color: rgba(249,115,22,0.25);
+  }
+  .history-item .del-btn{ opacity:0; transition:opacity .2s var(--ease); }
+  .history-item:hover .del-btn{ opacity:1; }
+
+  .btn-primary{
+    background: var(--accent);
+    color:#09090B;
+    transition: transform .18s var(--ease), box-shadow .3s var(--ease), background .2s;
+  }
+  .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(249,115,22,0.5); }
+  .btn-primary:active{ transform: translateY(0px) scale(.97); }
+
+  .icon-btn{
+    transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease);
+  }
+  .icon-btn:hover{ background: rgba(255,255,255,0.06); color: var(--text-hi); }
+  .icon-btn:active{ transform: scale(.9); }
+
+  /* Messages */
+  .msg-enter{ animation: msgIn .5s var(--ease) both; }
+  @keyframes msgIn{
+    from{ opacity:0; transform: translateY(14px) scale(.98); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  .bubble-user{
+    background: linear-gradient(155deg, #fb923c, #f97316);
+    color:#1a0d02;
+    border-radius: 24px 24px 4px 24px;
+  }
+  .bubble-ai{
+    background: var(--bg-2);
+    border:1px solid var(--border);
+    border-radius: 24px 24px 24px 4px;
+  }
+  .msg-actions{ opacity:0; transform: translateY(4px); transition: opacity .2s var(--ease), transform .2s var(--ease); }
+  .msg-row:hover .msg-actions{ opacity:1; transform: translateY(0); }
+
+  .typing-dot{
+    width:6px;height:6px;border-radius:50%;
+    background: var(--text-mid);
+    animation: typingBounce 1.2s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(2){ animation-delay:.15s; }
+  .typing-dot:nth-child(3){ animation-delay:.3s; }
+  @keyframes typingBounce{
+    0%,60%,100%{ transform: translateY(0); opacity:.4; }
+    30%{ transform: translateY(-5px); opacity:1; }
+  }
+
+  /* Composer */
+  #composer-wrap{
+    background: var(--bg-2);
+    border:1px solid var(--border);
+    border-radius:28px;
+    transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  #composer-wrap:focus-within{
+    border-color: rgba(249,115,22,0.4);
+    box-shadow: 0 0 0 4px rgba(249,115,22,0.08);
+  }
+  #chat-input{
+    background:transparent; resize:none; outline:none; color:var(--text-hi);
+    max-height: 200px;
+  }
+  #chat-input::placeholder{ color: var(--text-lo); }
+
+  #send-btn{ transition: transform .18s var(--ease), background .2s, opacity .2s; }
+  #send-btn:hover:not(:disabled){ transform: scale(1.06); }
+  #send-btn:active:not(:disabled){ transform: scale(.92); }
+  #send-btn:disabled{ opacity:.35; }
+
+  /* Modal */
+  .modal-backdrop{
+    background: rgba(9,9,11,0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity:0; transition: opacity .3s var(--ease);
+  }
+  .modal-backdrop.show{ opacity:1; }
+  .modal-panel{
+    transform: translateY(24px) scale(.96);
+    opacity:0;
+    transition: transform .35s var(--ease), opacity .3s var(--ease);
+  }
+  .modal-backdrop.show .modal-panel{ transform: translateY(0) scale(1); opacity:1; }
+
+  .tab-btn{
+    color: var(--text-mid);
+    border-left:2px solid transparent;
+    transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  }
+  .tab-btn.active{ color: var(--text-hi); background: rgba(255,255,255,0.04); border-color: var(--accent); }
+  .tab-btn:hover{ color: var(--text-hi); }
+
+  .switch{
+    width:42px; height:24px; border-radius:999px; background:#3f3f46; position:relative; cursor:pointer;
+    transition: background .25s var(--ease);
+    flex-shrink:0;
+  }
+  .switch.on{ background: var(--accent); }
+  .switch .knob{
+    position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff;
+    transition: transform .25s var(--ease);
+  }
+  .switch.on .knob{ transform: translateX(18px); }
+
+  .prompt-card{
+    background: var(--bg-2);
+    border:1px solid var(--border);
+    transition: transform .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
+  }
+  .prompt-card:hover{ transform: translateY(-3px); border-color: rgba(249,115,22,0.3); background: var(--bg-3); }
+
+  /* Toast */
+  #toast-container{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .toast{
+    background: var(--bg-2); border:1px solid var(--border); color:var(--text-hi);
+    padding:10px 18px; border-radius:999px; font-size:13px; display:flex; align-items:center; gap:8px;
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,0.5);
+    animation: toastIn .4s var(--ease) both;
+  }
+  @keyframes toastIn{
+    from{ opacity:0; transform: translateY(12px) scale(.9); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  .toast.hide{ animation: toastOut .3s var(--ease) both; }
+  @keyframes toastOut{ to{ opacity:0; transform: translateY(8px) scale(.9); } }
+
+  #mobile-overlay{
+    background: rgba(0,0,0,0.55);
+    opacity:0; pointer-events:none;
+    transition: opacity .35s var(--ease);
+  }
+  #mobile-overlay.show{ opacity:1; pointer-events:auto; }
+
+  @media (max-width: 900px){
+    #sidebar{
+      position:fixed; z-index:60; top:0; left:0; height:100%;
+      transform: translateX(-100%);
+    }
+    #sidebar.open{ transform: translateX(0); }
+  }
+
+  .scale-in{ animation: scaleIn .3s var(--ease) both; }
+  @keyframes scaleIn{ from{ opacity:0; transform:scale(.95);} to{opacity:1; transform:scale(1);} }
+
+  .spin{ animation: spin 1s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* Markdown content */
+  .md p{ margin: 0 0 0.6em 0; }
+  .md p:last-child{ margin-bottom:0; }
+  .md ul, .md ol{ margin: 0 0 0.6em 1.2em; }
+  .md li{ margin: 0.15em 0; }
+  .md strong{ font-weight:600; color:var(--text-hi); }
+  .md a{ color: var(--accent); text-decoration: underline; }
+  .md h1, .md h2, .md h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; margin: 0.8em 0 0.4em; }
+  .md h1{ font-size:1.25em; }
+  .md h2{ font-size:1.15em; }
+  .md h3{ font-size:1.05em; }
+  .md blockquote{ border-left:2px solid var(--accent); padding-left:0.8em; color:var(--text-mid); margin:0.6em 0; }
+  .md code{ background: rgba(255,255,255,0.08); padding:0.15em 0.4em; border-radius:6px; font-size:0.88em; }
+  .md pre{ background:#0d0d0f; border:1px solid var(--border); border-radius:14px; margin:0.6em 0; overflow:hidden; }
+  .md pre code{ background:transparent; padding:0; display:block; overflow-x:auto; padding:14px 16px; font-size:0.82em; line-height:1.5; }
+  .code-block-wrap{ position:relative; }
+  .code-block-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 8px 14px; background: rgba(255,255,255,0.03); border-bottom:1px solid var(--border);
+    font-size:11px; color:var(--text-lo); font-family:'Inter',sans-serif;
+  }
+  .code-copy-btn{
+    cursor:pointer; color:var(--text-lo); transition: color .2s var(--ease);
+    background:none; border:none; font-size:11px; display:flex; align-items:center; gap:4px;
+  }
+  .code-copy-btn:hover{ color:var(--accent); }
+  .cursor-blink{
+    display:inline-block; width:2px; height:1em; background:var(--accent); margin-left:2px;
+    vertical-align:text-bottom; animation: blink 1s step-start infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  #stop-btn{
+    background: var(--bg-2); border:1px solid var(--border); color:var(--text-hi);
+    transition: transform .18s var(--ease), border-color .2s var(--ease);
+  }
+  #stop-btn:hover{ border-color: rgba(249,115,22,0.4); transform: translateY(-1px); }
+
+  #history-search{
+    background: var(--bg-2); border:1px solid var(--border); color:var(--text-hi); outline:none;
+    transition: border-color .2s var(--ease);
+  }
+  #history-search:focus{ border-color: rgba(249,115,22,0.4); }
+  #history-search::placeholder{ color: var(--text-lo); }
+
+  .rename-input{
+    background: var(--bg-3); border:1px solid rgba(249,115,22,0.4); outline:none; color:var(--text-hi);
+    border-radius:6px; padding:1px 6px; width:100%;
+  }
+
+  /* Attachments */
+  #attach-menu button:hover{ background: rgba(255,255,255,0.06); }
+  .attach-chip{
+    background: var(--bg-2); border:1px solid var(--border); border-radius:14px;
+    display:flex; align-items:center; gap:8px; padding:6px 10px 6px 6px; max-width:220px;
+    animation: scaleIn .25s var(--ease) both;
+  }
+  .attach-chip img{ width:32px; height:32px; border-radius:9px; object-fit:cover; flex-shrink:0; }
+  .attach-chip .file-icon{
+    width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    background: var(--accent-dim); color: var(--accent); flex-shrink:0; font-size:13px;
+  }
+  .attach-chip .meta{ min-width:0; }
+  .attach-chip .meta .name{ font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+  .attach-chip .meta .size{ font-size:10px; color:var(--text-lo); }
+  .attach-chip .remove-btn{
+    color:var(--text-lo); flex-shrink:0; width:18px; height:18px; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; transition: color .2s var(--ease), background .2s var(--ease);
+  }
+  .attach-chip .remove-btn:hover{ color:#f87171; background: rgba(248,113,113,0.1); }
+
+  #mic-btn.recording{
+    color: #f87171 !important;
+    animation: micPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes micPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,0.35); }
+    50%{ box-shadow: 0 0 0 8px rgba(248,113,113,0); }
+  }
+
+  .msg-attachments{ display:flex; flex-wrap:wrap; gap:6px; }
+  .msg-attachments img{ width:120px; height:90px; object-fit:cover; border-radius:14px; border:1px solid var(--border); }
+  .msg-attachments .file-pill{
+    display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.15); border-radius:12px; padding:6px 10px; font-size:12px;
+  }
+
+  /* Model picker */
+  .model-card{
+    background: var(--bg-2); border:1px solid var(--border); border-radius:16px;
+    padding:12px 14px; cursor:pointer; display:flex; align-items:center; gap:12px;
+    transition: border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .model-card:hover{ border-color: rgba(249,115,22,0.3); }
+  .model-card.selected{ border-color: var(--accent); background: linear-gradient(180deg, rgba(249,115,22,0.08), transparent); }
+  .model-card .radio{
+    width:16px; height:16px; border-radius:50%; border:2px solid var(--text-lo); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; transition: border-color .2s var(--ease);
+  }
+  .model-card.selected .radio{ border-color: var(--accent); }
+  .model-card.selected .radio::after{ content:''; width:8px; height:8px; border-radius:50%; background:var(--accent); }
+  .model-card .icon-box{
+    width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background: rgba(255,255,255,0.05);
+  }
+  .model-card .title{ font-size:13px; font-weight:500; }
+  .model-card .subtitle{ font-size:11px; color:var(--text-lo); }
+</style>
+</head>
+<body class="antialiased">
+
+<div class="flex h-screen w-screen relative">
+
+  <!-- Mobile overlay -->
+  <div id="mobile-overlay" class="fixed inset-0 z-50" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="flex flex-col shrink-0 h-full">
+    <div class="p-4 flex items-center gap-2.5 border-b" style="border-color:var(--border)">
+      <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+        <path d="M20 3 L34 12 V28 L20 37 L6 28 V12 Z" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M20 12 L27 16.2 V24.6 L20 28.8 L13 24.6 V16.2 Z" fill="#f97316"/>
+      </svg>
+      <span class="font-display font-semibold text-[15px] tracking-tight">Nova</span>
+    </div>
+
+    <div class="p-3">
+      <button onclick="createNewChat()" class="btn-primary w-full rounded-2xl py-3 px-4 flex items-center justify-center gap-2 font-medium text-sm">
+        <i class="fa-solid fa-plus text-xs"></i> Новый чат
+      </button>
+    </div>
+
+    <div class="px-3 pb-2 pt-1">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:var(--text-lo)"></i>
+        <input id="history-search" type="text" placeholder="Поиск по чатам..." class="w-full rounded-lg pl-8 pr-3 py-2 text-[13px]" oninput="renderHistory()">
+      </div>
+    </div>
+    <div class="px-3 pb-2 text-[11px] uppercase tracking-wider font-medium" style="color:var(--text-lo)">История</div>
+    <div id="history-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-2"></div>
+
+    <div class="border-t p-3 space-y-1" style="border-color:var(--border)">
+      <button onclick="openSettings()" class="icon-btn w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-left" style="color:var(--text-mid)">
+        <i class="fa-solid fa-gear w-4"></i> Настройки
+      </button>
+      <div class="flex items-center gap-3 rounded-xl px-3 py-2.5">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style="background:var(--accent-dim); color:var(--accent)">Ты</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium truncate">Гость</div>
+          <div class="text-[11px]" style="color:var(--text-lo)">Nova · v1.0.0</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col h-full min-w-0 relative">
+
+    <!-- Topbar -->
+    <header class="flex items-center justify-between px-4 py-3 shrink-0">
+      <button onclick="toggleSidebar()" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center md:hidden" style="color:var(--text-mid)">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="hidden md:block"></div>
+      <div class="flex items-center gap-1">
+        <button onclick="exportChat()" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Скачать чат">
+          <i class="fa-solid fa-download text-sm"></i>
+        </button>
+        <button onclick="shareChat()" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Поделиться">
+          <i class="fa-solid fa-share-nodes text-sm"></i>
+        </button>
+        <button onclick="toast('Меню пока пусто','info')" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Меню">
+          <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat area -->
+    <div id="chat-scroll" class="flex-1 overflow-y-auto">
+      <div id="empty-state" class="h-full flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" class="mb-6">
+          <circle cx="60" cy="60" r="46" stroke="#27272a" stroke-width="1.5"/>
+          <circle cx="60" cy="60" r="46" stroke="#f97316" stroke-width="2.5" stroke-dasharray="12 250" stroke-linecap="round"/>
+          <path d="M60 34 L82.5 47 V73 L60 86 L37.5 73 V47 Z" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M60 47 L71.25 53.5 V66.5 L60 73 L48.75 66.5 V53.5 Z" fill="#f97316" fill-opacity="0.9"/>
+        </svg>
+        <h1 class="font-display text-3xl font-semibold mb-2">Чем займёмся сегодня?</h1>
+        <p class="text-sm mb-8" style="color:var(--text-mid)">Задай вопрос, вставь текст или обсуди идею — Nova на связи.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          <button onclick="promptCard('Объясни квантовые вычисления простыми словами')" class="prompt-card rounded-2xl p-4 text-left">
+            <i class="fa-solid fa-atom mb-2" style="color:var(--accent)"></i>
+            <div class="text-sm font-medium">Объясни сложную тему</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)">простыми словами</div>
+          </button>
+          <button onclick="promptCard('Помоги написать план недели с фокусом на продуктивность')" class="prompt-card rounded-2xl p-4 text-left">
+            <i class="fa-solid fa-list-check mb-2" style="color:var(--accent)"></i>
+            <div class="text-sm font-medium">Составь план</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)">на неделю вперёд</div>
+          </button>
+          <button onclick="promptCard('Напиши функцию на JavaScript для дебаунса')" class="prompt-card rounded-2xl p-4 text-left">
+            <i class="fa-solid fa-code mb-2" style="color:var(--accent)"></i>
+            <div class="text-sm font-medium">Напиши код</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)">на любом языке</div>
+          </button>
+          <button onclick="promptCard('Придумай 5 идей для подарка на день рождения другу')" class="prompt-card rounded-2xl p-4 text-left">
+            <i class="fa-solid fa-lightbulb mb-2" style="color:var(--accent)"></i>
+            <div class="text-sm font-medium">Придумай идею</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)">для любого случая</div>
+          </button>
+        </div>
+      </div>
+
+      <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-6 hidden"></div>
+    </div>
+
+    <!-- Composer -->
+    <div class="px-4 pb-5 pt-2 shrink-0">
+      <div class="max-w-3xl mx-auto">
+
+        <div id="attachment-preview" class="flex flex-wrap gap-2 mb-2 hidden"></div>
+
+        <div id="composer-wrap" class="flex items-end gap-2 p-2 pl-3 relative">
+          <div class="relative shrink-0">
+            <button id="attach-btn" onclick="toggleAttachMenu(event)" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center mb-0.5" style="color:var(--text-mid)">
+              <i class="fa-solid fa-paperclip text-sm"></i>
+            </button>
+            <div id="attach-menu" class="hidden absolute bottom-12 left-0 w-52 rounded-2xl overflow-hidden glass scale-in z-50" style="background:var(--bg-2)">
+              <button onclick="triggerAttach('camera')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)">
+                <i class="fa-solid fa-camera w-4" style="color:var(--accent)"></i> Камера
+              </button>
+              <button onclick="triggerAttach('photo')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)">
+                <i class="fa-solid fa-image w-4" style="color:var(--accent)"></i> Фото из галереи
+              </button>
+              <button onclick="triggerAttach('file')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)">
+                <i class="fa-solid fa-file w-4" style="color:var(--accent)"></i> Файл
+              </button>
+            </div>
+          </div>
+
+          <input id="file-camera" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFiles(this.files)">
+          <input id="file-photo" type="file" accept="image/*" multiple class="hidden" onchange="handleFiles(this.files)">
+          <input id="file-generic" type="file" multiple class="hidden" onchange="handleFiles(this.files)">
+
+          <textarea id="chat-input" rows="1" placeholder="Напишите сообщение..." class="flex-1 py-2 text-[15px] leading-6"></textarea>
+          <button id="mic-btn" onclick="toggleVoiceInput()" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center shrink-0 mb-0.5" style="color:var(--text-mid)" title="Голосовой ввод">
+            <i class="fa-solid fa-microphone text-sm"></i>
+          </button>
+          <button id="send-btn" onclick="sendMessage()" class="btn-primary w-9 h-9 rounded-full flex items-center justify-center shrink-0 mb-0.5">
+            <i class="fa-solid fa-arrow-up text-sm"></i>
+          </button>
+        </div>
+        <p class="text-center text-[11px] mt-2.5" style="color:var(--text-lo)">Nova может ошибаться. Проверяйте важные факты.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="attach-menu-backdrop" class="hidden fixed inset-0 z-40" onclick="closeAttachMenu()"></div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="fixed inset-0 z-[100] modal-backdrop hidden items-center justify-center px-4" onclick="if(event.target===this) closeSettings()">
+  <div class="modal-panel glass rounded-3xl w-full max-w-2xl h-[540px] flex overflow-hidden" style="background:var(--bg-1);">
+    <div class="w-48 shrink-0 border-r p-3 space-y-1" style="border-color:var(--border)">
+      <div class="px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
+      <button class="tab-btn active w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
+    </div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <div class="flex items-center justify-between p-4 border-b" style="border-color:var(--border)">
+        <div id="tab-title" class="font-medium text-sm">Общие</div>
+        <button onclick="closeSettings()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-mid)"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5">
+        <!-- General -->
+        <div class="tab-panel space-y-5" data-panel="general">
+          <div>
+            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">API ключ OpenRouter</label>
+            <input id="api-key-input" type="password" placeholder="sk-or-v1-..." class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Хранится только в вашем браузере (localStorage) и никуда, кроме OpenRouter, не отправляется.</p>
+          </div>
+          <div>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Модель</label>
+            <div id="model-picker" class="space-y-2"></div>
+            <button onclick="toggleAdvancedModel()" id="advanced-model-toggle" class="text-[11px] mt-2.5 underline" style="color:var(--text-lo)">Указать модель вручную</button>
+            <div id="advanced-model-wrap" class="hidden mt-2">
+              <input id="model-input" type="text" placeholder="например openai/gpt-oss-120b:free" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+              <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Любой идентификатор модели OpenRouter.</p>
+            </div>
+          </div>
+          <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium">Сохранить</button>
+        </div>
+
+        <!-- Appearance -->
+        <div class="tab-panel space-y-4 hidden" data-panel="appearance">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Компактный режим</div>
+              <div class="text-xs" style="color:var(--text-lo)">Уменьшить отступы в сообщениях</div>
+            </div>
+            <div class="switch" onclick="toggleSwitch(this,'compact')"><div class="knob"></div></div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Крупный шрифт</div>
+              <div class="text-xs" style="color:var(--text-lo)">Увеличить размер текста сообщений</div>
+            </div>
+            <div class="switch" onclick="toggleSwitch(this,'largeFont')"><div class="knob"></div></div>
+          </div>
+        </div>
+
+        <!-- Interface -->
+        <div class="tab-panel space-y-4 hidden" data-panel="interface">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Звук отправки</div>
+              <div class="text-xs" style="color:var(--text-lo)">Проигрывать звук при отправке сообщения</div>
+            </div>
+            <div class="switch" onclick="toggleSwitch(this,'sendSound')"><div class="knob"></div></div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Автоскролл</div>
+              <div class="text-xs" style="color:var(--text-lo)">Автоматически прокручивать к новым сообщениям</div>
+            </div>
+            <div class="switch on" onclick="toggleSwitch(this,'autoscroll')"><div class="knob"></div></div>
+          </div>
+        </div>
+
+        <!-- Experimental -->
+        <div class="tab-panel space-y-4 hidden" data-panel="experimental">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Потоковая генерация</div>
+              <div class="text-xs" style="color:var(--text-lo)">Показывать ответ по мере генерации</div>
+            </div>
+            <div class="switch on" onclick="toggleSwitch(this,'streaming')"><div class="knob"></div></div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Режим рассуждений</div>
+              <div class="text-xs" style="color:var(--text-lo)">Просить модель показывать ход мыслей</div>
+            </div>
+            <div class="switch" onclick="toggleSwitch(this,'reasoning')"><div class="knob"></div></div>
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="tab-panel hidden" data-panel="about">
+          <div class="flex items-center gap-3 mb-4">
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+              <path d="M20 3 L34 12 V28 L20 37 L6 28 V12 Z" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M20 12 L27 16.2 V24.6 L20 28.8 L13 24.6 V16.2 Z" fill="#f97316"/>
+            </svg>
+            <div>
+              <div class="font-display font-semibold">Nova</div>
+              <div class="text-xs" style="color:var(--text-lo)">Версия 1.0.0</div>
+            </div>
+          </div>
+          <p class="text-sm" style="color:var(--text-mid)">Минималистичный интерфейс для общения с языковыми моделями через OpenRouter. Все данные хранятся локально в вашем браузере.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+/* ---------- State ---------- */
+const state = {
+  chats: [],
+  activeChatId: null,
+  sending: false,
+  settings: { compact:false, largeFont:false, sendSound:false, autoscroll:true, streaming:true, reasoning:false }
+};
+
+const els = {
+  sidebar: document.getElementById('sidebar'),
+  overlay: document.getElementById('mobile-overlay'),
+  historyList: document.getElementById('history-list'),
+  chatScroll: document.getElementById('chat-scroll'),
+  emptyState: document.getElementById('empty-state'),
+  messages: document.getElementById('messages'),
+  input: document.getElementById('chat-input'),
+  sendBtn: document.getElementById('send-btn'),
+};
+
+/* ---------- Persistence ---------- */
+function loadState(){
+  try{
+    const raw = localStorage.getItem('nova_chats');
+    state.chats = raw ? JSON.parse(raw) : [];
+  }catch(e){ state.chats = []; }
+  try{
+    const s = localStorage.getItem('nova_settings');
+    if(s) Object.assign(state.settings, JSON.parse(s));
+  }catch(e){}
+  if(state.chats.length === 0){
+    state.chats.push({
+      id: 'c'+Date.now(),
+      title: 'Первое знакомство',
+      date: new Date().toISOString(),
+      messages: []
+    });
+  }
+  state.activeChatId = state.chats[0].id;
+}
+
+function persistChats(){
+  localStorage.setItem('nova_chats', JSON.stringify(state.chats));
+}
+function persistSettings(){
+  localStorage.setItem('nova_settings', JSON.stringify(state.settings));
+}
+
+function getActiveChat(){
+  return state.chats.find(c => c.id === state.activeChatId);
+}
+
+/* ---------- Sidebar / history ---------- */
+function fmtDate(iso){
+  const d = new Date(iso);
+  const today = new Date();
+  const sameDay = d.toDateString() === today.toDateString();
+  if(sameDay) return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});
+}
+
+function renderHistory(){
+  els.historyList.innerHTML = '';
+  const query = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
+  const filtered = state.chats
+    .slice()
+    .filter(c => !query || c.title.toLowerCase().includes(query))
+    .sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+  if(filtered.length === 0){
+    els.historyList.innerHTML = `<div class="px-3 py-6 text-center text-[12px]" style="color:var(--text-lo)">Ничего не найдено</div>`;
+    return;
+  }
+
+  filtered.forEach(chat => {
+      const active = chat.id === state.activeChatId;
+      const item = document.createElement('div');
+      item.className = 'history-item rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-2.5' + (active ? ' active':'');
+      item.onclick = () => selectChat(chat.id);
+      item.innerHTML = `
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:${active?'rgba(249,115,22,0.15)':'rgba(255,255,255,0.05)'}">
+          <i class="fa-regular fa-message text-[11px]" style="color:${active?'#f97316':'#71717a'}"></i>
+        </div>
+        <div class="flex-1 min-w-0" data-title-zone>
+          <div class="text-[13px] font-medium truncate" style="color:${active?'#f4f4f5':'#d4d4d8'}" ondblclick="event.stopPropagation(); startRename('${chat.id}', this)">${escapeHtml(chat.title)}</div>
+          <div class="text-[11px]" style="color:var(--text-lo)">${fmtDate(chat.date)}</div>
+        </div>
+        <button class="del-btn icon-btn w-6 h-6 rounded-md flex items-center justify-center shrink-0" style="color:var(--text-lo)" onclick="event.stopPropagation(); deleteChat('${chat.id}')">
+          <i class="fa-solid fa-trash text-[10px]"></i>
+        </button>
+      `;
+      els.historyList.appendChild(item);
+    });
+}
+
+function startRename(chatId, titleEl){
+  const chat = state.chats.find(c => c.id === chatId);
+  if(!chat) return;
+  const input = document.createElement('input');
+  input.className = 'rename-input text-[13px] font-medium';
+  input.value = chat.title;
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const commit = () => {
+    const val = input.value.trim();
+    if(val) chat.title = val;
+    persistChats();
+    renderHistory();
+  };
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); commit(); }
+    if(e.key === 'Escape'){ renderHistory(); }
+  });
+  input.addEventListener('blur', commit);
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.innerText = str;
+  return d.innerHTML;
+}
+
+function selectChat(id){
+  state.activeChatId = id;
+  renderHistory();
+  renderMessages();
+  closeSidebar();
+}
+
+function deleteChat(id){
+  state.chats = state.chats.filter(c => c.id !== id);
+  if(state.chats.length === 0){
+    state.chats.push({ id:'c'+Date.now(), title:'Новый чат', date: new Date().toISOString(), messages: [] });
+  }
+  if(state.activeChatId === id){
+    state.activeChatId = state.chats[0].id;
+  }
+  persistChats();
+  renderHistory();
+  renderMessages();
+  toast('Чат удалён','info');
+}
+
+function createNewChat(){
+  const chat = { id:'c'+Date.now(), title:'Новый чат', date: new Date().toISOString(), messages: [] };
+  state.chats.unshift(chat);
+  state.activeChatId = chat.id;
+  persistChats();
+  renderHistory();
+  renderMessages();
+  closeSidebar();
+  els.input.focus();
+}
+
+/* ---------- Sidebar mobile toggle ---------- */
+function toggleSidebar(){
+  els.sidebar.classList.toggle('open');
+  els.overlay.classList.toggle('show');
+}
+function closeSidebar(){
+  if(window.innerWidth < 900){
+    els.sidebar.classList.remove('open');
+    els.overlay.classList.remove('show');
+  }
+}
+
+/* ---------- Messages rendering ---------- */
+function renderMessages(){
+  const chat = getActiveChat();
+  if(!chat || chat.messages.length === 0){
+    els.emptyState.classList.remove('hidden');
+    els.messages.classList.add('hidden');
+    els.messages.innerHTML = '';
+    return;
+  }
+  els.emptyState.classList.add('hidden');
+  els.messages.classList.remove('hidden');
+  els.messages.innerHTML = '';
+  chat.messages.forEach((m, idx) => appendMessageEl(m, idx, false));
+  scrollToBottom(false);
+}
+
+function appendMessageEl(m, idx, animate){
+  const row = document.createElement('div');
+  row.className = 'msg-row flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start') + (animate ? ' msg-enter':'');
+
+  if(m.role === 'user'){
+    const atts = m.attachments || [];
+    const attHtml = atts.length ? `<div class="msg-attachments justify-end">${atts.map(a =>
+        a.type === 'image'
+          ? `<img src="${a.dataUrl}" alt="${escapeHtml(a.name)}">`
+          : `<div class="file-pill"><i class="fa-solid fa-file"></i>${escapeHtml(a.name)}</div>`
+      ).join('')}</div>` : '';
+    row.innerHTML = `
+      <div class="max-w-[80%] flex flex-col items-end gap-1.5">
+        ${attHtml}
+        ${m.content ? `<div class="bubble-user px-4 py-2.5 text-[15px] leading-relaxed">${escapeHtml(m.content)}</div>` : ''}
+      </div>`;
+  } else {
+    row.innerHTML = `
+      <div class="max-w-[85%] flex flex-col gap-1.5">
+        <div class="flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style="background:var(--bg-2); border:1px solid var(--border)">
+            <svg width="14" height="14" viewBox="0 0 40 40" fill="none">
+              <path d="M20 3 L34 12 V28 L20 37 L6 28 V12 Z" stroke="#f97316" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M20 12 L27 16.2 V24.6 L20 28.8 L13 24.6 V16.2 Z" fill="#f97316"/>
+            </svg>
+          </div>
+          <div class="bubble-ai px-4 py-2.5 text-[15px] leading-relaxed md" data-content data-raw="${encodeURIComponent(m.content)}">${renderMarkdown(m.content)}</div>
+        </div>
+        <div class="msg-actions flex items-center gap-1 pl-9">
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="copyMsg(this)" title="Копировать"><i class="fa-regular fa-copy text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="regenerate(${idx})" title="Повторить"><i class="fa-solid fa-rotate-right text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="reactMsg(this,'like')" title="Нравится"><i class="fa-regular fa-thumbs-up text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="reactMsg(this,'dislike')" title="Не нравится"><i class="fa-regular fa-thumbs-down text-[11px]"></i></button>
+        </div>
+      </div>`;
+  }
+  els.messages.appendChild(row);
+  if(m.role !== 'user') decorateCodeBlocks(row);
+  return row;
+}
+
+/* ---------- Markdown rendering ---------- */
+function renderMarkdown(text){
+  try{
+    if(window.marked){
+      marked.setOptions({ breaks:true, gfm:true });
+      return marked.parse(text || '');
+    }
+  }catch(e){}
+  return escapeHtml(text || '').replace(/\n/g,'<br>');
+}
+
+function decorateCodeBlocks(row){
+  row.querySelectorAll('pre').forEach(pre => {
+    const codeEl = pre.querySelector('code');
+    if(!codeEl || pre.dataset.decorated) return;
+    pre.dataset.decorated = '1';
+    let lang = 'text';
+    const cls = codeEl.className || '';
+    const match = cls.match(/language-(\w+)/);
+    if(match) lang = match[1];
+    try{ if(window.hljs) hljs.highlightElement(codeEl); }catch(e){}
+    const wrap = document.createElement('div');
+    wrap.className = 'code-block-wrap';
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+    header.innerHTML = `
+      <span>${escapeHtml(lang)}</span>
+      <div class="flex items-center gap-3">
+        <button class="code-copy-btn"><i class="fa-regular fa-copy"></i> Копировать</button>
+        <button class="code-copy-btn code-download-btn"><i class="fa-solid fa-download"></i> Скачать</button>
+      </div>`;
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(header);
+    wrap.appendChild(pre);
+    header.querySelector('.code-copy-btn').onclick = () => {
+      navigator.clipboard.writeText(codeEl.innerText).then(()=> toast('Код скопирован','success'));
+    };
+    header.querySelector('.code-download-btn').onclick = () => {
+      downloadCode(codeEl.innerText, lang);
+    };
+  });
+}
+
+const LANG_EXTENSIONS = {
+  javascript:'js', js:'js', typescript:'ts', ts:'ts', jsx:'jsx', tsx:'tsx',
+  python:'py', py:'py', java:'java', c:'c', cpp:'cpp', 'c++':'cpp', csharp:'cs', cs:'cs',
+  html:'html', css:'css', scss:'scss', json:'json', xml:'xml', yaml:'yml', yml:'yml',
+  bash:'sh', sh:'sh', shell:'sh', sql:'sql', php:'php', go:'go', rust:'rs', rb:'rb', ruby:'rb',
+  kotlin:'kt', swift:'swift', markdown:'md', md:'md', text:'txt', plaintext:'txt'
+};
+
+function downloadCode(code, lang){
+  const ext = LANG_EXTENSIONS[lang.toLowerCase()] || (lang && lang !== 'text' ? lang.toLowerCase() : 'txt');
+  const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `code.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('Код скачан', 'success');
+}
+
+function copyMsg(btn){
+  const el = btn.closest('.flex.flex-col').querySelector('[data-content]');
+  const raw = decodeURIComponent(el.dataset.raw || el.innerText);
+  navigator.clipboard.writeText(raw).then(()=> toast('Скопировано','success'));
+}
+function reactMsg(btn, type){
+  btn.style.color = '#f97316';
+  toast(type === 'like' ? 'Спасибо за оценку' : 'Учтём при улучшении', 'info');
+}
+
+function scrollToBottom(smooth=true){
+  if(!state.settings.autoscroll) return;
+  els.chatScroll.scrollTo({ top: els.chatScroll.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+}
+
+/* ---------- Composer ---------- */
+els.input.addEventListener('input', () => {
+  els.input.style.height = 'auto';
+  els.input.style.height = Math.min(els.input.scrollHeight, 200) + 'px';
+});
+els.input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* ---------- Build API content (text + images + inline text files) ---------- */
+function buildApiContent(m){
+  const atts = m.attachments || [];
+  const images = atts.filter(a => a.type === 'image');
+  const textFiles = atts.filter(a => a.type === 'text');
+  const otherFiles = atts.filter(a => a.type === 'file');
+
+  let textPart = m.content || '';
+  textFiles.forEach(f => {
+    textPart += `\n\n[Файл: ${f.name}]\n\`\`\`\n${f.content}\n\`\`\``;
+  });
+  otherFiles.forEach(f => {
+    textPart += `\n\n[Прикреплён файл "${f.name}", но эта модель не может прочитать его содержимое.]`;
+  });
+
+  if(images.length === 0){
+    return textPart;
+  }
+
+  const content = [];
+  if(textPart) content.push({ type:'text', text: textPart });
+  images.forEach(img => {
+    content.push({ type:'image_url', image_url: { url: img.dataUrl } });
+  });
+  return content;
+}
+
+/* ---------- Attachments ---------- */
+state.pendingAttachments = [];
+
+function toggleAttachMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('attach-menu');
+  const backdrop = document.getElementById('attach-menu-backdrop');
+  const isHidden = menu.classList.contains('hidden');
+  if(isHidden){
+    menu.classList.remove('hidden');
+    backdrop.classList.remove('hidden');
+  } else {
+    closeAttachMenu();
+  }
+}
+function closeAttachMenu(){
+  document.getElementById('attach-menu').classList.add('hidden');
+  document.getElementById('attach-menu-backdrop').classList.add('hidden');
+}
+function triggerAttach(kind){
+  closeAttachMenu();
+  const map = { camera:'file-camera', photo:'file-photo', file:'file-generic' };
+  const input = document.getElementById(map[kind]);
+  input.value = '';
+  input.click();
+}
+
+const TEXT_EXTENSIONS = ['txt','md','json','csv','js','ts','jsx','tsx','py','html','css','xml','yml','yaml','log','sh','sql'];
+
+function handleFiles(fileList){
+  const files = Array.from(fileList || []);
+  if(files.length === 0) return;
+  const MAX_SIZE = 8 * 1024 * 1024; // 8MB safety cap
+
+  files.forEach(file => {
+    if(file.size > MAX_SIZE){
+      toast(`"${file.name}" слишком большой (макс. 8MB)`, 'error');
+      return;
+    }
+    const id = 'a' + Date.now() + Math.random().toString(36).slice(2,7);
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+    if(file.type.startsWith('image/')){
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.pendingAttachments.push({ id, type:'image', name:file.name, size:file.size, dataUrl: reader.result });
+        renderAttachmentPreview();
+      };
+      reader.readAsDataURL(file);
+    } else if(TEXT_EXTENSIONS.includes(ext)){
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.pendingAttachments.push({ id, type:'text', name:file.name, size:file.size, content: reader.result });
+        renderAttachmentPreview();
+        toast(`"${file.name}" будет прочитан моделью как текст`, 'info');
+      };
+      reader.readAsText(file);
+    } else {
+      state.pendingAttachments.push({ id, type:'file', name:file.name, size:file.size });
+      renderAttachmentPreview();
+      toast(`"${file.name}" прикреплён, но модель не сможет прочитать содержимое этого формата`, 'info');
+    }
+  });
+}
+
+function fmtBytes(bytes){
+  if(bytes < 1024) return bytes + ' Б';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' КБ';
+  return (bytes/1024/1024).toFixed(1) + ' МБ';
+}
+
+function fileIconFor(name){
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  if(['pdf'].includes(ext)) return 'fa-file-pdf';
+  if(['doc','docx'].includes(ext)) return 'fa-file-word';
+  if(['xls','xlsx','csv'].includes(ext)) return 'fa-file-excel';
+  if(['zip','rar','7z'].includes(ext)) return 'fa-file-zipper';
+  if(['mp3','wav','ogg'].includes(ext)) return 'fa-file-audio';
+  if(['mp4','mov','avi'].includes(ext)) return 'fa-file-video';
+  if(TEXT_EXTENSIONS.includes(ext)) return 'fa-file-lines';
+  return 'fa-file';
+}
+
+function renderAttachmentPreview(){
+  const wrap = document.getElementById('attachment-preview');
+  const items = state.pendingAttachments;
+  if(items.length === 0){
+    wrap.classList.add('hidden');
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = items.map(a => `
+    <div class="attach-chip">
+      ${a.type === 'image'
+        ? `<img src="${a.dataUrl}" alt="">`
+        : `<div class="file-icon"><i class="fa-solid ${fileIconFor(a.name)}"></i></div>`}
+      <div class="meta">
+        <div class="name">${escapeHtml(a.name)}</div>
+        <div class="size">${fmtBytes(a.size)}</div>
+      </div>
+      <button class="remove-btn" onclick="removeAttachment('${a.id}')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  `).join('');
+}
+
+function removeAttachment(id){
+  state.pendingAttachments = state.pendingAttachments.filter(a => a.id !== id);
+  renderAttachmentPreview();
+}
+function clearAttachments(){
+  state.pendingAttachments = [];
+  renderAttachmentPreview();
+}
+
+/* ---------- Voice input ---------- */
+let recognizer = null;
+let isRecording = false;
+
+function toggleVoiceInput(){
+  const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognitionCtor){
+    toast('Голосовой ввод не поддерживается этим браузером', 'error');
+    return;
+  }
+  if(isRecording){
+    recognizer.stop();
+    return;
+  }
+  recognizer = new SpeechRecognitionCtor();
+  recognizer.lang = 'ru-RU';
+  recognizer.interimResults = true;
+  recognizer.continuous = true;
+
+  const micBtn = document.getElementById('mic-btn');
+  let baseText = els.input.value ? els.input.value + ' ' : '';
+
+  recognizer.onstart = () => {
+    isRecording = true;
+    micBtn.classList.add('recording');
+    micBtn.querySelector('i').className = 'fa-solid fa-stop text-sm';
+  };
+  recognizer.onresult = (event) => {
+    let transcript = '';
+    for(let i = 0; i < event.results.length; i++){
+      transcript += event.results[i][0].transcript;
+    }
+    els.input.value = baseText + transcript;
+    els.input.dispatchEvent(new Event('input'));
+  };
+  recognizer.onerror = (event) => {
+    if(event.error === 'not-allowed' || event.error === 'permission-denied'){
+      toast('Доступ к микрофону не разрешён', 'error');
+    } else if(event.error !== 'no-speech'){
+      toast('Ошибка распознавания речи: ' + event.error, 'error');
+    }
+  };
+  recognizer.onend = () => {
+    isRecording = false;
+    micBtn.classList.remove('recording');
+    micBtn.querySelector('i').className = 'fa-solid fa-microphone text-sm';
+  };
+  recognizer.start();
+}
+
+function promptCard(text){
+  els.input.value = text;
+  els.input.dispatchEvent(new Event('input'));
+  sendMessage();
+}
+
+async function sendMessage(){
+  const text = els.input.value.trim();
+  const attachments = state.pendingAttachments || [];
+  if(!text && attachments.length === 0) return;
+  if(state.sending) return;
+
+  const chat = getActiveChat();
+  const titleSource = text || (attachments[0] ? attachments[0].name : 'Вложение');
+  if(chat.messages.length === 0){
+    chat.title = titleSource.slice(0,40) + (titleSource.length > 40 ? '…':'');
+    chat.date = new Date().toISOString();
+  }
+  const userMsg = { role:'user', content:text, attachments: attachments.length ? attachments : undefined };
+  chat.messages.push(userMsg);
+  persistChats();
+  renderHistory();
+
+  els.emptyState.classList.add('hidden');
+  els.messages.classList.remove('hidden');
+  appendMessageEl(userMsg, chat.messages.length-1, true);
+
+  els.input.value = '';
+  els.input.style.height = 'auto';
+  clearAttachments();
+  scrollToBottom();
+
+  await requestAIReply(chat);
+}
+
+function regenerate(idx){
+  const chat = getActiveChat();
+  // find preceding user message
+  let userIdx = idx - 1;
+  while(userIdx >= 0 && chat.messages[userIdx].role !== 'user') userIdx--;
+  if(userIdx < 0) return;
+  chat.messages = chat.messages.slice(0, idx);
+  persistChats();
+  renderMessages();
+  requestAIReply(chat);
+}
+
+/* ---------- Typing indicator ---------- */
+function showTyping(){
+  const row = document.createElement('div');
+  row.className = 'msg-row flex justify-start msg-enter';
+  row.id = 'typing-row';
+  row.innerHTML = `
+    <div class="flex items-start gap-2.5">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:var(--bg-2); border:1px solid var(--border)">
+        <svg width="14" height="14" viewBox="0 0 40 40" fill="none">
+          <path d="M20 3 L34 12 V28 L20 37 L6 28 V12 Z" stroke="#f97316" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M20 12 L27 16.2 V24.6 L20 28.8 L13 24.6 V16.2 Z" fill="#f97316"/>
+        </svg>
+      </div>
+      <div class="bubble-ai px-4 py-3.5 flex items-center gap-1.5">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>`;
+  els.messages.appendChild(row);
+  scrollToBottom();
+}
+function hideTyping(){
+  const row = document.getElementById('typing-row');
+  if(row) row.remove();
+}
+
+/* ---------- OpenRouter call (streaming) ---------- */
+let currentAbortController = null;
+
+async function requestAIReply(chat){
+  state.sending = true;
+  setSendButtonState(true);
+
+  const apiKey = sanitizeKey(localStorage.getItem('nova_api_key') || '');
+  const model = localStorage.getItem('nova_model') || 'openrouter/free';
+
+  if(!apiKey){
+    state.sending = false;
+    setSendButtonState(false);
+    toast('Добавьте API-ключ OpenRouter в настройках','error');
+    openSettings();
+    return;
+  }
+
+  showTyping();
+  currentAbortController = new AbortController();
+
+  // Placeholder assistant message we fill in as tokens stream in.
+  chat.messages.push({ role:'assistant', content:'' });
+  const msgIndex = chat.messages.length - 1;
+  let liveRow = null;
+  let liveContentEl = null;
+  let accumulated = '';
+
+  try{
+    const payload = {
+      model: model,
+      stream: true,
+      messages: chat.messages.slice(0, msgIndex).map(m => ({ role: m.role, content: buildApiContent(m) }))
+    };
+
+    let res;
+    try{
+      res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify(payload),
+        signal: currentAbortController.signal
+      });
+    }catch(networkErr){
+      if(networkErr.name === 'AbortError') throw networkErr;
+      throw new Error('Сеть недоступна или запрос заблокирован (адблокер/VPN/файл открыт как file://). ' + networkErr.message);
+    }
+
+    if(!res.ok){
+      let errText;
+      try{ errText = await res.text(); }catch(_){ errText = res.statusText; }
+      const lower = errText.toLowerCase();
+      const isModelIssue = res.status === 404 || lower.includes('no longer available') || lower.includes('not a valid model') || lower.includes('model not found') || lower.includes('is not available');
+      const e = new Error('HTTP ' + res.status + ': ' + errText.slice(0,300));
+      e.isModelError = isModelIssue;
+      throw e;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+      buffer += decoder.decode(value, { stream:true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line for next chunk
+
+      for(const line of lines){
+        const trimmed = line.trim();
+        if(!trimmed.startsWith('data:')) continue;
+        const dataStr = trimmed.slice(5).trim();
+        if(dataStr === '[DONE]') continue;
+        let json;
+        try{ json = JSON.parse(dataStr); }catch(e){ continue; }
+        const delta = json?.choices?.[0]?.delta?.content;
+        if(delta){
+          if(!liveRow){
+            hideTyping();
+            liveRow = appendMessageEl({role:'assistant', content:''}, msgIndex, true);
+            liveContentEl = liveRow.querySelector('[data-content]');
+          }
+          accumulated += delta;
+          chat.messages[msgIndex].content = accumulated;
+          liveContentEl.innerHTML = renderMarkdown(accumulated) + '<span class="cursor-blink"></span>';
+          liveContentEl.dataset.raw = encodeURIComponent(accumulated);
+          scrollToBottom();
+        }
+      }
+    }
+
+    hideTyping();
+    if(!accumulated){
+      accumulated = 'Пустой ответ от модели.';
+      chat.messages[msgIndex].content = accumulated;
+    }
+    if(!liveRow){
+      liveRow = appendMessageEl({role:'assistant', content: accumulated}, msgIndex, true);
+    } else {
+      liveContentEl.innerHTML = renderMarkdown(accumulated);
+      decorateCodeBlocks(liveRow);
+    }
+    persistChats();
+    scrollToBottom();
+  }catch(err){
+    hideTyping();
+    if(err.name === 'AbortError'){
+      if(!accumulated){
+        chat.messages.pop();
+      }else{
+        chat.messages[msgIndex].content = accumulated;
+        if(liveContentEl) liveContentEl.innerHTML = renderMarkdown(accumulated);
+      }
+      persistChats();
+      toast('Генерация остановлена','info');
+    } else {
+      if(err.isModelError){
+        toast('Данная модель не доступна, выберите другую или выберите автовыбор', 'error');
+        chat.messages[msgIndex] = { role:'assistant', content: '⚠️ Данная модель не доступна, выберите другую или выберите автовыбор.' };
+        persistChats();
+        if(liveRow){ liveRow.remove(); }
+        appendMessageEl(chat.messages[msgIndex], msgIndex, true);
+        openSettings();
+      } else {
+        toast('Ошибка запроса: ' + err.message, 'error');
+        chat.messages[msgIndex] = { role:'assistant', content: '⚠️ Не удалось получить ответ: ' + err.message };
+        persistChats();
+        if(liveRow){ liveRow.remove(); }
+        appendMessageEl(chat.messages[msgIndex], msgIndex, true);
+      }
+    }
+  }finally{
+    state.sending = false;
+    currentAbortController = null;
+    setSendButtonState(false);
+  }
+}
+
+function stopGeneration(){
+  if(currentAbortController){
+    currentAbortController.abort();
+  }
+}
+
+function setSendButtonState(isSending){
+  if(isSending){
+    els.sendBtn.innerHTML = '<i class="fa-solid fa-stop text-xs"></i>';
+    els.sendBtn.onclick = stopGeneration;
+    els.sendBtn.disabled = false;
+    els.sendBtn.title = 'Остановить генерацию';
+  } else {
+    els.sendBtn.innerHTML = '<i class="fa-solid fa-arrow-up text-sm"></i>';
+    els.sendBtn.onclick = sendMessage;
+    els.sendBtn.disabled = false;
+    els.sendBtn.title = '';
+  }
+}
+
+/* ---------- Settings modal ---------- */
+/* ---------- Model picker ---------- */
+const AVAILABLE_MODELS = [
+  { id:'openrouter/free', title:'Автовыбор', subtitle:'Автоматически подбирает доступную бесплатную модель', icon:'fa-shuffle' },
+  { id:'poolside/laguna-m.1:free', title:'Poolside: Laguna M.1', subtitle:'Флагманская модель Poolside для агентных задач (free)', icon:'fa-water' },
+  { id:'poolside/laguna-xs-2.1:free', title:'Poolside: Laguna XS 2.1', subtitle:'Компактная кодинг-модель Poolside (free)', icon:'fa-microchip' },
+  { id:'openai/gpt-oss-120b:free', title:'OpenAI: gpt-oss-120b', subtitle:'Открытая модель OpenAI, 120B (free)', icon:'fa-brain' },
+];
+
+function renderModelPicker(){
+  const current = localStorage.getItem('nova_model') || 'openrouter/free';
+  const wrap = document.getElementById('model-picker');
+  const isPreset = AVAILABLE_MODELS.some(m => m.id === current);
+  wrap.innerHTML = AVAILABLE_MODELS.map(m => `
+    <div class="model-card${m.id === current ? ' selected':''}" onclick="selectModel('${m.id}', event)">
+      <div class="radio"></div>
+      <div class="icon-box"><i class="fa-solid ${m.icon}" style="color:var(--accent)"></i></div>
+      <div class="flex-1 min-w-0">
+        <div class="title">${escapeHtml(m.title)}</div>
+        <div class="subtitle">${escapeHtml(m.subtitle)}</div>
+      </div>
+    </div>
+  `).join('');
+  const advWrap = document.getElementById('advanced-model-wrap');
+  const modelInput = document.getElementById('model-input');
+  modelInput.value = current;
+  if(!isPreset){
+    advWrap.classList.remove('hidden');
+  } else {
+    advWrap.classList.add('hidden');
+  }
+}
+
+function selectModel(id, evt){
+  document.getElementById('model-input').value = id;
+  document.getElementById('advanced-model-wrap').classList.add('hidden');
+  document.querySelectorAll('.model-card').forEach(card => card.classList.remove('selected'));
+  (evt ? evt.currentTarget : event.currentTarget).classList.add('selected');
+}
+
+function toggleAdvancedModel(){
+  const wrap = document.getElementById('advanced-model-wrap');
+  wrap.classList.toggle('hidden');
+  if(!wrap.classList.contains('hidden')){
+    document.querySelectorAll('.model-card').forEach(card => card.classList.remove('selected'));
+    document.getElementById('model-input').focus();
+  }
+}
+
+function openSettings(){
+  const modal = document.getElementById('settings-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('api-key-input').value = localStorage.getItem('nova_api_key') || '';
+  renderModelPicker();
+  requestAnimationFrame(()=> modal.classList.add('show'));
+}
+function closeSettings(){
+  const modal = document.getElementById('settings-modal');
+  modal.classList.remove('show');
+  setTimeout(()=> { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+}
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
+  const titles = { general:'Общие', appearance:'Внешний вид', interface:'Интерфейс', experimental:'Эксперименты', about:'О приложении' };
+  document.getElementById('tab-title').innerText = titles[tab];
+}
+function sanitizeKey(raw){
+  // Strip whitespace, zero-width chars, and any non ISO-8859-1 code points
+  // that would break the fetch Authorization header.
+  return raw
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '') // zero-width + nbsp
+    .trim()
+    .split('')
+    .filter(ch => ch.charCodeAt(0) <= 255)
+    .join('');
+}
+
+function saveApiSettings(){
+  const key = sanitizeKey(document.getElementById('api-key-input').value);
+  const model = document.getElementById('model-input').value.trim() || 'openrouter/free';
+  localStorage.setItem('nova_api_key', key);
+  localStorage.setItem('nova_model', model);
+  toast('Настройки сохранены','success');
+  closeSettings();
+}
+function toggleSwitch(el, key){
+  el.classList.toggle('on');
+  state.settings[key] = el.classList.contains('on');
+  persistSettings();
+}
+
+/* ---------- Share / Export ---------- */
+function shareChat(){
+  const chat = getActiveChat();
+  const text = chat.messages.map(m => (m.role==='user'?'Вы: ':'Nova: ') + m.content).join('\n\n');
+  navigator.clipboard.writeText(text || 'Чат пока пуст').then(()=> toast('Чат скопирован в буфер обмена','success'));
+}
+
+function exportChat(){
+  const chat = getActiveChat();
+  if(!chat || chat.messages.length === 0){ toast('Чат пока пуст','info'); return; }
+  const lines = [`# ${chat.title}`, ''];
+  chat.messages.forEach(m => {
+    lines.push(m.role === 'user' ? '**Вы:**' : '**Nova:**');
+    lines.push(m.content);
+    lines.push('');
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = chat.title.replace(/[^\w\u0400-\u04FF\- ]/g,'').trim().slice(0,50) + '.md';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('Чат скачан','success');
+}
+
+/* ---------- Toasts ---------- */
+function toast(message, type='info'){
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  const icons = { success:'fa-circle-check', error:'fa-circle-exclamation', info:'fa-circle-info' };
+  const colors = { success:'#4ade80', error:'#f87171', info:'#f97316' };
+  el.innerHTML = `<i class="fa-solid ${icons[type]}" style="color:${colors[type]}"></i><span>${escapeHtml(message)}</span>`;
+  container.appendChild(el);
+  setTimeout(()=>{
+    el.classList.add('hide');
+    setTimeout(()=> el.remove(), 300);
+  }, 3200);
+}
+
+/* ---------- Init ---------- */
+function init(){
+  loadState();
+  renderHistory();
+  renderMessages();
+  document.querySelectorAll('.switch').forEach(sw => {
+    // reflect saved settings defaults for those with matching keys already set via markup (autoscroll/streaming default on)
+  });
+}
+init();
+</script>
+</body>
+</html>

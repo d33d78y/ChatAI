@@ -39,8 +39,8 @@
   .history-item.active{ background: linear-gradient(180deg, rgba(249,115,22,0.10), rgba(249,115,22,0.03)); border-color: rgba(249,115,22,0.25); }
   .history-item .row-actions{ opacity:0; transition:opacity .2s var(--ease); }
   .history-item:hover .row-actions{ opacity:1; }
-  .tag-dot{ width:7px;height:7px;border-radius:50%; flex-shrink:0; }
-  .tag-work{ background:#60a5fa; } .tag-personal{ background:#4ade80; }
+
+
 
   .btn-primary{ background: var(--accent); color:#09090B; transition: transform .18s var(--ease), box-shadow .3s var(--ease); }
   .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(249,115,22,0.5); }
@@ -172,11 +172,15 @@
   .changelog-entry:last-child{ padding-bottom:0; }
 
   .camera-modal video{ width:100%; border-radius:20px; background:#000; }
-  #mode-btn-direct, #mode-btn-backend{ color:var(--text-lo); transition: background .2s var(--ease), color .2s var(--ease); }
-  #mode-btn-direct.active-mode, #mode-btn-backend.active-mode{ background:var(--accent); color:#09090B; }
   #settings-panel{ height:100vh; max-height:100vh; }
   @media (min-width: 640px){ #settings-panel{ height:600px; max-height:85vh; } }
-  #tag-filters .tag-filter-btn{ background:transparent; color:var(--text-lo); transition: background .2s var(--ease), color .2s var(--ease); }
+
+  .accent-swatch{ width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); }
+  .accent-swatch:hover{ transform: scale(1.1); }
+  .accent-swatch.selected{ border-color: var(--text-hi); }
+  .msg-timestamp{ font-size:10px; color:var(--text-lo); margin-top:2px; }
+  #composer-wrap.drag-over{ border-color: var(--accent); box-shadow: 0 0 0 4px rgba(249,115,22,0.15); }
+  .drop-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(24,24,27,0.92); border-radius:28px; font-size:13px; color:var(--accent); font-weight:500; pointer-events:none; z-index:5; }
 </style>
 </head>
 <body class="antialiased">
@@ -206,11 +210,7 @@
         <input id="history-search" type="text" placeholder="Поиск по чатам..." class="w-full rounded-lg pl-8 pr-3 py-2 text-[13px]" oninput="renderHistory()">
       </div>
     </div>
-    <div class="px-3 pb-2 flex items-center gap-1.5" id="tag-filters">
-      <button class="tag-filter-btn text-[11px] px-2.5 py-1 rounded-full" data-tag="" onclick="setTagFilter('')">Все</button>
-      <button class="tag-filter-btn text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1" data-tag="work" onclick="setTagFilter('work')"><span class="tag-dot tag-work"></span>Работа</button>
-      <button class="tag-filter-btn text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1" data-tag="personal" onclick="setTagFilter('personal')"><span class="tag-dot tag-personal"></span>Личное</button>
-    </div>
+
     <div class="px-3 pb-2 text-[11px] uppercase tracking-wider font-medium" style="color:var(--text-lo)">История</div>
     <div id="history-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-2"></div>
 
@@ -331,6 +331,7 @@
         </div>
         <div class="flex items-center justify-center gap-3 mt-2.5">
           <p class="text-center text-[11px]" style="color:var(--text-lo)">BarbosovAI может ошибаться. Проверяйте важные факты.</p>
+          <span id="composer-counter" class="text-[11px]" style="color:var(--text-lo)"></span>
           <span id="token-counter" class="text-[11px]" style="color:var(--text-lo)"></span>
         </div>
       </div>
@@ -384,21 +385,10 @@
         <!-- General -->
         <div class="tab-panel space-y-5" data-panel="general">
           <div>
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">Режим подключения</label>
-            <div class="rounded-xl p-1 flex gap-1" style="background:var(--bg-2); border:1px solid var(--border)">
-              <button id="mode-btn-direct" onclick="setConnectionMode('direct')" class="flex-1 text-xs font-medium rounded-lg py-2" >Свой ключ</button>
-              <button id="mode-btn-backend" onclick="setConnectionMode('backend')" class="flex-1 text-xs font-medium rounded-lg py-2">Через бэкенд</button>
-            </div>
-          </div>
-          <div id="direct-mode-fields">
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">API ключ OpenRouter</label>
-            <input id="api-key-input" type="password" placeholder="sk-or-v1-..." class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
-            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Хранится только в вашем браузере (localStorage) и никуда, кроме OpenRouter, не отправляется.</p>
-          </div>
-          <div id="backend-mode-fields" class="hidden">
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">URL бэкенда</label>
-            <input id="backend-url-input" type="text" placeholder="https://your-backend.onrender.com/api/chat" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
-            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Ключ хранится на сервере — вводить его здесь не нужно. Все запросы идут через ваш бэкенд.</p>
+            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">API ключ</label>
+            <input id="api-key-input" type="password" placeholder="Вставьте свой API-ключ..." class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)" oninput="updateProviderDetection()">
+            <div id="provider-detection" class="text-[11px] mt-1.5 flex items-center gap-1.5" style="color:var(--text-lo)"></div>
+            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Хранится только в вашем браузере (localStorage) и никуда, кроме сервиса, которому принадлежит ключ, не отправляется.</p>
           </div>
           <div class="flex items-center justify-between">
             <div><div class="text-sm font-medium">Звук уведомлений об ошибках</div><div class="text-xs" style="color:var(--text-lo)">Показывать тосты при сетевых ошибках</div></div>
@@ -408,6 +398,15 @@
             <div><div class="text-sm font-medium">Подтверждение удаления</div><div class="text-xs" style="color:var(--text-lo)">Спрашивать перед удалением чата</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'confirmDelete')"><div class="knob"></div></div>
           </div>
+          <div>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Резервная копия</label>
+            <div class="flex gap-2">
+              <button onclick="exportBackup()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-download"></i> Экспорт всех данных</button>
+              <button onclick="document.getElementById('backup-file-input').click()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-upload"></i> Импорт</button>
+              <input id="backup-file-input" type="file" accept=".json" class="hidden" onchange="importBackup(this.files[0])">
+            </div>
+            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Сохраняет все чаты и настройки в один файл — удобно перенести на другое устройство.</p>
+          </div>
           <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium">Сохранить</button>
         </div>
 
@@ -416,9 +415,11 @@
           <div>
             <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Модель</label>
             <div id="model-picker" class="space-y-2"></div>
+            <p class="text-[11px] mt-2" style="color:var(--text-lo)">Список выше подходит для ключей OpenRouter. Если ваш ключ от другого сервиса, впишите название модели вручную.</p>
             <button onclick="toggleAdvancedModel()" id="advanced-model-toggle" class="text-[11px] mt-2.5 underline" style="color:var(--text-lo)">Указать модель вручную</button>
             <div id="advanced-model-wrap" class="hidden mt-2">
-              <input id="model-input" type="text" placeholder="например openai/gpt-oss-120b:free" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+              <input id="model-input" type="text" placeholder="например gpt-4o-mini, claude-3-5-sonnet-20241022" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+              <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Если оставить пустым, для вашего сервиса будет использована модель по умолчанию.</p>
             </div>
           </div>
           <div>
@@ -483,13 +484,32 @@
             <div class="switch" onclick="toggleSwitch(this,'sendSound')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
+            <div><div class="text-sm font-medium">Звук получения ответа</div><div class="text-xs" style="color:var(--text-lo)">Проигрывать звук, когда ИИ закончил отвечать</div></div>
+            <div class="switch" onclick="toggleSwitch(this,'receiveSound')"><div class="knob"></div></div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div><div class="text-sm font-medium">Время сообщений</div><div class="text-xs" style="color:var(--text-lo)">Показывать время под каждым сообщением</div></div>
+            <div class="switch" onclick="toggleSwitch(this,'showTimestamps')"><div class="knob"></div></div>
+          </div>
+          <div class="flex items-center justify-between">
             <div><div class="text-sm font-medium">Автоскролл</div><div class="text-xs" style="color:var(--text-lo)">Автоматически прокручивать к новым сообщениям</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'autoscroll')"><div class="knob"></div></div>
+          </div>
+          <div class="rounded-xl p-3 text-xs space-y-1.5" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-lo)">
+            <div class="font-medium mb-1" style="color:var(--text-mid)">Горячие клавиши</div>
+            <div>Ctrl/⌘ + K — новый чат</div>
+            <div>Ctrl/⌘ + F — поиск по чатам</div>
+            <div>Enter — отправить · Shift+Enter — новая строка</div>
+            <div>Esc — закрыть окно/меню</div>
           </div>
         </div>
 
         <!-- Appearance -->
         <div class="tab-panel space-y-4 hidden" data-panel="appearance">
+          <div>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Акцентный цвет</label>
+            <div id="accent-picker" class="flex items-center gap-3"></div>
+          </div>
           <div class="flex items-center justify-between">
             <div><div class="text-sm font-medium">Анимации интерфейса</div><div class="text-xs" style="color:var(--text-lo)">Плавные переходы и появления элементов</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'animations')"><div class="knob"></div></div>
@@ -545,7 +565,7 @@
               <div class="text-xs" style="color:var(--text-lo)">Версия <span id="about-version"></span></div>
             </div>
           </div>
-          <p class="text-sm" style="color:var(--text-mid)">Минималистичный интерфейс для общения с языковыми моделями через OpenRouter. Все данные хранятся локально в вашем браузере.</p>
+          <p class="text-sm" style="color:var(--text-mid)">Ваш собственный AI через API key. Все данные хранятся локально в вашем браузере.</p>
         </div>
       </div>
     </div>
@@ -596,7 +616,7 @@ const DEFAULT_INTEGRATIONS = [
 /* ================= STATE ================= */
 const state = {
   chats: [], activeChatId: null, sending: false, tagFilter: '',
-  settings: { compact:false, largeFont:false, sendSound:false, autoscroll:true, streaming:true, reasoning:false, animations:true, showAvatar:true, denseHistory:false, errorToasts:true, confirmDelete:true },
+  settings: { compact:false, largeFont:false, sendSound:false, receiveSound:false, showTimestamps:false, autoscroll:true, streaming:true, reasoning:false, animations:true, showAvatar:true, denseHistory:false, errorToasts:true, confirmDelete:true },
   pendingAttachments: []
 };
 const els = {
@@ -631,21 +651,10 @@ function fmtDate(iso){
 function estimateTokens(text){ return Math.ceil((text||'').length / 4); }
 
 /* ================= SIDEBAR / HISTORY ================= */
-function setTagFilter(tag){
-  state.tagFilter = tag;
-  document.querySelectorAll('.tag-filter-btn').forEach(b => b.classList.toggle('active-filter', b.dataset.tag === tag));
-  document.querySelectorAll('.tag-filter-btn').forEach(b => {
-    if(b.dataset.tag === tag){ b.style.background = 'var(--accent-dim)'; b.style.color = 'var(--accent)'; }
-    else { b.style.background = 'transparent'; b.style.color = 'var(--text-lo)'; }
-  });
-  renderHistory();
-}
-
 function renderHistory(){
   els.historyList.innerHTML = '';
   const query = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
   let filtered = state.chats.slice().filter(c => !query || c.title.toLowerCase().includes(query));
-  if(state.tagFilter) filtered = filtered.filter(c => c.tag === state.tagFilter);
   filtered.sort((a,b) => {
     if(!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
     return new Date(b.date) - new Date(a.date);
@@ -661,16 +670,12 @@ function renderHistory(){
     const item = document.createElement('div');
     item.className = 'history-item rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-2.5' + (active ? ' active':'') + (state.settings.denseHistory ? ' py-1.5':'');
     item.onclick = () => selectChat(chat.id);
-    const tagDot = chat.tag ? `<span class="tag-dot tag-${chat.tag}"></span>` : '';
     item.innerHTML = `
       <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:${active?'rgba(249,115,22,0.15)':'rgba(255,255,255,0.05)'}">
         <i class="fa-solid ${chat.pinned?'fa-thumbtack':'fa-message'} text-[11px]" style="color:${active?'#f97316':'#71717a'}"></i>
       </div>
       <div class="flex-1 min-w-0" data-title-zone>
-        <div class="flex items-center gap-1.5">
-          ${tagDot}
-          <div class="text-[13px] font-medium truncate" style="color:${active?'#f4f4f5':'#d4d4d8'}" ondblclick="event.stopPropagation(); startRename('${chat.id}', this)">${escapeHtml(chat.title)}</div>
-        </div>
+        <div class="text-[13px] font-medium truncate" style="color:${active?'#f4f4f5':'#d4d4d8'}" ondblclick="event.stopPropagation(); startRename('${chat.id}', this)">${escapeHtml(chat.title)}</div>
         <div class="text-[11px]" style="color:var(--text-lo)">${fmtDate(chat.date)}</div>
       </div>
       <div class="row-actions flex items-center gap-1 shrink-0">
@@ -703,18 +708,7 @@ function togglePin(chatId){
   toast(chat.pinned ? 'Чат закреплён' : 'Чат откреплён', 'success');
 }
 
-function cycleTag(chatId){
-  const chat = state.chats.find(c => c.id === chatId);
-  if(!chat) return;
-  const order = [null, 'work', 'personal'];
-  const idx = order.indexOf(chat.tag);
-  chat.tag = order[(idx+1) % order.length];
-  persistChats(); renderHistory(); closeMoreMenu();
-  const labels = { work:'Работа', personal:'Личное' };
-  toast(chat.tag ? `Тег: ${labels[chat.tag]}` : 'Тег снят', 'info');
-}
-
-function selectChat(id){ state.activeChatId = id; renderHistory(); renderMessages(); closeSidebar(); }
+function selectChat(id){ state.activeChatId = id; renderHistory(); renderMessages(); closeSidebar(); loadDraftForActiveChat(); }
 
 function deleteChat(id){
   const doDelete = () => {
@@ -734,6 +728,8 @@ function createNewChat(){
   state.chats.unshift(chat);
   state.activeChatId = chat.id;
   persistChats(); renderHistory(); renderMessages(); closeSidebar();
+  els.input.value = ''; els.input.style.height = 'auto';
+  els.input.dispatchEvent(new Event('input'));
   els.input.focus();
 }
 
@@ -757,6 +753,7 @@ function appendMessageEl(m, idx, animate){
   const row = document.createElement('div');
   row.className = 'msg-row flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start') + (animate ? ' msg-enter':'');
   row.dataset.idx = idx;
+  const timeHtml = (state.settings.showTimestamps && m.time) ? `<div class="msg-timestamp">${new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>` : '';
 
   if(m.role === 'user'){
     const atts = m.attachments || [];
@@ -767,6 +764,7 @@ function appendMessageEl(m, idx, animate){
       <div class="max-w-[80%] flex flex-col items-end gap-1.5">
         ${attHtml}
         <div data-bubble>${m.content ? `<div class="bubble-user px-4 py-2.5 text-[15px] leading-relaxed">${escapeHtml(m.content)}</div>` : ''}</div>
+        ${timeHtml}
         <div class="msg-actions flex items-center gap-1">
           <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="startEditMessage(${idx})" title="Редактировать"><i class="fa-solid fa-pen text-[11px]"></i></button>
           <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="deleteMessageAt(${idx})" title="Удалить"><i class="fa-solid fa-trash text-[11px]"></i></button>
@@ -782,6 +780,7 @@ function appendMessageEl(m, idx, animate){
           </div>` : ''}
           <div class="bubble-ai px-4 py-2.5 text-[15px] leading-relaxed md" data-content data-raw="${encodeURIComponent(m.content)}">${renderMarkdown(m.content)}</div>
         </div>
+        ${timeHtml ? `<div class="pl-9">${timeHtml}</div>` : ''}
         <div class="msg-actions flex items-center gap-1 pl-9">
           <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="copyMsg(this)" title="Копировать"><i class="fa-regular fa-copy text-[11px]"></i></button>
           <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="speakMessage(this, ${idx})" title="Озвучить"><i class="fa-solid fa-volume-high text-[11px]"></i></button>
@@ -939,6 +938,40 @@ function buildApiContent(m){
   return content;
 }
 
+/* ================= Provider auto-detection ================= */
+const PROVIDERS = {
+  openrouter: { name:'OpenRouter', api:'openai', baseUrl:'https://openrouter.ai/api/v1/chat/completions' },
+  openai:     { name:'OpenAI', api:'openai', baseUrl:'https://api.openai.com/v1/chat/completions', defaultModel:'gpt-4o-mini' },
+  groq:       { name:'Groq', api:'openai', baseUrl:'https://api.groq.com/openai/v1/chat/completions', defaultModel:'llama-3.3-70b-versatile' },
+  anthropic:  { name:'Anthropic (Claude)', api:'anthropic', baseUrl:'https://api.anthropic.com/v1/messages', defaultModel:'claude-3-5-sonnet-20241022' },
+  google:     { name:'Google Gemini', api:'unsupported' },
+  unknown:    { name:'неизвестный сервис', api:'openai', baseUrl:'https://api.openai.com/v1/chat/completions', defaultModel:'gpt-4o-mini' }
+};
+function detectProvider(rawKey){
+  const key = (rawKey || '').trim();
+  if(!key) return null;
+  if(/^sk-ant-/i.test(key)) return 'anthropic';
+  if(/^sk-or-/i.test(key)) return 'openrouter';
+  if(/^gsk_/i.test(key)) return 'groq';
+  if(/^AIza/i.test(key)) return 'google';
+  if(/^sk-/i.test(key)) return 'openai';
+  return 'unknown';
+}
+function updateProviderDetection(){
+  const el = document.getElementById('provider-detection');
+  if(!el) return;
+  const key = sanitizeKey(document.getElementById('api-key-input').value);
+  const provider = detectProvider(key);
+  if(!provider){ el.innerHTML = ''; return; }
+  if(provider === 'unknown'){
+    el.innerHTML = `<i class="fa-solid fa-circle-question"></i><span>Сервис не определён — попробуем как OpenAI-совместимый API</span>`;
+  } else if(provider === 'google'){
+    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#f87171"></i><span style="color:#f87171">Обнаружен ключ Google Gemini — прямая поддержка пока не реализована</span>`;
+  } else {
+    el.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#4ade80"></i><span style="color:#4ade80">Подключён сервис: ${PROVIDERS[provider].name}</span>`;
+  }
+}
+
 async function sendMessage(){
   const text = els.input.value.trim();
   const attachments = state.pendingAttachments || [];
@@ -948,7 +981,7 @@ async function sendMessage(){
   const chat = getActiveChat();
   const titleSource = text || (attachments[0] ? attachments[0].name : 'Вложение');
   if(chat.messages.length === 0){ chat.title = titleSource.slice(0,40) + (titleSource.length > 40 ? '…':''); chat.date = new Date().toISOString(); }
-  const userMsg = { role:'user', content:text, attachments: attachments.length ? attachments : undefined };
+  const userMsg = { role:'user', content:text, time:new Date().toISOString(), attachments: attachments.length ? attachments : undefined };
   chat.messages.push(userMsg);
   persistChats(); renderHistory();
 
@@ -956,6 +989,8 @@ async function sendMessage(){
   appendMessageEl(userMsg, chat.messages.length-1, true);
 
   els.input.value = ''; els.input.style.height = 'auto';
+  updateComposerCounter();
+  clearDraftForChat(chat.id);
   clearAttachments();
   scrollToBottom();
 
@@ -996,61 +1031,89 @@ function showTyping(){
 }
 function hideTyping(){ const row = document.getElementById('typing-row'); if(row) row.remove(); }
 
-/* ================= OpenRouter call (streaming) ================= */
+/* -------- content builders for each API shape -------- */
+function buildAnthropicContent(m){
+  const atts = m.attachments || [];
+  const images = atts.filter(a => a.type === 'image');
+  const textFiles = atts.filter(a => a.type === 'text');
+  const otherFiles = atts.filter(a => a.type === 'file');
+  let textPart = m.content || '';
+  textFiles.forEach(f => { textPart += `\n\n[Файл: ${f.name}]\n\`\`\`\n${f.content}\n\`\`\``; });
+  otherFiles.forEach(f => { textPart += `\n\n[Прикреплён файл "${f.name}", но эта модель не может прочитать его содержимое.]`; });
+  if(images.length === 0) return textPart || '.';
+  const blocks = [];
+  if(textPart) blocks.push({ type:'text', text: textPart });
+  images.forEach(img => {
+    const match = img.dataUrl.match(/^data:(.+);base64,(.+)$/);
+    if(match) blocks.push({ type:'image', source:{ type:'base64', media_type: match[1], data: match[2] } });
+  });
+  return blocks;
+}
+
+/* ================= AI request (streaming, multi-provider) ================= */
 let currentAbortController = null;
 
 async function requestAIReply(chat){
   state.sending = true; setSendButtonState(true);
-  const connectionMode = localStorage.getItem('nova_connection_mode') || 'direct';
   const apiKey = sanitizeKey(localStorage.getItem('nova_api_key') || '');
-  const backendUrl = (localStorage.getItem('nova_backend_url') || '').trim();
-  const model = localStorage.getItem('nova_model') || 'openrouter/free';
   const systemPrompt = localStorage.getItem('nova_system_prompt') || '';
   const temperature = parseFloat(localStorage.getItem('nova_temperature') || '0.7');
   const topP = parseFloat(localStorage.getItem('nova_top_p') || '1');
+  const customModel = localStorage.getItem('nova_model') || '';
 
-  const usingBackend = connectionMode === 'backend' && backendUrl;
+  if(!apiKey){
+    state.sending = false; setSendButtonState(false);
+    toast('Добавьте API-ключ в настройках','error'); openSettings(); return;
+  }
 
-  if(!usingBackend && !apiKey){
+  const provider = detectProvider(apiKey);
+  const providerCfg = PROVIDERS[provider] || PROVIDERS.unknown;
+
+  if(providerCfg.api === 'unsupported'){
     state.sending = false; setSendButtonState(false);
-    toast('Добавьте API-ключ OpenRouter или укажите URL бэкенда в настройках','error'); openSettings(); return;
+    toast(`${providerCfg.name} пока не поддерживается напрямую. Используйте ключ OpenRouter, OpenAI, Anthropic или Groq.`, 'error');
+    openSettings();
+    return;
   }
-  if(connectionMode === 'backend' && !backendUrl){
-    state.sending = false; setSendButtonState(false);
-    toast('Укажите URL бэкенда в настройках','error'); openSettings(); return;
-  }
+
+  const model = customModel || providerCfg.defaultModel || 'gpt-4o-mini';
 
   showTyping();
   currentAbortController = new AbortController();
-  chat.messages.push({ role:'assistant', content:'' });
+  chat.messages.push({ role:'assistant', content:'', time:new Date().toISOString() });
   const msgIndex = chat.messages.length - 1;
   let liveRow = null, liveContentEl = null, accumulated = '';
 
   try{
-    const apiMessages = chat.messages.slice(0, msgIndex).map(m => ({ role:m.role, content: buildApiContent(m) }));
-    if(systemPrompt.trim()) apiMessages.unshift({ role:'system', content: systemPrompt.trim() });
+    let endpoint, headers, payload;
 
-    const payload = { model, stream:true, messages: apiMessages, temperature, top_p: topP };
-    if(state.settings.reasoning) payload.reasoning = { enabled: true };
-
-    const endpoint = usingBackend ? backendUrl : 'https://openrouter.ai/api/v1/chat/completions';
-    const headers = { 'Content-Type':'application/json' };
-    if(!usingBackend) headers['Authorization'] = 'Bearer '+apiKey;
+    if(providerCfg.api === 'anthropic'){
+      const apiMessages = chat.messages.slice(0, msgIndex).map(m => ({ role:m.role, content: buildAnthropicContent(m) }));
+      endpoint = providerCfg.baseUrl;
+      headers = { 'Content-Type':'application/json', 'x-api-key': apiKey, 'anthropic-version':'2023-06-01' };
+      payload = { model, stream:true, max_tokens:4096, messages: apiMessages, temperature, top_p: topP };
+      if(systemPrompt.trim()) payload.system = systemPrompt.trim();
+    } else {
+      const apiMessages = chat.messages.slice(0, msgIndex).map(m => ({ role:m.role, content: buildApiContent(m) }));
+      if(systemPrompt.trim()) apiMessages.unshift({ role:'system', content: systemPrompt.trim() });
+      endpoint = providerCfg.baseUrl;
+      headers = { 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey };
+      payload = { model, stream:true, messages: apiMessages, temperature, top_p: topP };
+      if(state.settings.reasoning && provider === 'openrouter') payload.reasoning = { enabled: true };
+    }
 
     let res;
     try{
-      res = await fetch(endpoint, {
-        method:'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal
-      });
+      res = await fetch(endpoint, { method:'POST', headers, body: JSON.stringify(payload), signal: currentAbortController.signal });
     }catch(networkErr){
       if(networkErr.name === 'AbortError') throw networkErr;
-      throw new Error('Сеть недоступна или запрос заблокирован (адблокер/VPN/файл открыт как file://, недоступен бэкенд). ' + networkErr.message);
+      throw new Error('Сеть недоступна или запрос заблокирован (адблокер/VPN/файл открыт как file://). ' + networkErr.message);
     }
 
     if(!res.ok){
       let errText; try{ errText = await res.text(); }catch(_){ errText = res.statusText; }
       const lower = errText.toLowerCase();
-      const isModelIssue = res.status === 404 || lower.includes('no longer available') || lower.includes('not a valid model') || lower.includes('model not found') || lower.includes('is not available');
+      const isModelIssue = res.status === 404 || lower.includes('no longer available') || lower.includes('not a valid model') || lower.includes('model not found') || lower.includes('is not available') || lower.includes('does not exist');
       const e = new Error('HTTP ' + res.status + ': ' + errText.slice(0,300)); e.isModelError = isModelIssue; throw e;
     }
 
@@ -1066,7 +1129,14 @@ async function requestAIReply(chat){
         const dataStr = trimmed.slice(5).trim();
         if(dataStr === '[DONE]') continue;
         let json; try{ json = JSON.parse(dataStr); }catch(e){ continue; }
-        const delta = json?.choices?.[0]?.delta?.content;
+
+        let delta = null;
+        if(providerCfg.api === 'anthropic'){
+          if(json.type === 'content_block_delta' && json.delta?.type === 'text_delta') delta = json.delta.text;
+        } else {
+          delta = json?.choices?.[0]?.delta?.content;
+        }
+
         if(delta){
           if(!liveRow){ hideTyping(); liveRow = appendMessageEl({role:'assistant', content:''}, msgIndex, true); liveContentEl = liveRow.querySelector('[data-content]'); }
           accumulated += delta;
@@ -1083,6 +1153,7 @@ async function requestAIReply(chat){
     if(!liveRow){ liveRow = appendMessageEl({role:'assistant', content: accumulated}, msgIndex, true); }
     else { liveContentEl.innerHTML = renderMarkdown(accumulated); decorateCodeBlocks(liveRow); }
     persistChats(); scrollToBottom(); updateContextUsage();
+    if(state.settings.receiveSound) playReceiveSound();
   }catch(err){
     hideTyping();
     if(err.name === 'AbortError'){
@@ -1342,7 +1413,6 @@ function toggleMoreMenu(e){
   menu.innerHTML = `
     <button onclick="renameActiveChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-pen w-4" style="color:var(--accent)"></i> Переименовать чат</button>
     <button onclick="togglePin('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-thumbtack w-4" style="color:var(--accent)"></i> ${chat.pinned ? 'Открепить чат' : 'Закрепить чат'}</button>
-    <button onclick="cycleTag('${chat.id}')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-tag w-4" style="color:var(--accent)"></i> Изменить тег</button>
     <button onclick="duplicateChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-copy w-4" style="color:var(--accent)"></i> Дублировать чат</button>
     <button onclick="clearActiveChatMessages()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-broom w-4" style="color:var(--accent)"></i> Очистить сообщения</button>
     <button onclick="exportChat(); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-download w-4" style="color:var(--accent)"></i> Экспортировать (.txt)</button>
@@ -1499,8 +1569,7 @@ function openSettings(){
   const modal = document.getElementById('settings-modal');
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.getElementById('api-key-input').value = localStorage.getItem('nova_api_key') || '';
-  document.getElementById('backend-url-input').value = localStorage.getItem('nova_backend_url') || '';
-  setConnectionMode(localStorage.getItem('nova_connection_mode') || 'direct');
+  updateProviderDetection();
   document.getElementById('system-prompt-input').value = localStorage.getItem('nova_system_prompt') || '';
   document.getElementById('temperature-slider').value = localStorage.getItem('nova_temperature') || '0.7';
   document.getElementById('temperature-value').innerText = document.getElementById('temperature-slider').value;
@@ -1511,15 +1580,8 @@ function openSettings(){
   document.getElementById('avatar-preview-wrap').innerHTML = avatar ? `<img src="${avatar}">` : `<i class="fa-solid fa-camera" style="color:var(--text-lo)"></i>`;
   pendingAvatarDataUrl = null;
   document.getElementById('about-version').innerText = APP_VERSION;
-  renderModelPicker(); renderIntegrations(); renderPromptsLibrary(); renderChangelog(); updateContextUsage();
+  renderModelPicker(); renderIntegrations(); renderPromptsLibrary(); renderChangelog(); updateContextUsage(); renderAccentPicker();
   requestAnimationFrame(()=> modal.classList.add('show'));
-}
-function setConnectionMode(mode){
-  document.getElementById('mode-btn-direct').classList.toggle('active-mode', mode === 'direct');
-  document.getElementById('mode-btn-backend').classList.toggle('active-mode', mode === 'backend');
-  document.getElementById('direct-mode-fields').classList.toggle('hidden', mode !== 'direct');
-  document.getElementById('backend-mode-fields').classList.toggle('hidden', mode !== 'backend');
-  document.getElementById('settings-modal').dataset.pendingMode = mode;
 }
 function closeSettings(){
   const modal = document.getElementById('settings-modal');
@@ -1534,15 +1596,11 @@ function switchTab(tab){
 }
 function saveApiSettings(){
   const key = sanitizeKey(document.getElementById('api-key-input').value);
-  const backendUrl = document.getElementById('backend-url-input').value.trim();
-  const mode = document.getElementById('settings-modal').dataset.pendingMode || 'direct';
-  const model = document.getElementById('model-input').value.trim() || 'openrouter/free';
+  const model = document.getElementById('model-input').value.trim();
   const systemPrompt = document.getElementById('system-prompt-input').value;
   const temperature = document.getElementById('temperature-slider').value;
   const topP = document.getElementById('topp-slider').value;
   localStorage.setItem('nova_api_key', key);
-  localStorage.setItem('nova_backend_url', backendUrl);
-  localStorage.setItem('nova_connection_mode', mode);
   localStorage.setItem('nova_model', model);
   localStorage.setItem('nova_system_prompt', systemPrompt);
   localStorage.setItem('nova_temperature', temperature);
@@ -1574,14 +1632,185 @@ function toast(message, type='info'){
   setTimeout(()=>{ el.classList.add('hide'); setTimeout(()=> el.remove(), 300); }, 3200);
 }
 
-/* ================= Init ================= */
+/* ================= Receive sound ================= */
+function playReceiveSound(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 440;
+    gain.gain.setValueAtTime(0.07, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.2);
+  }catch(e){}
+}
+
+/* ================= Accent color picker ================= */
+const ACCENT_COLORS = [
+  { id:'orange', value:'#f97316' }, { id:'blue', value:'#3b82f6' }, { id:'green', value:'#22c55e' },
+  { id:'purple', value:'#a855f7' }, { id:'red', value:'#ef4444' }, { id:'pink', value:'#ec4899' }
+];
+function renderAccentPicker(){
+  const current = localStorage.getItem('nova_accent') || '#f97316';
+  const wrap = document.getElementById('accent-picker');
+  if(!wrap) return;
+  wrap.innerHTML = ACCENT_COLORS.map(c => `<div class="accent-swatch${c.value===current?' selected':''}" style="background:${c.value}" onclick="setAccentColor('${c.value}')"></div>`).join('');
+}
+function setAccentColor(hex){
+  document.documentElement.style.setProperty('--accent', hex);
+  document.documentElement.style.setProperty('--accent-dim', hex + '26');
+  localStorage.setItem('nova_accent', hex);
+  renderAccentPicker();
+}
+function applySavedAccent(){
+  const saved = localStorage.getItem('nova_accent');
+  if(saved) setAccentColor(saved);
+}
+
+/* ================= Backup export/import ================= */
+function exportBackup(){
+  const backup = {
+    app: 'BarbosovAI', version: APP_VERSION, exportedAt: new Date().toISOString(),
+    chats: state.chats,
+    settings: state.settings,
+    apiKey: localStorage.getItem('nova_api_key') || '',
+    model: localStorage.getItem('nova_model') || '',
+    systemPrompt: localStorage.getItem('nova_system_prompt') || '',
+    temperature: localStorage.getItem('nova_temperature') || '',
+    topP: localStorage.getItem('nova_top_p') || '',
+    profileName: localStorage.getItem('nova_profile_name') || '',
+    profileAvatar: localStorage.getItem('nova_profile_avatar') || '',
+    accent: localStorage.getItem('nova_accent') || '',
+    prompts: localStorage.getItem('nova_prompts') || '[]',
+    integrations: localStorage.getItem('nova_integrations') || '{}'
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'barbosovai-backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Резервная копия скачана','success');
+}
+function importBackup(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data.chats) throw new Error('Некорректный файл резервной копии');
+      if(!confirm('Импорт заменит текущие чаты и настройки этим бэкапом. Продолжить?')) return;
+      state.chats = data.chats;
+      Object.assign(state.settings, data.settings || {});
+      localStorage.setItem('nova_api_key', data.apiKey || '');
+      localStorage.setItem('nova_model', data.model || '');
+      localStorage.setItem('nova_system_prompt', data.systemPrompt || '');
+      localStorage.setItem('nova_temperature', data.temperature || '');
+      localStorage.setItem('nova_top_p', data.topP || '');
+      localStorage.setItem('nova_profile_name', data.profileName || '');
+      if(data.profileAvatar) localStorage.setItem('nova_profile_avatar', data.profileAvatar);
+      if(data.accent) localStorage.setItem('nova_accent', data.accent);
+      localStorage.setItem('nova_prompts', data.prompts || '[]');
+      localStorage.setItem('nova_integrations', data.integrations || '{}');
+      persistChats(); persistSettings();
+      state.activeChatId = state.chats[0]?.id;
+      applyProfileToSidebar(); applyGlobalSettingEffects(); applySavedAccent();
+      renderHistory(); renderMessages();
+      toast('Резервная копия импортирована','success');
+      closeSettings();
+    }catch(err){
+      toast('Не удалось прочитать файл: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= Drag & drop attachments onto composer ================= */
+(function setupDragDrop(){
+  const wrap = document.getElementById('composer-wrap');
+  let dragCounter = 0;
+  ['dragenter','dragover'].forEach(evt => wrap.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter++;
+    wrap.classList.add('drag-over');
+    if(!wrap.querySelector('.drop-hint')){
+      const hint = document.createElement('div'); hint.className = 'drop-hint'; hint.innerText = 'Отпустите, чтобы прикрепить файл';
+      wrap.appendChild(hint);
+    }
+  }));
+  ['dragleave','drop'].forEach(evt => wrap.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter = Math.max(0, dragCounter - 1);
+    if(dragCounter === 0 || evt === 'drop'){
+      wrap.classList.remove('drag-over');
+      const hint = wrap.querySelector('.drop-hint'); if(hint) hint.remove();
+      dragCounter = 0;
+    }
+  }));
+  wrap.addEventListener('drop', e => {
+    e.preventDefault();
+    if(e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+  });
+})();
+
+/* ================= Per-chat draft autosave ================= */
+let draftSaveTimer = null;
+function loadDraftForActiveChat(){
+  let drafts = {}; try{ drafts = JSON.parse(localStorage.getItem('nova_drafts') || '{}'); }catch(e){}
+  const draft = drafts[state.activeChatId] || '';
+  els.input.value = draft;
+  els.input.dispatchEvent(new Event('input'));
+}
+function saveDraftForActiveChat(){
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(() => {
+    let drafts = {}; try{ drafts = JSON.parse(localStorage.getItem('nova_drafts') || '{}'); }catch(e){}
+    if(els.input.value.trim()) drafts[state.activeChatId] = els.input.value;
+    else delete drafts[state.activeChatId];
+    localStorage.setItem('nova_drafts', JSON.stringify(drafts));
+  }, 300);
+}
+function clearDraftForChat(chatId){
+  let drafts = {}; try{ drafts = JSON.parse(localStorage.getItem('nova_drafts') || '{}'); }catch(e){}
+  delete drafts[chatId];
+  localStorage.setItem('nova_drafts', JSON.stringify(drafts));
+}
+els.input.addEventListener('input', saveDraftForActiveChat);
+
+/* ================= Composer character/word counter ================= */
+function updateComposerCounter(){
+  const text = els.input.value;
+  const el = document.getElementById('composer-counter');
+  if(!el) return;
+  if(!text.trim()){ el.innerText = ''; return; }
+  const words = text.trim().split(/\s+/).length;
+  el.innerText = `${text.length} симв. · ${words} сл.`;
+}
+els.input.addEventListener('input', updateComposerCounter);
+
+/* ================= Keyboard shortcuts ================= */
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  if(mod && e.key.toLowerCase() === 'k'){ e.preventDefault(); createNewChat(); }
+  else if(mod && e.key.toLowerCase() === 'f'){
+    e.preventDefault();
+    if(window.innerWidth < 900){ toggleSidebar(); }
+    document.getElementById('history-search').focus();
+  }
+  else if(e.key === 'Escape'){
+    closeAttachMenu(); closeShareMenu(); closeMoreMenu();
+    if(!document.getElementById('settings-modal').classList.contains('hidden')) closeSettings();
+    if(!document.getElementById('camera-modal').classList.contains('hidden')) closeCameraModal();
+  }
+});
+
+
 function init(){
   loadState();
   document.getElementById('sidebar-version').innerText = APP_VERSION;
   applyProfileToSidebar();
   applyGlobalSettingEffects();
+  applySavedAccent();
   renderHistory();
   renderMessages();
+  loadDraftForActiveChat();
 }
 init();
 </script>

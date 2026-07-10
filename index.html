@@ -210,6 +210,34 @@
   .msg-timestamp{ font-size:10px; color:var(--text-lo); margin-top:2px; }
   #composer-wrap.drag-over{ border-color: var(--accent); box-shadow: 0 0 0 4px rgba(249,115,22,0.15); }
   .drop-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(24,24,27,0.92); border-radius:28px; font-size:13px; color:var(--accent); font-weight:500; pointer-events:none; z-index:5; }
+
+  /* Mobile bottom-sheet behavior for popover menus */
+  @media (max-width: 640px){
+    #attach-menu, #share-menu, #more-menu{
+      position: fixed !important; left:0 !important; right:0 !important; bottom:0 !important; top:auto !important;
+      width:100% !important; max-width:100% !important; border-radius:24px 24px 0 0 !important;
+      max-height:75vh; overflow-y:auto; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      animation: sheetUp .32s var(--ease) both !important;
+    }
+    #attach-menu::before, #share-menu::before, #more-menu::before{
+      content:''; display:block; width:36px; height:4px; border-radius:999px; background:rgba(255,255,255,0.15); margin:10px auto 6px;
+    }
+    #attach-menu button, #share-menu button, #more-menu button{ padding-top:14px; padding-bottom:14px; }
+  }
+  @keyframes sheetUp{ from{ transform:translateY(100%); opacity:.4; } to{ transform:translateY(0); opacity:1; } }
+
+  .settings-mobile-item{
+    width:100%; display:flex; align-items:center; gap:12px; padding:14px 12px; border-radius:14px;
+    text-align:left; font-size:14px; color:var(--text-hi); transition: background .2s var(--ease);
+  }
+  .settings-mobile-item:active{ background: rgba(255,255,255,0.06); }
+  .settings-mobile-item i:first-child{ width:20px; color:var(--accent); font-size:15px; }
+  .settings-mobile-item span{ flex:1; }
+  .settings-mobile-item .chev{ color:var(--text-lo); font-size:12px; }
+  @media (max-width: 640px){
+    #settings-content-wrap.mobile-hidden{ display:none; }
+    #settings-mobile-list.mobile-hidden{ display:none; }
+  }
 </style>
 </head>
 <body class="antialiased">
@@ -390,23 +418,41 @@
 <!-- SETTINGS MODAL -->
 <div id="settings-modal" class="fixed inset-0 z-[100] modal-backdrop hidden items-center justify-center sm:px-4" onclick="if(event.target===this) closeSettings()">
   <div class="modal-panel glass rounded-none sm:rounded-3xl w-full h-full sm:h-auto sm:w-full sm:max-w-3xl flex flex-col sm:flex-row overflow-hidden" style="background:var(--bg-1);" id="settings-panel">
-    <div class="shrink-0 border-b sm:border-b-0 sm:border-r flex sm:block gap-1 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto p-2 sm:p-3 sm:w-48 sm:space-y-1 pt-safe sm:pt-3" style="border-color:var(--border)">
-      <div class="hidden sm:block px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
-      <button class="tab-btn active shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" onclick="switchTab('model')">Модель</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" onclick="switchTab('integrations')">Интеграции</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" onclick="switchTab('prompts')">Промпты</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" onclick="switchTab('changelog')">Что нового</button>
-      <button class="tab-btn shrink-0 sm:w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
+    <div class="hidden sm:flex shrink-0 border-r flex-col p-3 w-48 space-y-1 overflow-y-auto" style="border-color:var(--border)">
+      <div class="px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
+      <button class="tab-btn active w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" onclick="switchTab('model')">Модель</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" onclick="switchTab('integrations')">Интеграции</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" onclick="switchTab('prompts')">Промпты</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" onclick="switchTab('changelog')">Что нового</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
     </div>
 
-    <div class="flex-1 flex flex-col min-w-0 min-h-0">
-      <div class="flex items-center justify-between p-4 border-b" style="border-color:var(--border)">
-        <div id="tab-title" class="font-medium text-sm">Общие</div>
+    <!-- Mobile-only category list (drill-down navigation) -->
+    <div id="settings-mobile-list" class="sm:hidden flex-1 overflow-y-auto p-2 pt-safe">
+      <div class="px-3 py-3 font-display font-semibold text-base">Настройки</div>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('general')"><i class="fa-solid fa-key"></i><span>Общие</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('model')"><i class="fa-solid fa-robot"></i><span>Модель</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('profile')"><i class="fa-solid fa-user"></i><span>Профиль</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('interface')"><i class="fa-solid fa-sliders"></i><span>Интерфейс</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('appearance')"><i class="fa-solid fa-palette"></i><span>Внешний вид</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('experimental')"><i class="fa-solid fa-flask"></i><span>Эксперименты</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('integrations')"><i class="fa-solid fa-plug"></i><span>Интеграции</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('prompts')"><i class="fa-solid fa-bookmark"></i><span>Промпты</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('changelog')"><i class="fa-solid fa-clock-rotate-left"></i><span>Что нового</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('about')"><i class="fa-solid fa-circle-info"></i><span>О приложении</span><i class="fa-solid fa-chevron-right chev"></i></button>
+    </div>
+
+    <div id="settings-content-wrap" class="flex-1 flex flex-col min-w-0 min-h-0 mobile-hidden">
+      <div class="flex items-center justify-between p-4 border-b pt-safe sm:pt-4" style="border-color:var(--border)">
+        <div class="flex items-center gap-1">
+          <button id="settings-back-btn" onclick="closeMobileSettingsPanel()" class="sm:hidden icon-btn w-8 h-8 rounded-lg flex items-center justify-center -ml-1" style="color:var(--text-mid)"><i class="fa-solid fa-arrow-left"></i></button>
+          <div id="tab-title" class="font-medium text-sm">Общие</div>
+        </div>
         <button onclick="closeSettings()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-mid)"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -1610,12 +1656,23 @@ function openSettings(){
   pendingAvatarDataUrl = null;
   document.getElementById('about-version').innerText = APP_VERSION;
   renderModelPicker(); renderIntegrations(); renderPromptsLibrary(); renderChangelog(); updateContextUsage(); renderAccentPicker();
+  document.getElementById('settings-mobile-list').classList.remove('mobile-hidden');
+  document.getElementById('settings-content-wrap').classList.add('mobile-hidden');
   requestAnimationFrame(()=> modal.classList.add('show'));
 }
 function closeSettings(){
   const modal = document.getElementById('settings-modal');
   modal.classList.remove('show');
   setTimeout(()=> { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+}
+function openMobileSettingsPanel(tab){
+  switchTab(tab);
+  document.getElementById('settings-mobile-list').classList.add('mobile-hidden');
+  document.getElementById('settings-content-wrap').classList.remove('mobile-hidden');
+}
+function closeMobileSettingsPanel(){
+  document.getElementById('settings-content-wrap').classList.add('mobile-hidden');
+  document.getElementById('settings-mobile-list').classList.remove('mobile-hidden');
 }
 function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));

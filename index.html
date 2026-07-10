@@ -312,7 +312,7 @@
     </header>
 
     <div id="chat-scroll" class="flex-1 overflow-y-auto">
-      <div id="empty-state" class="h-full flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto">
+      <div id="empty-state" class="h-full flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto" style="max-width:672px; margin-left:auto; margin-right:auto;">
         <svg width="120" height="120" viewBox="0 0 120 120" fill="none" class="mb-6">
           <defs>
             <linearGradient id="ringGrad" x1="30" y1="20" x2="90" y2="100" gradientUnits="userSpaceOnUse">
@@ -363,7 +363,7 @@
           </button>
         </div>
       </div>
-      <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-6 hidden"></div>
+      <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-6 hidden" style="max-width:768px; margin-left:auto; margin-right:auto;"></div>
     </div>
 
     <div class="px-4 pb-5 pt-2 shrink-0 pb-safe">
@@ -895,12 +895,33 @@ function decorateCodeBlocks(row){
 }
 
 const LANG_EXTENSIONS = { javascript:'js', js:'js', typescript:'ts', ts:'ts', jsx:'jsx', tsx:'tsx', python:'py', py:'py', java:'java', c:'c', cpp:'cpp', csharp:'cs', cs:'cs', html:'html', css:'css', scss:'scss', json:'json', xml:'xml', yaml:'yml', yml:'yml', bash:'sh', sh:'sh', shell:'sh', sql:'sql', php:'php', go:'go', rust:'rs', rb:'rb', ruby:'rb', kotlin:'kt', swift:'swift', markdown:'md', md:'md', text:'txt', plaintext:'txt' };
+
+function guessCodeFilename(code){
+  const patterns = [
+    /class\s+([A-Za-z_$][\w$]*)/,                 // class Foo
+    /function\s+([A-Za-z_$][\w$]*)\s*\(/,          // function foo(
+    /def\s+([A-Za-z_$][\w$]*)\s*\(/,               // def foo(
+    /func\s+([A-Za-z_$][\w$]*)\s*\(/,              // func foo(
+    /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/,  // const foo =
+    /<title>\s*([^<]{2,40})\s*<\/title>/i,         // HTML <title>
+  ];
+  for(const re of patterns){
+    const match = code.match(re);
+    if(match && match[1]){
+      return match[1].trim().replace(/\s+/g,'-').replace(/[^\w-]/g,'').slice(0,40);
+    }
+  }
+  return null;
+}
+
 function downloadCode(code, lang){
   const ext = LANG_EXTENSIONS[lang.toLowerCase()] || (lang && lang !== 'text' ? lang.toLowerCase() : 'txt');
+  const guessed = guessCodeFilename(code);
+  const base = guessed || ('snippet-' + Date.now().toString().slice(-6));
   const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
-  a.href = url; a.download = `code.${ext}`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  toast('Код скачан', 'success');
+  a.href = url; a.download = `${base}.${ext}`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast(`Скачано как ${base}.${ext}`, 'success');
 }
 
 function copyMsg(btn){

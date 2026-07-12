@@ -205,6 +205,9 @@
   @media (min-width: 640px){ #settings-panel{ height:600px; max-height:85vh; } }
 
   .accent-swatch{ width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); }
+  .lang-flag{ width:44px; height:36px; border-radius:10px; cursor:pointer; border:2px solid transparent; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--bg-2); transition: transform .15s var(--ease), border-color .15s var(--ease); }
+  .lang-flag:hover{ transform: scale(1.06); }
+  .lang-flag.selected{ border-color: var(--accent); }
   .accent-swatch:hover{ transform: scale(1.1); }
   .accent-swatch.selected{ border-color: var(--text-hi); }
   .msg-timestamp{ font-size:10px; color:var(--text-lo); margin-top:2px; }
@@ -257,23 +260,23 @@
 
     <div class="p-3">
       <button onclick="createNewChat()" class="btn-primary w-full rounded-2xl py-3 px-4 flex items-center justify-center gap-2 font-medium text-sm">
-        <i class="fa-solid fa-plus text-xs"></i> Новый чат
+        <i class="fa-solid fa-plus text-xs"></i> <span data-i18n="new_chat">Новый чат</span>
       </button>
     </div>
 
     <div class="px-3 pb-2 pt-1">
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:var(--text-lo)"></i>
-        <input id="history-search" type="text" placeholder="Поиск по чатам..." class="w-full rounded-lg pl-8 pr-3 py-2 text-[13px]" oninput="renderHistory()">
+        <input id="history-search" type="text" placeholder="Поиск по чатам..." data-i18n-placeholder="search_placeholder" class="w-full rounded-lg pl-8 pr-3 py-2 text-[13px]" oninput="renderHistory()">
       </div>
     </div>
 
-    <div class="px-3 pb-2 text-[11px] uppercase tracking-wider font-medium" style="color:var(--text-lo)">История</div>
+    <div class="px-3 pb-2 text-[11px] uppercase tracking-wider font-medium" data-i18n="history_label" style="color:var(--text-lo)">История</div>
     <div id="history-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-2"></div>
 
     <div class="border-t p-3 space-y-1 pb-safe" style="border-color:var(--border)">
       <button onclick="openSettings()" class="icon-btn w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-left" style="color:var(--text-mid)">
-        <i class="fa-solid fa-gear w-4"></i> Настройки
+        <i class="fa-solid fa-gear w-4"></i> <span data-i18n="settings">Настройки</span>
       </button>
       <div class="flex items-center gap-3 rounded-xl px-3 py-2.5">
         <div id="sidebar-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 overflow-hidden" style="background:var(--accent-dim); color:var(--accent)">Б</div>
@@ -293,17 +296,17 @@
       </button>
       <div class="hidden md:block"></div>
       <div class="flex items-center gap-1 relative">
-        <button onclick="exportChat()" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Скачать чат">
+        <button onclick="exportChat()" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Скачать чат" data-i18n-title="download_title">
           <i class="fa-solid fa-download text-sm"></i>
         </button>
         <div class="relative">
-          <button onclick="toggleShareMenu(event)" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Поделиться">
+          <button onclick="toggleShareMenu(event)" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Поделиться" data-i18n-title="share_title">
             <i class="fa-solid fa-share-nodes text-sm"></i>
           </button>
           <div id="share-menu" class="hidden absolute top-11 right-0 w-56 dropdown-menu scale-in z-50"></div>
         </div>
         <div class="relative">
-          <button onclick="toggleMoreMenu(event)" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Меню">
+          <button onclick="toggleMoreMenu(event)" class="icon-btn w-9 h-9 rounded-xl flex items-center justify-center" style="color:var(--text-mid)" title="Меню" data-i18n-title="menu_title">
             <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
           </button>
           <div id="more-menu" class="hidden absolute top-11 right-0 w-60 dropdown-menu scale-in z-50"></div>
@@ -338,28 +341,28 @@
             <path d="M60 40 L77.32 50 V70 L60 80 L42.68 70 V50 Z" fill="url(#hexFaceGrad)"/>
           </g>
         </svg>
-        <h1 class="font-display text-3xl font-semibold mb-2">Чем займёмся сегодня?</h1>
-        <p class="text-sm mb-8" style="color:var(--text-mid)">Задай вопрос, вставь текст или обсуди идею — BarbosovAI на связи.</p>
+        <h1 class="font-display text-3xl font-semibold mb-2" data-i18n="empty_title">Чем займёмся сегодня?</h1>
+        <p class="text-sm mb-8" style="color:var(--text-mid)" data-i18n="empty_subtitle">Задай вопрос, вставь текст или обсуди идею — BarbosovAI на связи.</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
           <button onclick="promptCard('Объясни квантовые вычисления простыми словами')" class="prompt-card rounded-2xl p-4 text-left">
             <i class="fa-solid fa-atom mb-2" style="color:var(--accent)"></i>
-            <div class="text-sm font-medium">Объясни сложную тему</div>
-            <div class="text-xs mt-0.5" style="color:var(--text-lo)">простыми словами</div>
+            <div class="text-sm font-medium" data-i18n="prompt1_title">Объясни сложную тему</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)" data-i18n="prompt1_sub">простыми словами</div>
           </button>
           <button onclick="promptCard('Помоги написать план недели с фокусом на продуктивность')" class="prompt-card rounded-2xl p-4 text-left">
             <i class="fa-solid fa-list-check mb-2" style="color:var(--accent)"></i>
-            <div class="text-sm font-medium">Составь план</div>
-            <div class="text-xs mt-0.5" style="color:var(--text-lo)">на неделю вперёд</div>
+            <div class="text-sm font-medium" data-i18n="prompt2_title">Составь план</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)" data-i18n="prompt2_sub">на неделю вперёд</div>
           </button>
           <button onclick="promptCard('Напиши функцию на JavaScript для дебаунса')" class="prompt-card rounded-2xl p-4 text-left">
             <i class="fa-solid fa-code mb-2" style="color:var(--accent)"></i>
-            <div class="text-sm font-medium">Напиши код</div>
-            <div class="text-xs mt-0.5" style="color:var(--text-lo)">на любом языке</div>
+            <div class="text-sm font-medium" data-i18n="prompt3_title">Напиши код</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)" data-i18n="prompt3_sub">на любом языке</div>
           </button>
           <button onclick="promptCard('Придумай 5 идей для подарка на день рождения другу')" class="prompt-card rounded-2xl p-4 text-left">
             <i class="fa-solid fa-lightbulb mb-2" style="color:var(--accent)"></i>
-            <div class="text-sm font-medium">Придумай идею</div>
-            <div class="text-xs mt-0.5" style="color:var(--text-lo)">для любого случая</div>
+            <div class="text-sm font-medium" data-i18n="prompt4_title">Придумай идею</div>
+            <div class="text-xs mt-0.5" style="color:var(--text-lo)" data-i18n="prompt4_sub">для любого случая</div>
           </button>
         </div>
       </div>
@@ -375,19 +378,19 @@
               <i class="fa-solid fa-paperclip text-sm"></i>
             </button>
             <div id="attach-menu" class="hidden absolute bottom-12 left-0 w-52 rounded-2xl overflow-hidden glass scale-in z-50" style="background:var(--bg-2)">
-              <button onclick="triggerAttach('camera')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-camera w-4" style="color:var(--accent)"></i> Камера</button>
-              <button onclick="triggerAttach('photo')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-image w-4" style="color:var(--accent)"></i> Фото из галереи</button>
-              <button onclick="triggerAttach('file')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-file w-4" style="color:var(--accent)"></i> Файл</button>
+              <button onclick="triggerAttach('camera')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-camera w-4" style="color:var(--accent)"></i> <span data-i18n="attach_camera">Камера</span></button>
+              <button onclick="triggerAttach('photo')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-image w-4" style="color:var(--accent)"></i> <span data-i18n="attach_photo">Фото из галереи</span></button>
+              <button onclick="triggerAttach('file')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left icon-btn" style="color:var(--text-hi)"><i class="fa-solid fa-file w-4" style="color:var(--accent)"></i> <span data-i18n="attach_file">Файл</span></button>
             </div>
           </div>
           <input id="file-photo" type="file" accept="image/*" multiple class="hidden" onchange="handleFiles(this.files)">
           <input id="file-generic" type="file" multiple class="hidden" onchange="handleFiles(this.files)">
-          <textarea id="chat-input" rows="1" placeholder="Напишите сообщение..." class="flex-1 py-2 text-[15px] leading-6"></textarea>
-          <button id="mic-btn" onclick="toggleVoiceInput()" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center shrink-0 mb-0.5" style="color:var(--text-mid)" title="Голосовой ввод"><i class="fa-solid fa-microphone text-sm"></i></button>
+          <textarea id="chat-input" rows="1" placeholder="Напишите сообщение..." data-i18n-placeholder="composer_placeholder" class="flex-1 py-2 text-[15px] leading-6"></textarea>
+          <button id="mic-btn" onclick="toggleVoiceInput()" class="icon-btn w-9 h-9 rounded-full flex items-center justify-center shrink-0 mb-0.5" style="color:var(--text-mid)" title="Голосовой ввод" data-i18n-title="mic_title"><i class="fa-solid fa-microphone text-sm"></i></button>
           <button id="send-btn" onclick="sendMessage()" class="btn-primary w-9 h-9 rounded-full flex items-center justify-center shrink-0 mb-0.5"><i class="fa-solid fa-arrow-up text-sm"></i></button>
         </div>
         <div class="flex items-center justify-center gap-3 mt-2.5">
-          <p class="text-center text-[11px]" style="color:var(--text-lo)">BarbosovAI может ошибаться. Проверяйте важные факты.</p>
+          <p class="text-center text-[11px]" style="color:var(--text-lo)" data-i18n="composer_disclaimer">BarbosovAI может ошибаться. Проверяйте важные факты.</p>
           <span id="composer-counter" class="text-[11px]" style="color:var(--text-lo)"></span>
           <span id="token-counter" class="text-[11px]" style="color:var(--text-lo)"></span>
         </div>
@@ -402,13 +405,13 @@
 <div id="camera-modal" class="fixed inset-0 z-[110] modal-backdrop hidden items-center justify-center px-4">
   <div class="modal-panel camera-modal glass rounded-3xl w-full max-w-md p-4" style="background:var(--bg-1);">
     <div class="flex items-center justify-between mb-3">
-      <div class="font-medium text-sm">Камера</div>
+      <div class="font-medium text-sm" data-i18n="camera_title">Камера</div>
       <button onclick="closeCameraModal()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-mid)"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <video id="camera-video" autoplay playsinline muted></video>
     <canvas id="camera-canvas" class="hidden"></canvas>
     <div class="flex items-center justify-center gap-3 mt-4">
-      <button onclick="capturePhoto()" class="btn-primary rounded-2xl px-6 py-2.5 text-sm font-medium flex items-center gap-2"><i class="fa-solid fa-camera"></i> Сделать снимок</button>
+      <button onclick="capturePhoto()" class="btn-primary rounded-2xl px-6 py-2.5 text-sm font-medium flex items-center gap-2"><i class="fa-solid fa-camera"></i> <span data-i18n="camera_capture">Сделать снимок</span></button>
     </div>
   </div>
 </div>
@@ -419,32 +422,32 @@
 <div id="settings-modal" class="fixed inset-0 z-[100] modal-backdrop hidden items-center justify-center sm:px-4" onclick="if(event.target===this) closeSettings()">
   <div class="modal-panel glass rounded-none sm:rounded-3xl w-full h-full sm:h-auto sm:w-full sm:max-w-3xl flex flex-col sm:flex-row overflow-hidden" style="background:var(--bg-1);" id="settings-panel">
     <div class="hidden sm:flex shrink-0 border-r flex-col p-3 w-48 space-y-1 overflow-y-auto" style="border-color:var(--border)">
-      <div class="px-3 py-2 font-display font-semibold text-sm mb-2">Настройки</div>
-      <button class="tab-btn active w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" onclick="switchTab('general')">Общие</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" onclick="switchTab('model')">Модель</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" onclick="switchTab('interface')">Интерфейс</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" onclick="switchTab('appearance')">Внешний вид</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" onclick="switchTab('experimental')">Эксперименты</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" onclick="switchTab('integrations')">Интеграции</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" onclick="switchTab('prompts')">Промпты</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" onclick="switchTab('changelog')">Что нового</button>
-      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" onclick="switchTab('about')">О приложении</button>
+      <div class="px-3 py-2 font-display font-semibold text-sm mb-2" data-i18n="settings_title">Настройки</div>
+      <button class="tab-btn active w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="general" data-i18n="tab_general" onclick="switchTab('general')">Общие</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="model" data-i18n="tab_model" onclick="switchTab('model')">Модель</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="profile" data-i18n="tab_profile" onclick="switchTab('profile')">Профиль</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="interface" data-i18n="tab_interface" onclick="switchTab('interface')">Интерфейс</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="appearance" data-i18n="tab_appearance" onclick="switchTab('appearance')">Внешний вид</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="experimental" data-i18n="tab_experimental" onclick="switchTab('experimental')">Эксперименты</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="integrations" data-i18n="tab_integrations" onclick="switchTab('integrations')">Интеграции</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="prompts" data-i18n="tab_prompts" onclick="switchTab('prompts')">Промпты</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="changelog" data-i18n="tab_changelog" onclick="switchTab('changelog')">Что нового</button>
+      <button class="tab-btn w-full text-left text-sm px-3 py-2.5 rounded-lg" data-tab="about" data-i18n="tab_about" onclick="switchTab('about')">О приложении</button>
     </div>
 
     <!-- Mobile-only category list (drill-down navigation) -->
     <div id="settings-mobile-list" class="sm:hidden flex-1 overflow-y-auto p-2 pt-safe">
-      <div class="px-3 py-3 font-display font-semibold text-base">Настройки</div>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('general')"><i class="fa-solid fa-key"></i><span>Общие</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('model')"><i class="fa-solid fa-robot"></i><span>Модель</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('profile')"><i class="fa-solid fa-user"></i><span>Профиль</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('interface')"><i class="fa-solid fa-sliders"></i><span>Интерфейс</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('appearance')"><i class="fa-solid fa-palette"></i><span>Внешний вид</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('experimental')"><i class="fa-solid fa-flask"></i><span>Эксперименты</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('integrations')"><i class="fa-solid fa-plug"></i><span>Интеграции</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('prompts')"><i class="fa-solid fa-bookmark"></i><span>Промпты</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('changelog')"><i class="fa-solid fa-clock-rotate-left"></i><span>Что нового</span><i class="fa-solid fa-chevron-right chev"></i></button>
-      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('about')"><i class="fa-solid fa-circle-info"></i><span>О приложении</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <div class="px-3 py-3 font-display font-semibold text-base" data-i18n="settings_title">Настройки</div>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('general')"><i class="fa-solid fa-key"></i><span data-i18n="tab_general">Общие</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('model')"><i class="fa-solid fa-robot"></i><span data-i18n="tab_model">Модель</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('profile')"><i class="fa-solid fa-user"></i><span data-i18n="tab_profile">Профиль</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('interface')"><i class="fa-solid fa-sliders"></i><span data-i18n="tab_interface">Интерфейс</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('appearance')"><i class="fa-solid fa-palette"></i><span data-i18n="tab_appearance">Внешний вид</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('experimental')"><i class="fa-solid fa-flask"></i><span data-i18n="tab_experimental">Эксперименты</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('integrations')"><i class="fa-solid fa-plug"></i><span data-i18n="tab_integrations">Интеграции</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('prompts')"><i class="fa-solid fa-bookmark"></i><span data-i18n="tab_prompts">Промпты</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('changelog')"><i class="fa-solid fa-clock-rotate-left"></i><span data-i18n="tab_changelog">Что нового</span><i class="fa-solid fa-chevron-right chev"></i></button>
+      <button class="settings-mobile-item" onclick="openMobileSettingsPanel('about')"><i class="fa-solid fa-circle-info"></i><span data-i18n="tab_about">О приложении</span><i class="fa-solid fa-chevron-right chev"></i></button>
     </div>
 
     <div id="settings-content-wrap" class="flex-1 flex flex-col min-w-0 min-h-0 mobile-hidden">
@@ -460,69 +463,73 @@
         <!-- General -->
         <div class="tab-panel space-y-5" data-panel="general">
           <div>
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">API ключ</label>
-            <input id="api-key-input" type="password" placeholder="Вставьте свой API-ключ..." class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)" oninput="updateProviderDetection()">
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)" data-i18n="language_label">Язык интерфейса</label>
+            <div id="language-picker" class="flex flex-wrap items-center gap-2"></div>
+          </div>
+          <div>
+            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)" data-i18n="api_key_label">API ключ</label>
+            <input id="api-key-input" type="password" placeholder="Вставьте свой API-ключ..." data-i18n-placeholder="api_key_placeholder" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)" oninput="updateProviderDetection()">
             <div id="provider-detection" class="text-[11px] mt-1.5 flex items-center gap-1.5" style="color:var(--text-lo)"></div>
-            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Хранится только в вашем браузере (localStorage) и никуда, кроме сервиса, которому принадлежит ключ, не отправляется.</p>
+            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)" data-i18n="api_key_help">Хранится только в вашем браузере (localStorage) и никуда, кроме сервиса, которому принадлежит ключ, не отправляется.</p>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Звук уведомлений об ошибках</div><div class="text-xs" style="color:var(--text-lo)">Показывать тосты при сетевых ошибках</div></div>
+            <div><div class="text-sm font-medium" data-i18n="error_toasts_label">Звук уведомлений об ошибках</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="error_toasts_sub">Показывать тосты при сетевых ошибках</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'errorToasts')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Подтверждение удаления</div><div class="text-xs" style="color:var(--text-lo)">Спрашивать перед удалением чата</div></div>
+            <div><div class="text-sm font-medium" data-i18n="confirm_delete_label">Подтверждение удаления</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="confirm_delete_sub">Спрашивать перед удалением чата</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'confirmDelete')"><div class="knob"></div></div>
           </div>
           <div>
-            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Резервная копия</label>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)" data-i18n="backup_label">Резервная копия</label>
             <div class="flex gap-2">
-              <button onclick="exportBackup()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-download"></i> Экспорт всех данных</button>
-              <button onclick="document.getElementById('backup-file-input').click()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-upload"></i> Импорт</button>
+              <button onclick="exportBackup()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-download"></i> <span data-i18n="backup_export">Экспорт всех данных</span></button>
+              <button onclick="document.getElementById('backup-file-input').click()" class="flex-1 icon-btn rounded-xl px-3 py-2.5 text-xs font-medium flex items-center justify-center gap-2" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"><i class="fa-solid fa-upload"></i> <span data-i18n="backup_import">Импорт</span></button>
               <input id="backup-file-input" type="file" accept=".json" class="hidden" onchange="importBackup(this.files[0])">
             </div>
-            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Сохраняет все чаты и настройки в один файл — удобно перенести на другое устройство.</p>
+            <p class="text-[11px] mt-1.5" style="color:var(--text-lo)" data-i18n="backup_help">Сохраняет все чаты и настройки в один файл — удобно перенести на другое устройство.</p>
           </div>
-          <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium">Сохранить</button>
+          <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium" data-i18n="save">Сохранить</button>
         </div>
 
         <!-- Model -->
         <div class="tab-panel space-y-5 hidden" data-panel="model">
           <div>
-            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Модель</label>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)" data-i18n="model_label">Модель</label>
             <div id="model-picker" class="space-y-2"></div>
-            <p class="text-[11px] mt-2" style="color:var(--text-lo)">Список выше подходит для ключей OpenRouter. Если ваш ключ от другого сервиса, впишите название модели вручную.</p>
-            <button onclick="toggleAdvancedModel()" id="advanced-model-toggle" class="text-[11px] mt-2.5 underline" style="color:var(--text-lo)">Указать модель вручную</button>
+            <p class="text-[11px] mt-2" style="color:var(--text-lo)" data-i18n="model_hint">Список выше подходит для ключей OpenRouter. Если ваш ключ от другого сервиса, впишите название модели вручную.</p>
+            <button onclick="toggleAdvancedModel()" id="advanced-model-toggle" class="text-[11px] mt-2.5 underline" style="color:var(--text-lo)" data-i18n="model_manual_toggle">Указать модель вручную</button>
             <div id="advanced-model-wrap" class="hidden mt-2">
-              <input id="model-input" type="text" placeholder="например gpt-4o-mini, claude-3-5-sonnet-20241022" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
-              <p class="text-[11px] mt-1.5" style="color:var(--text-lo)">Если оставить пустым, для вашего сервиса будет использована модель по умолчанию.</p>
+              <input id="model-input" type="text" placeholder="например gpt-4o-mini, claude-3-5-sonnet-20241022" data-i18n-placeholder="model_manual_placeholder" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+              <p class="text-[11px] mt-1.5" style="color:var(--text-lo)" data-i18n="model_manual_help">Если оставить пустым, для вашего сервиса будет использована модель по умолчанию.</p>
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">Системный промпт (инструкции для ИИ)</label>
-            <textarea id="system-prompt-input" rows="3" placeholder="Например: Всегда отвечай коротко и по делу. Ты — senior-разработчик." class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none resize-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"></textarea>
+            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)" data-i18n="system_prompt_label">Системный промпт (инструкции для ИИ)</label>
+            <textarea id="system-prompt-input" rows="3" placeholder="Например: Всегда отвечай коротко и по делу. Ты — senior-разработчик." data-i18n-placeholder="system_prompt_placeholder" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none resize-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)"></textarea>
           </div>
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-medium" style="color:var(--text-mid)">Temperature (креативность)</label>
+              <label class="text-xs font-medium" style="color:var(--text-mid)" data-i18n="temperature_label">Temperature (креативность)</label>
               <span id="temperature-value" class="text-xs" style="color:var(--accent)">0.7</span>
             </div>
             <input id="temperature-slider" type="range" min="0" max="2" step="0.1" value="0.7" class="slider" oninput="document.getElementById('temperature-value').innerText=this.value">
           </div>
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-medium" style="color:var(--text-mid)">Top-P</label>
+              <label class="text-xs font-medium" style="color:var(--text-mid)" data-i18n="topp_label">Top-P</label>
               <span id="topp-value" class="text-xs" style="color:var(--accent)">1</span>
             </div>
             <input id="topp-slider" type="range" min="0" max="1" step="0.05" value="1" class="slider" oninput="document.getElementById('topp-value').innerText=this.value">
           </div>
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <span class="text-xs font-medium" style="color:var(--text-mid)">Контекст текущего чата</span>
+              <span class="text-xs font-medium" style="color:var(--text-mid)" data-i18n="context_label">Контекст текущего чата</span>
               <span id="context-usage-text" class="text-xs" style="color:var(--text-lo)">~0 / 128000 токенов</span>
             </div>
             <div class="w-full h-1.5 rounded-full" style="background:#3f3f46"><div id="context-usage-bar" class="h-1.5 rounded-full" style="background:var(--accent); width:0%"></div></div>
           </div>
-          <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium">Сохранить</button>
+          <button onclick="saveApiSettings()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium" data-i18n="save">Сохранить</button>
         </div>
 
         <!-- Profile -->
@@ -533,68 +540,68 @@
             </div>
             <input id="avatar-file-input" type="file" accept="image/*" class="hidden" onchange="handleAvatarUpload(this.files[0])">
             <div>
-              <button onclick="document.getElementById('avatar-file-input').click()" class="text-xs underline" style="color:var(--text-mid)">Загрузить фото</button><br>
-              <button onclick="removeAvatar()" class="text-xs underline mt-1" style="color:var(--text-lo)">Удалить фото</button>
+              <button onclick="document.getElementById('avatar-file-input').click()" class="text-xs underline" style="color:var(--text-mid)" data-i18n="avatar_upload">Загрузить фото</button><br>
+              <button onclick="removeAvatar()" class="text-xs underline mt-1" style="color:var(--text-lo)" data-i18n="avatar_remove">Удалить фото</button>
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)">Ваше имя</label>
-            <input id="profile-name-input" type="text" placeholder="Гость" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)" data-i18n="your_name">Ваше имя</label>
+            <input id="profile-name-input" type="text" placeholder="Гость" data-i18n-placeholder="your_name_placeholder" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
           </div>
-          <button onclick="saveProfile()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium">Сохранить</button>
+          <button onclick="saveProfile()" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-medium" data-i18n="save">Сохранить</button>
         </div>
 
         <!-- Interface -->
         <div class="tab-panel space-y-4 hidden" data-panel="interface">
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Компактный режим</div><div class="text-xs" style="color:var(--text-lo)">Уменьшить отступы в сообщениях</div></div>
+            <div><div class="text-sm font-medium" data-i18n="compact_label">Компактный режим</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="compact_sub">Уменьшить отступы в сообщениях</div></div>
             <div class="switch" onclick="toggleSwitch(this,'compact')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Крупный шрифт</div><div class="text-xs" style="color:var(--text-lo)">Увеличить размер текста сообщений</div></div>
+            <div><div class="text-sm font-medium" data-i18n="large_font_label">Крупный шрифт</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="large_font_sub">Увеличить размер текста сообщений</div></div>
             <div class="switch" onclick="toggleSwitch(this,'largeFont')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Звук отправки</div><div class="text-xs" style="color:var(--text-lo)">Проигрывать звук при отправке сообщения</div></div>
+            <div><div class="text-sm font-medium" data-i18n="send_sound_label">Звук отправки</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="send_sound_sub">Проигрывать звук при отправке сообщения</div></div>
             <div class="switch" onclick="toggleSwitch(this,'sendSound')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Звук получения ответа</div><div class="text-xs" style="color:var(--text-lo)">Проигрывать звук, когда ИИ закончил отвечать</div></div>
+            <div><div class="text-sm font-medium" data-i18n="receive_sound_label">Звук получения ответа</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="receive_sound_sub">Проигрывать звук, когда ИИ закончил отвечать</div></div>
             <div class="switch" onclick="toggleSwitch(this,'receiveSound')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Время сообщений</div><div class="text-xs" style="color:var(--text-lo)">Показывать время под каждым сообщением</div></div>
+            <div><div class="text-sm font-medium" data-i18n="timestamps_label">Время сообщений</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="timestamps_sub">Показывать время под каждым сообщением</div></div>
             <div class="switch" onclick="toggleSwitch(this,'showTimestamps')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Автоскролл</div><div class="text-xs" style="color:var(--text-lo)">Автоматически прокручивать к новым сообщениям</div></div>
+            <div><div class="text-sm font-medium" data-i18n="autoscroll_label">Автоскролл</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="autoscroll_sub">Автоматически прокручивать к новым сообщениям</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'autoscroll')"><div class="knob"></div></div>
           </div>
           <div class="rounded-xl p-3 text-xs space-y-1.5" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-lo)">
-            <div class="font-medium mb-1" style="color:var(--text-mid)">Горячие клавиши</div>
-            <div>Ctrl/⌘ + K — новый чат</div>
-            <div>Ctrl/⌘ + F — поиск по чатам</div>
-            <div>Enter — отправить · Shift+Enter — новая строка</div>
-            <div>Esc — закрыть окно/меню</div>
+            <div class="font-medium mb-1" style="color:var(--text-mid)" data-i18n="shortcuts_title">Горячие клавиши</div>
+            <div>Ctrl/⌘ + K — <span data-i18n="shortcuts_new_chat">новый чат</span></div>
+            <div>Ctrl/⌘ + F — <span data-i18n="shortcuts_search">поиск по чатам</span></div>
+            <div>Enter — <span data-i18n="shortcuts_send">отправить</span> · Shift+Enter — <span data-i18n="shortcuts_newline">новая строка</span></div>
+            <div>Esc — <span data-i18n="shortcuts_esc">закрыть окно/меню</span></div>
           </div>
         </div>
 
         <!-- Appearance -->
         <div class="tab-panel space-y-4 hidden" data-panel="appearance">
           <div>
-            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)">Акцентный цвет</label>
+            <label class="text-xs font-medium block mb-2" style="color:var(--text-mid)" data-i18n="accent_label">Акцентный цвет</label>
             <div id="accent-picker" class="flex items-center gap-3"></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Анимации интерфейса</div><div class="text-xs" style="color:var(--text-lo)">Плавные переходы и появления элементов</div></div>
+            <div><div class="text-sm font-medium" data-i18n="animations_label">Анимации интерфейса</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="animations_sub">Плавные переходы и появления элементов</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'animations')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Показывать аватар ИИ</div><div class="text-xs" style="color:var(--text-lo)">Значок BarbosovAI рядом с ответами</div></div>
+            <div><div class="text-sm font-medium" data-i18n="avatar_show_label">Показывать аватар ИИ</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="avatar_show_sub">Значок BarbosovAI рядом с ответами</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'showAvatar')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Плотный список чатов</div><div class="text-xs" style="color:var(--text-lo)">Меньше отступы в истории слева</div></div>
+            <div><div class="text-sm font-medium" data-i18n="dense_label">Плотный список чатов</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="dense_sub">Меньше отступы в истории слева</div></div>
             <div class="switch" onclick="toggleSwitch(this,'denseHistory')"><div class="knob"></div></div>
           </div>
         </div>
@@ -602,30 +609,42 @@
         <!-- Experimental -->
         <div class="tab-panel space-y-4 hidden" data-panel="experimental">
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Потоковая генерация</div><div class="text-xs" style="color:var(--text-lo)">Показывать ответ по мере генерации</div></div>
+            <div><div class="text-sm font-medium" data-i18n="streaming_label">Потоковая генерация</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="streaming_sub">Показывать ответ по мере генерации</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'streaming')"><div class="knob"></div></div>
           </div>
           <div class="flex items-center justify-between">
-            <div><div class="text-sm font-medium">Режим рассуждений</div><div class="text-xs" style="color:var(--text-lo)">Просить модель показывать ход мыслей (если модель поддерживает)</div></div>
+            <div><div class="text-sm font-medium" data-i18n="reasoning_label">Режим рассуждений</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="reasoning_sub">Просить модель показывать ход мыслей (если модель поддерживает)</div></div>
             <div class="switch" onclick="toggleSwitch(this,'reasoning')"><div class="knob"></div></div>
           </div>
         </div>
 
         <!-- Integrations -->
         <div class="tab-panel space-y-3 hidden" data-panel="integrations">
-          <p class="text-xs mb-2" style="color:var(--text-lo)">Подключите сторонние сервисы. Токены хранятся только локально в вашем браузере.</p>
-          <div id="integrations-list" class="space-y-3"></div>
+          <p class="text-xs mb-2" style="color:var(--text-lo)" data-i18n="integrations_desc">Подключите сторонние сервисы. Токены хранятся только локально в вашем браузере.</p>
+          <div class="relative">
+            <div id="integrations-list" class="space-y-3 pointer-events-none select-none" style="filter:blur(2px); opacity:0.5;"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="glass rounded-2xl px-5 py-4 flex items-center gap-3 scale-in" style="background:rgba(24,24,27,0.85)">
+                <i class="fa-solid fa-code-branch" style="color:var(--accent)"></i>
+                <div>
+                  <div class="text-sm font-medium" data-i18n="wip_title">В разработке</div>
+                  <div class="text-xs" style="color:var(--text-lo)" data-i18n="wip_sub">Интеграции скоро появятся</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Prompts library -->
         <div class="tab-panel space-y-3 hidden" data-panel="prompts">
-          <button onclick="addPromptEntry()" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2"><i class="fa-solid fa-plus text-xs"></i> Сохранить новый промпт</button>
+          <button onclick="addPromptEntry()" class="btn-primary rounded-xl px-4 py-2 text-sm font-medium flex items-center gap-2"><i class="fa-solid fa-plus text-xs"></i> <span data-i18n="prompts_add">Сохранить новый промпт</span></button>
           <div id="prompts-list" class="space-y-2 mt-3"></div>
         </div>
 
         <!-- Changelog -->
         <div class="tab-panel hidden" data-panel="changelog">
           <div id="changelog-list" class="space-y-0"></div>
+          <div id="changelog-pagination" class="flex items-center justify-between gap-2 mt-5 pt-4 border-t" style="border-color:var(--border)"></div>
         </div>
 
         <!-- About -->
@@ -640,7 +659,7 @@
               <div class="text-xs" style="color:var(--text-lo)">Версия <span id="about-version"></span></div>
             </div>
           </div>
-          <p class="text-sm" style="color:var(--text-mid)">Ваш собственный AI через API key. Все данные хранятся локально в вашем браузере.</p>
+          <p class="text-sm" style="color:var(--text-mid)" data-i18n="about_desc">Ваш собственный AI через API key. Все данные хранятся локально в вашем браузере.</p>
         </div>
       </div>
     </div>
@@ -651,12 +670,31 @@
 
 <script>
 /* ================= CONSTANTS ================= */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.4.0';
 const CHANGELOG = [
+  { version:'1.4.0', date:'9 июля 2026', changes:[
+    'Выбор языка интерфейса с флагами (по умолчанию — английский)',
+    'Пагинация в разделе «Что нового», адаптированная под телефон',
+    'Более надёжные отступы у сообщений (защита от сбоев вёрстки)',
+    'Осмысленные имена файлов при скачивании кода вместо code.ext'
+  ]},
+  { version:'1.3.0', date:'9 июля 2026', changes:[
+    'Полная перестройка мобильной версии: всплывающие меню — как нижние шторки',
+    'Настройки на телефоне — список разделов с «проваливанием», как в нативных приложениях',
+    'Обновлён список моделей: убрана слабая модель Poolside, добавлена Google Gemma 4 31B'
+  ]},
+  { version:'1.2.0', date:'9 июля 2026', changes:[
+    'Автоопределение сервиса по API-ключу: OpenRouter, OpenAI, Anthropic, Groq',
+    'Убраны упоминания OpenRouter из текстов интерфейса',
+    'Убраны теги «Работа»/«Личное»',
+    'Горячие клавиши, перетаскивание файлов в composer, черновики по чатам',
+    'Резервная копия (экспорт/импорт всех чатов и настроек)',
+    'Акцентный цвет на выбор, время сообщений, звук получения ответа'
+  ]},
   { version:'1.1.0', date:'8 июля 2026', changes:[
     'Новое имя проекта — BarbosovAI',
     'Редактирование и удаление отдельных сообщений',
-    'Закреплённые чаты и теги (Работа/Личное)',
+    'Закреплённые чаты',
     'Системный промпт, Temperature и Top-P',
     'Счётчик токенов контекста',
     'Озвучка ответов ИИ (Text-to-Speech)',
@@ -687,6 +725,364 @@ const DEFAULT_INTEGRATIONS = [
   { id:'slack', name:'Slack', icon:'fa-brands fa-slack', desc:'Сообщения команды' },
   { id:'github', name:'GitHub', icon:'fa-brands fa-github', desc:'Репозитории и issues' },
 ];
+
+/* ================= I18N ================= */
+const LANGUAGES = [
+  { code:'en', flag:'🇬🇧', label:'English' },
+  { code:'ru', flag:'🇷🇺', label:'Русский' },
+  { code:'es', flag:'🇪🇸', label:'Español' },
+  { code:'de', flag:'🇩🇪', label:'Deutsch' },
+  { code:'fr', flag:'🇫🇷', label:'Français' },
+  { code:'zh', flag:'🇨🇳', label:'中文' },
+];
+const I18N = {
+en:{
+  new_chat:'New chat', search_placeholder:'Search chats...', history_label:'History', settings:'Settings',
+  download_title:'Download chat', share_title:'Share', menu_title:'Menu',
+  empty_title:'What shall we do today?', empty_subtitle:'Ask a question, paste text, or discuss an idea — BarbosovAI is here.',
+  prompt1_title:'Explain something complex', prompt1_sub:'in simple words',
+  prompt2_title:'Make a plan', prompt2_sub:'for the week ahead',
+  prompt3_title:'Write code', prompt3_sub:'in any language',
+  prompt4_title:'Suggest an idea', prompt4_sub:'for any occasion',
+  composer_placeholder:'Type a message...', composer_disclaimer:'BarbosovAI can make mistakes. Check important facts.',
+  attach_title:'Attach', mic_title:'Voice input',
+  settings_title:'Settings', tab_general:'General', tab_model:'Model', tab_profile:'Profile', tab_interface:'Interface',
+  tab_appearance:'Appearance', tab_experimental:'Experimental', tab_integrations:'Integrations', tab_prompts:'Prompts',
+  tab_changelog:"What's new", tab_about:'About',
+  api_key_label:'API key', api_key_placeholder:'Paste your API key...', api_key_help:'Stored only in your browser and sent only to the service the key belongs to.',
+  backup_label:'Backup', backup_export:'Export all data', backup_import:'Import', backup_help:'Saves all chats and settings into one file — handy for moving to another device.',
+  error_toasts_label:'Error notifications', error_toasts_sub:'Show toasts on network errors',
+  confirm_delete_label:'Confirm deletion', confirm_delete_sub:'Ask before deleting a chat',
+  save:'Save', cancel:'Cancel', language_label:'Interface language',
+  model_label:'Model', model_hint:'The list above is for OpenRouter keys. If your key is from another service, type the model name manually.',
+  model_manual_toggle:'Enter model manually', model_manual_placeholder:'e.g. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'If left empty, the default model for your service will be used.',
+  system_prompt_label:'System prompt (instructions for the AI)', system_prompt_placeholder:'E.g.: Always answer briefly. You are a senior developer.',
+  temperature_label:'Temperature (creativity)', topp_label:'Top-P', context_label:'Current chat context', tokens_label:'tokens',
+  avatar_upload:'Upload photo', avatar_remove:'Remove photo', your_name:'Your name', your_name_placeholder:'Guest',
+  compact_label:'Compact mode', compact_sub:'Reduce spacing in messages',
+  large_font_label:'Large font', large_font_sub:'Increase message text size',
+  send_sound_label:'Send sound', send_sound_sub:'Play a sound when sending a message',
+  receive_sound_label:'Receive sound', receive_sound_sub:'Play a sound when the AI finishes replying',
+  timestamps_label:'Message timestamps', timestamps_sub:'Show time under each message',
+  autoscroll_label:'Autoscroll', autoscroll_sub:'Automatically scroll to new messages',
+  shortcuts_title:'Keyboard shortcuts', shortcuts_new_chat:'New chat', shortcuts_search:'Search chats',
+  shortcuts_send:'Send', shortcuts_newline:'New line', shortcuts_esc:'Close window/menu',
+  accent_label:'Accent color', animations_label:'Interface animations', animations_sub:'Smooth transitions and appearances',
+  avatar_show_label:'Show AI avatar', avatar_show_sub:'BarbosovAI icon next to replies',
+  dense_label:'Dense chat list', dense_sub:'Less spacing in the left history',
+  streaming_label:'Streaming', streaming_sub:'Show the reply as it is generated',
+  reasoning_label:'Reasoning mode', reasoning_sub:'Ask the model to show its thinking (if supported)',
+  integrations_desc:'Connect third-party services. Tokens are stored locally only.', wip_title:'In development', wip_sub:'Integrations are coming soon',
+  prompts_add:'Save a new prompt', prompts_empty:'No saved prompts yet',
+  changelog_newer:'Newer', changelog_older:'Older', changelog_page:'Version {n} of {total}',
+  about_desc:'Your own AI through an API key. All data is stored locally in your browser.',
+  msg_copy:'Copy', msg_speak:'Read aloud', msg_regenerate:'Regenerate', msg_like:'Like', msg_dislike:'Dislike', msg_delete:'Delete', msg_edit:'Edit',
+  attach_camera:'Camera', attach_photo:'Photo from gallery', attach_file:'File',
+  share_via_system:'Share via...', share_copy_link:'Copy link', share_copy_text:'Copy chat text',
+  more_rename:'Rename chat', more_pin:'Pin chat', more_unpin:'Unpin chat', more_duplicate:'Duplicate chat',
+  more_clear:'Clear messages', more_export:'Export (.txt)', more_delete:'Delete chat',
+  camera_title:'Camera', camera_capture:'Take photo',
+  provider_connected:'Connected service: {name}', provider_unknown:'Service not recognized — trying as an OpenAI-compatible API',
+  provider_google:'Google Gemini key detected — direct support not implemented yet',
+},
+ru:{
+  new_chat:'Новый чат', search_placeholder:'Поиск по чатам...', history_label:'История', settings:'Настройки',
+  download_title:'Скачать чат', share_title:'Поделиться', menu_title:'Меню',
+  empty_title:'Чем займёмся сегодня?', empty_subtitle:'Задай вопрос, вставь текст или обсуди идею — BarbosovAI на связи.',
+  prompt1_title:'Объясни сложную тему', prompt1_sub:'простыми словами',
+  prompt2_title:'Составь план', prompt2_sub:'на неделю вперёд',
+  prompt3_title:'Напиши код', prompt3_sub:'на любом языке',
+  prompt4_title:'Придумай идею', prompt4_sub:'для любого случая',
+  composer_placeholder:'Напишите сообщение...', composer_disclaimer:'BarbosovAI может ошибаться. Проверяйте важные факты.',
+  attach_title:'Вложить', mic_title:'Голосовой ввод',
+  settings_title:'Настройки', tab_general:'Общие', tab_model:'Модель', tab_profile:'Профиль', tab_interface:'Интерфейс',
+  tab_appearance:'Внешний вид', tab_experimental:'Эксперименты', tab_integrations:'Интеграции', tab_prompts:'Промпты',
+  tab_changelog:'Что нового', tab_about:'О приложении',
+  api_key_label:'API ключ', api_key_placeholder:'Вставьте свой API-ключ...', api_key_help:'Хранится только в вашем браузере и отправляется только сервису, которому принадлежит ключ.',
+  backup_label:'Резервная копия', backup_export:'Экспорт всех данных', backup_import:'Импорт', backup_help:'Сохраняет все чаты и настройки в один файл — удобно перенести на другое устройство.',
+  error_toasts_label:'Звук уведомлений об ошибках', error_toasts_sub:'Показывать тосты при сетевых ошибках',
+  confirm_delete_label:'Подтверждение удаления', confirm_delete_sub:'Спрашивать перед удалением чата',
+  save:'Сохранить', cancel:'Отмена', language_label:'Язык интерфейса',
+  model_label:'Модель', model_hint:'Список выше подходит для ключей OpenRouter. Если ваш ключ от другого сервиса, впишите название модели вручную.',
+  model_manual_toggle:'Указать модель вручную', model_manual_placeholder:'например gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Если оставить пустым, для вашего сервиса будет использована модель по умолчанию.',
+  system_prompt_label:'Системный промпт (инструкции для ИИ)', system_prompt_placeholder:'Например: Всегда отвечай коротко и по делу. Ты — senior-разработчик.',
+  temperature_label:'Temperature (креативность)', topp_label:'Top-P', context_label:'Контекст текущего чата', tokens_label:'токенов',
+  avatar_upload:'Загрузить фото', avatar_remove:'Удалить фото', your_name:'Ваше имя', your_name_placeholder:'Гость',
+  compact_label:'Компактный режим', compact_sub:'Уменьшить отступы в сообщениях',
+  large_font_label:'Крупный шрифт', large_font_sub:'Увеличить размер текста сообщений',
+  send_sound_label:'Звук отправки', send_sound_sub:'Проигрывать звук при отправке сообщения',
+  receive_sound_label:'Звук получения ответа', receive_sound_sub:'Проигрывать звук, когда ИИ закончил отвечать',
+  timestamps_label:'Время сообщений', timestamps_sub:'Показывать время под каждым сообщением',
+  autoscroll_label:'Автоскролл', autoscroll_sub:'Автоматически прокручивать к новым сообщениям',
+  shortcuts_title:'Горячие клавиши', shortcuts_new_chat:'Новый чат', shortcuts_search:'Поиск по чатам',
+  shortcuts_send:'Отправить', shortcuts_newline:'Новая строка', shortcuts_esc:'Закрыть окно/меню',
+  accent_label:'Акцентный цвет', animations_label:'Анимации интерфейса', animations_sub:'Плавные переходы и появления элементов',
+  avatar_show_label:'Показывать аватар ИИ', avatar_show_sub:'Значок BarbosovAI рядом с ответами',
+  dense_label:'Плотный список чатов', dense_sub:'Меньше отступы в истории слева',
+  streaming_label:'Потоковая генерация', streaming_sub:'Показывать ответ по мере генерации',
+  reasoning_label:'Режим рассуждений', reasoning_sub:'Просить модель показывать ход мыслей (если поддерживает)',
+  integrations_desc:'Подключите сторонние сервисы. Токены хранятся только локально в вашем браузере.', wip_title:'В разработке', wip_sub:'Интеграции скоро появятся',
+  prompts_add:'Сохранить новый промпт', prompts_empty:'Пока нет сохранённых промптов',
+  changelog_newer:'Новее', changelog_older:'Старее', changelog_page:'Версия {n} из {total}',
+  about_desc:'Ваш собственный AI через API key. Все данные хранятся локально в вашем браузере.',
+  msg_copy:'Копировать', msg_speak:'Озвучить', msg_regenerate:'Повторить', msg_like:'Нравится', msg_dislike:'Не нравится', msg_delete:'Удалить', msg_edit:'Редактировать',
+  attach_camera:'Камера', attach_photo:'Фото из галереи', attach_file:'Файл',
+  share_via_system:'Поделиться через...', share_copy_link:'Скопировать ссылку', share_copy_text:'Скопировать текст чата',
+  more_rename:'Переименовать чат', more_pin:'Закрепить чат', more_unpin:'Открепить чат', more_duplicate:'Дублировать чат',
+  more_clear:'Очистить сообщения', more_export:'Экспортировать (.txt)', more_delete:'Удалить чат',
+  camera_title:'Камера', camera_capture:'Сделать снимок',
+  provider_connected:'Подключён сервис: {name}', provider_unknown:'Сервис не определён — попробуем как OpenAI-совместимый API',
+  provider_google:'Обнаружен ключ Google Gemini — прямая поддержка пока не реализована',
+},
+es:{
+  new_chat:'Nuevo chat', search_placeholder:'Buscar chats...', history_label:'Historial', settings:'Ajustes',
+  download_title:'Descargar chat', share_title:'Compartir', menu_title:'Menú',
+  empty_title:'¿Qué hacemos hoy?', empty_subtitle:'Haz una pregunta, pega un texto o comenta una idea — BarbosovAI está aquí.',
+  prompt1_title:'Explica algo complejo', prompt1_sub:'con palabras simples',
+  prompt2_title:'Haz un plan', prompt2_sub:'para la semana',
+  prompt3_title:'Escribe código', prompt3_sub:'en cualquier lenguaje',
+  prompt4_title:'Sugiere una idea', prompt4_sub:'para cualquier ocasión',
+  composer_placeholder:'Escribe un mensaje...', composer_disclaimer:'BarbosovAI puede cometer errores. Verifica los datos importantes.',
+  attach_title:'Adjuntar', mic_title:'Entrada de voz',
+  settings_title:'Ajustes', tab_general:'General', tab_model:'Modelo', tab_profile:'Perfil', tab_interface:'Interfaz',
+  tab_appearance:'Apariencia', tab_experimental:'Experimental', tab_integrations:'Integraciones', tab_prompts:'Prompts',
+  tab_changelog:'Novedades', tab_about:'Acerca de',
+  api_key_label:'Clave API', api_key_placeholder:'Pega tu clave API...', api_key_help:'Se guarda solo en tu navegador y se envía solo al servicio dueño de la clave.',
+  backup_label:'Copia de seguridad', backup_export:'Exportar todos los datos', backup_import:'Importar', backup_help:'Guarda todos los chats y ajustes en un archivo — útil para cambiar de dispositivo.',
+  error_toasts_label:'Notificaciones de error', error_toasts_sub:'Mostrar avisos ante errores de red',
+  confirm_delete_label:'Confirmar eliminación', confirm_delete_sub:'Preguntar antes de eliminar un chat',
+  save:'Guardar', cancel:'Cancelar', language_label:'Idioma de la interfaz',
+  model_label:'Modelo', model_hint:'La lista de arriba es para claves de OpenRouter. Si tu clave es de otro servicio, escribe el modelo manualmente.',
+  model_manual_toggle:'Escribir modelo manualmente', model_manual_placeholder:'p. ej. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Si se deja vacío, se usará el modelo por defecto de tu servicio.',
+  system_prompt_label:'Prompt de sistema (instrucciones para la IA)', system_prompt_placeholder:'Ej.: Responde siempre de forma breve. Eres un desarrollador senior.',
+  temperature_label:'Temperature (creatividad)', topp_label:'Top-P', context_label:'Contexto del chat actual', tokens_label:'tokens',
+  avatar_upload:'Subir foto', avatar_remove:'Quitar foto', your_name:'Tu nombre', your_name_placeholder:'Invitado',
+  compact_label:'Modo compacto', compact_sub:'Reducir el espaciado en los mensajes',
+  large_font_label:'Fuente grande', large_font_sub:'Aumentar el tamaño del texto',
+  send_sound_label:'Sonido al enviar', send_sound_sub:'Reproducir un sonido al enviar un mensaje',
+  receive_sound_label:'Sonido al recibir', receive_sound_sub:'Reproducir un sonido cuando la IA termina de responder',
+  timestamps_label:'Hora de los mensajes', timestamps_sub:'Mostrar la hora bajo cada mensaje',
+  autoscroll_label:'Autodesplazamiento', autoscroll_sub:'Desplazar automáticamente hacia nuevos mensajes',
+  shortcuts_title:'Atajos de teclado', shortcuts_new_chat:'Nuevo chat', shortcuts_search:'Buscar chats',
+  shortcuts_send:'Enviar', shortcuts_newline:'Nueva línea', shortcuts_esc:'Cerrar ventana/menú',
+  accent_label:'Color de acento', animations_label:'Animaciones de la interfaz', animations_sub:'Transiciones y apariciones suaves',
+  avatar_show_label:'Mostrar avatar de la IA', avatar_show_sub:'Icono de BarbosovAI junto a las respuestas',
+  dense_label:'Lista de chats compacta', dense_sub:'Menos espaciado en el historial izquierdo',
+  streaming_label:'Generación en streaming', streaming_sub:'Mostrar la respuesta mientras se genera',
+  reasoning_label:'Modo de razonamiento', reasoning_sub:'Pedir al modelo que muestre su razonamiento (si es compatible)',
+  integrations_desc:'Conecta servicios externos. Los tokens se guardan solo localmente.', wip_title:'En desarrollo', wip_sub:'Las integraciones llegarán pronto',
+  prompts_add:'Guardar nuevo prompt', prompts_empty:'Aún no hay prompts guardados',
+  changelog_newer:'Más reciente', changelog_older:'Más antiguo', changelog_page:'Versión {n} de {total}',
+  about_desc:'Tu propia IA mediante una API key. Todos los datos se guardan localmente en tu navegador.',
+  msg_copy:'Copiar', msg_speak:'Leer en voz alta', msg_regenerate:'Regenerar', msg_like:'Me gusta', msg_dislike:'No me gusta', msg_delete:'Eliminar', msg_edit:'Editar',
+  attach_camera:'Cámara', attach_photo:'Foto de la galería', attach_file:'Archivo',
+  share_via_system:'Compartir vía...', share_copy_link:'Copiar enlace', share_copy_text:'Copiar texto del chat',
+  more_rename:'Renombrar chat', more_pin:'Fijar chat', more_unpin:'Desfijar chat', more_duplicate:'Duplicar chat',
+  more_clear:'Vaciar mensajes', more_export:'Exportar (.txt)', more_delete:'Eliminar chat',
+  camera_title:'Cámara', camera_capture:'Tomar foto',
+  provider_connected:'Servicio conectado: {name}', provider_unknown:'Servicio no reconocido — probaremos como API compatible con OpenAI',
+  provider_google:'Se detectó una clave de Google Gemini — el soporte directo aún no está implementado',
+},
+de:{
+  new_chat:'Neuer Chat', search_placeholder:'Chats durchsuchen...', history_label:'Verlauf', settings:'Einstellungen',
+  download_title:'Chat herunterladen', share_title:'Teilen', menu_title:'Menü',
+  empty_title:'Was steht heute an?', empty_subtitle:'Stell eine Frage, füge Text ein oder besprich eine Idee — BarbosovAI ist da.',
+  prompt1_title:'Erkläre etwas Komplexes', prompt1_sub:'in einfachen Worten',
+  prompt2_title:'Erstelle einen Plan', prompt2_sub:'für die kommende Woche',
+  prompt3_title:'Schreibe Code', prompt3_sub:'in jeder Sprache',
+  prompt4_title:'Schlage eine Idee vor', prompt4_sub:'für jeden Anlass',
+  composer_placeholder:'Nachricht schreiben...', composer_disclaimer:'BarbosovAI kann Fehler machen. Prüfe wichtige Fakten.',
+  attach_title:'Anhängen', mic_title:'Spracheingabe',
+  settings_title:'Einstellungen', tab_general:'Allgemein', tab_model:'Modell', tab_profile:'Profil', tab_interface:'Oberfläche',
+  tab_appearance:'Erscheinungsbild', tab_experimental:'Experimentell', tab_integrations:'Integrationen', tab_prompts:'Prompts',
+  tab_changelog:'Neuigkeiten', tab_about:'Über',
+  api_key_label:'API-Schlüssel', api_key_placeholder:'API-Schlüssel einfügen...', api_key_help:'Wird nur in deinem Browser gespeichert und nur an den zugehörigen Dienst gesendet.',
+  backup_label:'Sicherung', backup_export:'Alle Daten exportieren', backup_import:'Importieren', backup_help:'Speichert alle Chats und Einstellungen in einer Datei — praktisch für den Gerätewechsel.',
+  error_toasts_label:'Fehlerbenachrichtigungen', error_toasts_sub:'Hinweise bei Netzwerkfehlern anzeigen',
+  confirm_delete_label:'Löschen bestätigen', confirm_delete_sub:'Vor dem Löschen eines Chats nachfragen',
+  save:'Speichern', cancel:'Abbrechen', language_label:'Oberflächensprache',
+  model_label:'Modell', model_hint:'Die Liste oben passt zu OpenRouter-Schlüsseln. Bei einem anderen Dienst das Modell manuell eingeben.',
+  model_manual_toggle:'Modell manuell eingeben', model_manual_placeholder:'z. B. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Bleibt das Feld leer, wird das Standardmodell deines Dienstes verwendet.',
+  system_prompt_label:'System-Prompt (Anweisungen für die KI)', system_prompt_placeholder:'Z. B.: Antworte immer kurz. Du bist ein Senior-Entwickler.',
+  temperature_label:'Temperature (Kreativität)', topp_label:'Top-P', context_label:'Kontext des aktuellen Chats', tokens_label:'Tokens',
+  avatar_upload:'Foto hochladen', avatar_remove:'Foto entfernen', your_name:'Dein Name', your_name_placeholder:'Gast',
+  compact_label:'Kompaktmodus', compact_sub:'Abstände in Nachrichten verringern',
+  large_font_label:'Große Schrift', large_font_sub:'Textgröße der Nachrichten erhöhen',
+  send_sound_label:'Sendeton', send_sound_sub:'Ton beim Senden einer Nachricht abspielen',
+  receive_sound_label:'Empfangston', receive_sound_sub:'Ton abspielen, wenn die KI fertig geantwortet hat',
+  timestamps_label:'Zeitstempel', timestamps_sub:'Uhrzeit unter jeder Nachricht anzeigen',
+  autoscroll_label:'Automatisch scrollen', autoscroll_sub:'Automatisch zu neuen Nachrichten scrollen',
+  shortcuts_title:'Tastenkürzel', shortcuts_new_chat:'Neuer Chat', shortcuts_search:'Chats durchsuchen',
+  shortcuts_send:'Senden', shortcuts_newline:'Neue Zeile', shortcuts_esc:'Fenster/Menü schließen',
+  accent_label:'Akzentfarbe', animations_label:'Oberflächen-Animationen', animations_sub:'Sanfte Übergänge und Einblendungen',
+  avatar_show_label:'KI-Avatar anzeigen', avatar_show_sub:'BarbosovAI-Symbol neben Antworten',
+  dense_label:'Kompakte Chatliste', dense_sub:'Weniger Abstand im linken Verlauf',
+  streaming_label:'Streaming', streaming_sub:'Antwort während der Generierung anzeigen',
+  reasoning_label:'Denkmodus', reasoning_sub:'Modell bitten, seine Gedankengänge zu zeigen (falls unterstützt)',
+  integrations_desc:'Verbinde externe Dienste. Tokens werden nur lokal gespeichert.', wip_title:'In Entwicklung', wip_sub:'Integrationen folgen bald',
+  prompts_add:'Neuen Prompt speichern', prompts_empty:'Noch keine gespeicherten Prompts',
+  changelog_newer:'Neuer', changelog_older:'Älter', changelog_page:'Version {n} von {total}',
+  about_desc:'Deine eigene KI über einen API-Schlüssel. Alle Daten werden lokal in deinem Browser gespeichert.',
+  msg_copy:'Kopieren', msg_speak:'Vorlesen', msg_regenerate:'Wiederholen', msg_like:'Gefällt mir', msg_dislike:'Gefällt mir nicht', msg_delete:'Löschen', msg_edit:'Bearbeiten',
+  attach_camera:'Kamera', attach_photo:'Foto aus Galerie', attach_file:'Datei',
+  share_via_system:'Teilen über...', share_copy_link:'Link kopieren', share_copy_text:'Chat-Text kopieren',
+  more_rename:'Chat umbenennen', more_pin:'Chat anheften', more_unpin:'Anheften aufheben', more_duplicate:'Chat duplizieren',
+  more_clear:'Nachrichten löschen', more_export:'Exportieren (.txt)', more_delete:'Chat löschen',
+  camera_title:'Kamera', camera_capture:'Foto aufnehmen',
+  provider_connected:'Verbundener Dienst: {name}', provider_unknown:'Dienst nicht erkannt — Versuch als OpenAI-kompatible API',
+  provider_google:'Google-Gemini-Schlüssel erkannt — direkte Unterstützung noch nicht implementiert',
+},
+fr:{
+  new_chat:'Nouvelle discussion', search_placeholder:'Rechercher des discussions...', history_label:'Historique', settings:'Paramètres',
+  download_title:'Télécharger la discussion', share_title:'Partager', menu_title:'Menu',
+  empty_title:"Qu'est-ce qu'on fait aujourd'hui ?", empty_subtitle:'Pose une question, colle un texte ou discute d’une idée — BarbosovAI est là.',
+  prompt1_title:'Explique un sujet complexe', prompt1_sub:'en mots simples',
+  prompt2_title:'Fais un plan', prompt2_sub:'pour la semaine à venir',
+  prompt3_title:'Écris du code', prompt3_sub:'dans n’importe quel langage',
+  prompt4_title:'Propose une idée', prompt4_sub:'pour n’importe quelle occasion',
+  composer_placeholder:'Écrire un message...', composer_disclaimer:'BarbosovAI peut faire des erreurs. Vérifiez les faits importants.',
+  attach_title:'Joindre', mic_title:'Saisie vocale',
+  settings_title:'Paramètres', tab_general:'Général', tab_model:'Modèle', tab_profile:'Profil', tab_interface:'Interface',
+  tab_appearance:'Apparence', tab_experimental:'Expérimental', tab_integrations:'Intégrations', tab_prompts:'Prompts',
+  tab_changelog:'Nouveautés', tab_about:'À propos',
+  api_key_label:'Clé API', api_key_placeholder:'Collez votre clé API...', api_key_help:'Stockée uniquement dans votre navigateur, envoyée uniquement au service propriétaire de la clé.',
+  backup_label:'Sauvegarde', backup_export:'Exporter toutes les données', backup_import:'Importer', backup_help:'Enregistre toutes les discussions et paramètres dans un fichier — pratique pour changer d’appareil.',
+  error_toasts_label:'Notifications d’erreur', error_toasts_sub:'Afficher des messages en cas d’erreur réseau',
+  confirm_delete_label:'Confirmer la suppression', confirm_delete_sub:'Demander avant de supprimer une discussion',
+  save:'Enregistrer', cancel:'Annuler', language_label:'Langue de l’interface',
+  model_label:'Modèle', model_hint:'La liste ci-dessus convient aux clés OpenRouter. Pour une autre clé, saisissez le modèle manuellement.',
+  model_manual_toggle:'Saisir le modèle manuellement', model_manual_placeholder:'ex. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Si laissé vide, le modèle par défaut de votre service sera utilisé.',
+  system_prompt_label:'Prompt système (instructions pour l’IA)', system_prompt_placeholder:'Ex. : Réponds toujours brièvement. Tu es développeur senior.',
+  temperature_label:'Temperature (créativité)', topp_label:'Top-P', context_label:'Contexte de la discussion actuelle', tokens_label:'jetons',
+  avatar_upload:'Importer une photo', avatar_remove:'Retirer la photo', your_name:'Votre nom', your_name_placeholder:'Invité',
+  compact_label:'Mode compact', compact_sub:'Réduire l’espacement des messages',
+  large_font_label:'Grande police', large_font_sub:'Augmenter la taille du texte des messages',
+  send_sound_label:'Son d’envoi', send_sound_sub:'Jouer un son à l’envoi d’un message',
+  receive_sound_label:'Son de réception', receive_sound_sub:'Jouer un son quand l’IA a fini de répondre',
+  timestamps_label:'Horodatage des messages', timestamps_sub:'Afficher l’heure sous chaque message',
+  autoscroll_label:'Défilement automatique', autoscroll_sub:'Défiler automatiquement vers les nouveaux messages',
+  shortcuts_title:'Raccourcis clavier', shortcuts_new_chat:'Nouvelle discussion', shortcuts_search:'Rechercher des discussions',
+  shortcuts_send:'Envoyer', shortcuts_newline:'Nouvelle ligne', shortcuts_esc:'Fermer la fenêtre/le menu',
+  accent_label:'Couleur d’accent', animations_label:'Animations de l’interface', animations_sub:'Transitions et apparitions fluides',
+  avatar_show_label:'Afficher l’avatar de l’IA', avatar_show_sub:'Icône BarbosovAI à côté des réponses',
+  dense_label:'Liste de discussions compacte', dense_sub:'Moins d’espacement dans l’historique à gauche',
+  streaming_label:'Génération en streaming', streaming_sub:'Afficher la réponse au fur et à mesure',
+  reasoning_label:'Mode raisonnement', reasoning_sub:'Demander au modèle de montrer son raisonnement (si pris en charge)',
+  integrations_desc:'Connectez des services tiers. Les jetons sont stockés localement uniquement.', wip_title:'En développement', wip_sub:'Les intégrations arrivent bientôt',
+  prompts_add:'Enregistrer un nouveau prompt', prompts_empty:'Aucun prompt enregistré pour l’instant',
+  changelog_newer:'Plus récent', changelog_older:'Plus ancien', changelog_page:'Version {n} sur {total}',
+  about_desc:'Votre propre IA via une clé API. Toutes les données sont stockées localement dans votre navigateur.',
+  msg_copy:'Copier', msg_speak:'Lire à voix haute', msg_regenerate:'Régénérer', msg_like:'J’aime', msg_dislike:'Je n’aime pas', msg_delete:'Supprimer', msg_edit:'Modifier',
+  attach_camera:'Caméra', attach_photo:'Photo depuis la galerie', attach_file:'Fichier',
+  share_via_system:'Partager via...', share_copy_link:'Copier le lien', share_copy_text:'Copier le texte de la discussion',
+  more_rename:'Renommer la discussion', more_pin:'Épingler la discussion', more_unpin:'Désépingler', more_duplicate:'Dupliquer la discussion',
+  more_clear:'Effacer les messages', more_export:'Exporter (.txt)', more_delete:'Supprimer la discussion',
+  camera_title:'Caméra', camera_capture:'Prendre une photo',
+  provider_connected:'Service connecté : {name}', provider_unknown:'Service non reconnu — tentative en tant qu’API compatible OpenAI',
+  provider_google:'Clé Google Gemini détectée — prise en charge directe pas encore implémentée',
+},
+zh:{
+  new_chat:'新建对话', search_placeholder:'搜索对话...', history_label:'历史记录', settings:'设置',
+  download_title:'下载对话', share_title:'分享', menu_title:'菜单',
+  empty_title:'今天想聊点什么？', empty_subtitle:'提个问题、粘贴文本或聊聊想法 — BarbosovAI 随时在线。',
+  prompt1_title:'解释复杂概念', prompt1_sub:'用简单的语言',
+  prompt2_title:'制定计划', prompt2_sub:'规划接下来的一周',
+  prompt3_title:'编写代码', prompt3_sub:'支持任何语言',
+  prompt4_title:'给个点子', prompt4_sub:'适用任何场合',
+  composer_placeholder:'输入消息...', composer_disclaimer:'BarbosovAI 可能出错，请核实重要信息。',
+  attach_title:'添加附件', mic_title:'语音输入',
+  settings_title:'设置', tab_general:'通用', tab_model:'模型', tab_profile:'个人资料', tab_interface:'界面',
+  tab_appearance:'外观', tab_experimental:'实验性', tab_integrations:'集成', tab_prompts:'提示词库',
+  tab_changelog:'更新日志', tab_about:'关于',
+  api_key_label:'API 密钥', api_key_placeholder:'粘贴你的 API 密钥...', api_key_help:'仅保存在你的浏览器中，只发送给密钥所属的服务。',
+  backup_label:'备份', backup_export:'导出全部数据', backup_import:'导入', backup_help:'将所有对话和设置保存到一个文件中，方便更换设备。',
+  error_toasts_label:'错误提示', error_toasts_sub:'网络出错时显示提示',
+  confirm_delete_label:'删除前确认', confirm_delete_sub:'删除对话前先询问',
+  save:'保存', cancel:'取消', language_label:'界面语言',
+  model_label:'模型', model_hint:'上方列表适用于 OpenRouter 密钥。如果你的密钥来自其他服务，请手动输入模型名称。',
+  model_manual_toggle:'手动输入模型', model_manual_placeholder:'例如 gpt-4o-mini、claude-3-5-sonnet-20241022',
+  model_manual_help:'留空时将使用你所用服务的默认模型。',
+  system_prompt_label:'系统提示词（给 AI 的指令）', system_prompt_placeholder:'例如：请始终简明作答。你是一名高级开发者。',
+  temperature_label:'Temperature（创造性）', topp_label:'Top-P', context_label:'当前对话上下文', tokens_label:'个token',
+  avatar_upload:'上传照片', avatar_remove:'移除照片', your_name:'你的名字', your_name_placeholder:'访客',
+  compact_label:'紧凑模式', compact_sub:'减少消息间距',
+  large_font_label:'大字体', large_font_sub:'增大消息文字大小',
+  send_sound_label:'发送提示音', send_sound_sub:'发送消息时播放提示音',
+  receive_sound_label:'接收提示音', receive_sound_sub:'AI 回复完成时播放提示音',
+  timestamps_label:'消息时间戳', timestamps_sub:'在每条消息下方显示时间',
+  autoscroll_label:'自动滚动', autoscroll_sub:'自动滚动到最新消息',
+  shortcuts_title:'快捷键', shortcuts_new_chat:'新建对话', shortcuts_search:'搜索对话',
+  shortcuts_send:'发送', shortcuts_newline:'换行', shortcuts_esc:'关闭窗口/菜单',
+  accent_label:'主题色', animations_label:'界面动画', animations_sub:'平滑的过渡与出现效果',
+  avatar_show_label:'显示 AI 头像', avatar_show_sub:'回复旁显示 BarbosovAI 图标',
+  dense_label:'紧凑对话列表', dense_sub:'减少左侧历史记录的间距',
+  streaming_label:'流式生成', streaming_sub:'边生成边显示回复',
+  reasoning_label:'推理模式', reasoning_sub:'要求模型展示思考过程（如支持）',
+  integrations_desc:'连接第三方服务。密钥仅保存在本地。', wip_title:'开发中', wip_sub:'集成功能即将上线',
+  prompts_add:'保存新提示词', prompts_empty:'还没有保存的提示词',
+  changelog_newer:'较新', changelog_older:'较旧', changelog_page:'第 {n} 版，共 {total} 版',
+  about_desc:'通过 API 密钥使用你自己的 AI。所有数据仅保存在本地浏览器中。',
+  msg_copy:'复制', msg_speak:'朗读', msg_regenerate:'重新生成', msg_like:'赞', msg_dislike:'踩', msg_delete:'删除', msg_edit:'编辑',
+  attach_camera:'相机', attach_photo:'从相册选择', attach_file:'文件',
+  share_via_system:'分享到...', share_copy_link:'复制链接', share_copy_text:'复制对话文本',
+  more_rename:'重命名对话', more_pin:'置顶对话', more_unpin:'取消置顶', more_duplicate:'复制对话',
+  more_clear:'清空消息', more_export:'导出 (.txt)', more_delete:'删除对话',
+  camera_title:'相机', camera_capture:'拍照',
+  provider_connected:'已连接服务：{name}', provider_unknown:'未识别的服务 — 将尝试作为兼容 OpenAI 的接口',
+  provider_google:'检测到 Google Gemini 密钥 — 尚未实现直接支持',
+}
+};
+function t(key){
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+}
+const TOASTS_I18N = {
+  en:{ chat_deleted:'Chat deleted', code_copied:'Code copied', copied:'Copied', already_rated:'This message already has a rating',
+       message_deleted:'Message deleted', add_key_first:'Add an API key in settings', generation_stopped:'Generation stopped',
+       chat_downloaded:'Chat downloaded', chat_duplicated:'Chat duplicated', messages_cleared:'Messages cleared',
+       prompt_saved:'Prompt saved', profile_saved:'Profile saved', settings_saved:'Settings saved',
+       backup_downloaded:'Backup downloaded', backup_imported:'Backup imported', chat_empty:'Chat is empty',
+       link_copied:'Link copied (local, for this browser)', chat_text_copied:'Chat text copied' },
+  ru:{ chat_deleted:'Чат удалён', code_copied:'Код скопирован', copied:'Скопировано', already_rated:'Оценка уже поставлена для этого сообщения',
+       message_deleted:'Сообщение удалено', add_key_first:'Добавьте API-ключ в настройках', generation_stopped:'Генерация остановлена',
+       chat_downloaded:'Чат скачан', chat_duplicated:'Чат продублирован', messages_cleared:'Сообщения очищены',
+       prompt_saved:'Промпт сохранён', profile_saved:'Профиль сохранён', settings_saved:'Настройки сохранены',
+       backup_downloaded:'Резервная копия скачана', backup_imported:'Резервная копия импортирована', chat_empty:'Чат пока пуст',
+       link_copied:'Ссылка скопирована (локальная, для этого браузера)', chat_text_copied:'Текст чата скопирован' },
+  es:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Este mensaje ya tiene una valoración',
+       message_deleted:'Mensaje eliminado', add_key_first:'Añade una clave API en ajustes', generation_stopped:'Generación detenida',
+       chat_downloaded:'Chat descargado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensajes borrados',
+       prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Ajustes guardados',
+       backup_downloaded:'Copia de seguridad descargada', backup_imported:'Copia de seguridad importada', chat_empty:'El chat está vacío',
+       link_copied:'Enlace copiado (local, para este navegador)', chat_text_copied:'Texto del chat copiado' },
+  de:{ chat_deleted:'Chat gelöscht', code_copied:'Code kopiert', copied:'Kopiert', already_rated:'Diese Nachricht wurde bereits bewertet',
+       message_deleted:'Nachricht gelöscht', add_key_first:'Füge einen API-Schlüssel in den Einstellungen hinzu', generation_stopped:'Generierung gestoppt',
+       chat_downloaded:'Chat heruntergeladen', chat_duplicated:'Chat dupliziert', messages_cleared:'Nachrichten gelöscht',
+       prompt_saved:'Prompt gespeichert', profile_saved:'Profil gespeichert', settings_saved:'Einstellungen gespeichert',
+       backup_downloaded:'Sicherung heruntergeladen', backup_imported:'Sicherung importiert', chat_empty:'Chat ist leer',
+       link_copied:'Link kopiert (lokal, für diesen Browser)', chat_text_copied:'Chat-Text kopiert' },
+  fr:{ chat_deleted:'Discussion supprimée', code_copied:'Code copié', copied:'Copié', already_rated:'Ce message a déjà une note',
+       message_deleted:'Message supprimé', add_key_first:'Ajoutez une clé API dans les paramètres', generation_stopped:'Génération arrêtée',
+       chat_downloaded:'Discussion téléchargée', chat_duplicated:'Discussion dupliquée', messages_cleared:'Messages effacés',
+       prompt_saved:'Prompt enregistré', profile_saved:'Profil enregistré', settings_saved:'Paramètres enregistrés',
+       backup_downloaded:'Sauvegarde téléchargée', backup_imported:'Sauvegarde importée', chat_empty:'La discussion est vide',
+       link_copied:'Lien copié (local, pour ce navigateur)', chat_text_copied:'Texte de la discussion copié' },
+  zh:{ chat_deleted:'对话已删除', code_copied:'代码已复制', copied:'已复制', already_rated:'该消息已评价过',
+       message_deleted:'消息已删除', add_key_first:'请在设置中添加 API 密钥', generation_stopped:'已停止生成',
+       chat_downloaded:'对话已下载', chat_duplicated:'对话已复制', messages_cleared:'消息已清空',
+       prompt_saved:'提示词已保存', profile_saved:'个人资料已保存', settings_saved:'设置已保存',
+       backup_downloaded:'备份已下载', backup_imported:'备份已导入', chat_empty:'对话为空',
+       link_copied:'链接已复制（仅限本浏览器本地使用）', chat_text_copied:'对话文本已复制' },
+};
+function tt(key){
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  return (TOASTS_I18N[lang] && TOASTS_I18N[lang][key]) || TOASTS_I18N.en[key] || key;
+}
 
 /* ================= STATE ================= */
 const state = {
@@ -791,7 +1187,7 @@ function deleteChat(id){
     if(state.chats.length === 0) state.chats.push({ id:'c'+Date.now(), title:'Новый чат', date:new Date().toISOString(), messages:[], pinned:false, tag:null });
     if(state.activeChatId === id) state.activeChatId = state.chats[0].id;
     persistChats(); renderHistory(); renderMessages();
-    toast('Чат удалён','info');
+    toast(tt('chat_deleted'),'info');
   };
   if(state.settings.confirmDelete){
     if(confirm('Удалить этот чат безвозвратно?')) doDelete();
@@ -841,8 +1237,8 @@ function appendMessageEl(m, idx, animate){
         <div data-bubble>${m.content ? `<div class="bubble-user px-4 py-2.5 text-[15px] leading-relaxed">${escapeHtml(m.content)}</div>` : ''}</div>
         ${timeHtml}
         <div class="msg-actions flex items-center gap-1">
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="startEditMessage(${idx})" title="Редактировать"><i class="fa-solid fa-pen text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="deleteMessageAt(${idx})" title="Удалить"><i class="fa-solid fa-trash text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="startEditMessage(${idx})" title="${t('msg_edit')}"><i class="fa-solid fa-pen text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="deleteMessageAt(${idx})" title="${t('msg_delete')}"><i class="fa-solid fa-trash text-[11px]"></i></button>
         </div>
       </div>`;
   } else {
@@ -857,12 +1253,12 @@ function appendMessageEl(m, idx, animate){
         </div>
         ${timeHtml ? `<div class="pl-9">${timeHtml}</div>` : ''}
         <div class="msg-actions flex items-center gap-1 pl-9">
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="copyMsg(this)" title="Копировать"><i class="fa-regular fa-copy text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="speakMessage(this, ${idx})" title="Озвучить"><i class="fa-solid fa-volume-high text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="regenerate(${idx})" title="Повторить"><i class="fa-solid fa-rotate-right text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center like-btn" data-idx="${idx}" style="color:${reaction==='like'?'#4ade80':'var(--text-lo)'}" ${reaction==='dislike'?'disabled':''} onclick="reactMsg(${idx},'like')" title="Нравится"><i class="fa-regular fa-thumbs-up text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center dislike-btn" data-idx="${idx}" style="color:${reaction==='dislike'?'#f87171':'var(--text-lo)'}" ${reaction==='like'?'disabled':''} onclick="reactMsg(${idx},'dislike')" title="Не нравится"><i class="fa-regular fa-thumbs-down text-[11px]"></i></button>
-          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="deleteMessageAt(${idx})" title="Удалить"><i class="fa-solid fa-trash text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="copyMsg(this)" title="${t('msg_copy')}"><i class="fa-regular fa-copy text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="speakMessage(this, ${idx})" title="${t('msg_speak')}"><i class="fa-solid fa-volume-high text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="regenerate(${idx})" title="${t('msg_regenerate')}"><i class="fa-solid fa-rotate-right text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center like-btn" data-idx="${idx}" style="color:${reaction==='like'?'#4ade80':'var(--text-lo)'}" ${reaction==='dislike'?'disabled':''} onclick="reactMsg(${idx},'like')" title="${t('msg_like')}"><i class="fa-regular fa-thumbs-up text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center dislike-btn" data-idx="${idx}" style="color:${reaction==='dislike'?'#f87171':'var(--text-lo)'}" ${reaction==='like'?'disabled':''} onclick="reactMsg(${idx},'dislike')" title="${t('msg_dislike')}"><i class="fa-regular fa-thumbs-down text-[11px]"></i></button>
+          <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="deleteMessageAt(${idx})" title="${t('msg_delete')}"><i class="fa-solid fa-trash text-[11px]"></i></button>
         </div>
       </div>`;
   }
@@ -889,7 +1285,7 @@ function decorateCodeBlocks(row){
     const header = document.createElement('div'); header.className = 'code-block-header';
     header.innerHTML = `<span>${escapeHtml(lang)}</span><div class="flex items-center gap-3"><button class="code-copy-btn"><i class="fa-regular fa-copy"></i> Копировать</button><button class="code-copy-btn code-download-btn"><i class="fa-solid fa-download"></i> Скачать</button></div>`;
     pre.parentNode.insertBefore(wrap, pre); wrap.appendChild(header); wrap.appendChild(pre);
-    header.querySelector('.code-copy-btn').onclick = () => navigator.clipboard.writeText(codeEl.innerText).then(()=> toast('Код скопирован','success'));
+    header.querySelector('.code-copy-btn').onclick = () => navigator.clipboard.writeText(codeEl.innerText).then(()=> toast(tt('code_copied'),'success'));
     header.querySelector('.code-download-btn').onclick = () => downloadCode(codeEl.innerText, lang);
   });
 }
@@ -927,7 +1323,7 @@ function downloadCode(code, lang){
 function copyMsg(btn){
   const el = btn.closest('.flex.flex-col').querySelector('[data-content]');
   const raw = decodeURIComponent(el.dataset.raw || el.innerText);
-  navigator.clipboard.writeText(raw).then(()=> toast('Скопировано','success'));
+  navigator.clipboard.writeText(raw).then(()=> toast(tt('copied'),'success'));
 }
 
 /* -------- Like / dislike (permanent) -------- */
@@ -936,7 +1332,7 @@ function reactMsg(idx, type){
   const msg = chat.messages[idx];
   if(!msg) return;
   if(msg.reaction){
-    toast('Оценка уже поставлена для этого сообщения','info');
+    toast(tt('already_rated'),'info');
     return;
   }
   msg.reaction = type;
@@ -982,7 +1378,7 @@ function deleteMessageAt(idx){
   chat.messages.splice(idx, 1);
   persistChats();
   renderMessages();
-  toast('Сообщение удалено','info');
+  toast(tt('message_deleted'),'info');
 }
 
 /* -------- Text-to-speech -------- */
@@ -1060,11 +1456,11 @@ function updateProviderDetection(){
   const provider = detectProvider(key);
   if(!provider){ el.innerHTML = ''; return; }
   if(provider === 'unknown'){
-    el.innerHTML = `<i class="fa-solid fa-circle-question"></i><span>Сервис не определён — попробуем как OpenAI-совместимый API</span>`;
+    el.innerHTML = `<i class="fa-solid fa-circle-question"></i><span>${t('provider_unknown')}</span>`;
   } else if(provider === 'google'){
-    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#f87171"></i><span style="color:#f87171">Обнаружен ключ Google Gemini — прямая поддержка пока не реализована</span>`;
+    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#f87171"></i><span style="color:#f87171">${t('provider_google')}</span>`;
   } else {
-    el.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#4ade80"></i><span style="color:#4ade80">Подключён сервис: ${PROVIDERS[provider].name}</span>`;
+    el.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#4ade80"></i><span style="color:#4ade80">${t('provider_connected').replace('{name}', PROVIDERS[provider].name)}</span>`;
   }
 }
 
@@ -1159,7 +1555,7 @@ async function requestAIReply(chat){
 
   if(!apiKey){
     state.sending = false; setSendButtonState(false);
-    toast('Добавьте API-ключ в настройках','error'); openSettings(); return;
+    toast(tt('add_key_first'),'error'); openSettings(); return;
   }
 
   const provider = detectProvider(apiKey);
@@ -1254,7 +1650,7 @@ async function requestAIReply(chat){
     hideTyping();
     if(err.name === 'AbortError'){
       if(!accumulated){ chat.messages.pop(); } else { chat.messages[msgIndex].content = accumulated; if(liveContentEl) liveContentEl.innerHTML = renderMarkdown(accumulated); }
-      persistChats(); toast('Генерация остановлена','info');
+      persistChats(); toast(tt('generation_stopped'),'info');
     } else if(err.isModelError){
       toast('Данная модель не доступна, выберите другую или выберите автовыбор', 'error');
       chat.messages[msgIndex] = { role:'assistant', content: '⚠️ Данная модель не доступна, выберите другую или выберите автовыбор.' };
@@ -1445,7 +1841,7 @@ function startRecognizer(Ctor){
 /* ================= Share / Export ================= */
 function exportChat(){
   const chat = getActiveChat();
-  if(!chat || chat.messages.length === 0){ toast('Чат пока пуст','info'); return; }
+  if(!chat || chat.messages.length === 0){ toast(tt('chat_empty'),'info'); return; }
   const lines = [`BarbosovAI — ${chat.title}`, ''];
   chat.messages.forEach(m => {
     lines.push(m.role === 'user' ? 'Вы:' : 'BarbosovAI:');
@@ -1456,7 +1852,7 @@ function exportChat(){
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = chat.title.replace(/[^\w\u0400-\u04FF\- ]/g,'').trim().slice(0,50) + '.txt';
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  toast('Чат скачан','success');
+  toast(tt('chat_downloaded'),'success');
 }
 
 function toggleShareMenu(e){
@@ -1466,9 +1862,9 @@ function toggleShareMenu(e){
   const isHidden = menu.classList.contains('hidden');
   if(!isHidden){ closeShareMenu(); return; }
   menu.innerHTML = `
-    ${navigator.share ? `<button onclick="shareViaSystem()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-share-nodes w-4" style="color:var(--accent)"></i> Поделиться через...</button>` : ''}
-    <button onclick="copyShareLink()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-link w-4" style="color:var(--accent)"></i> Скопировать ссылку</button>
-    <button onclick="copyShareText()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-regular fa-copy w-4" style="color:var(--accent)"></i> Скопировать текст чата</button>
+    ${navigator.share ? `<button onclick="shareViaSystem()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-share-nodes w-4" style="color:var(--accent)"></i> ${t('share_via_system')}</button>` : ''}
+    <button onclick="copyShareLink()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-link w-4" style="color:var(--accent)"></i> ${t('share_copy_link')}</button>
+    <button onclick="copyShareText()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-regular fa-copy w-4" style="color:var(--accent)"></i> ${t('share_copy_text')}</button>
   `;
   menu.classList.remove('hidden'); backdrop.classList.remove('hidden');
 }
@@ -1491,11 +1887,11 @@ function copyShareLink(){
   closeShareMenu();
   const chat = getActiveChat();
   const fakeLink = `${location.origin}${location.pathname}#chat=${chat.id}`;
-  navigator.clipboard.writeText(fakeLink).then(()=> toast('Ссылка скопирована (локальная, для этого браузера)','success'));
+  navigator.clipboard.writeText(fakeLink).then(()=> toast(tt('link_copied'),'success'));
 }
 function copyShareText(){
   closeShareMenu();
-  navigator.clipboard.writeText(getShareText() || 'Чат пока пуст').then(()=> toast('Текст чата скопирован','success'));
+  navigator.clipboard.writeText(getShareText() || tt('chat_empty')).then(()=> toast(tt('chat_text_copied'),'success'));
 }
 
 /* ================= Three-dot menu ================= */
@@ -1507,12 +1903,12 @@ function toggleMoreMenu(e){
   if(!isHidden){ closeMoreMenu(); return; }
   const chat = getActiveChat();
   menu.innerHTML = `
-    <button onclick="renameActiveChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-pen w-4" style="color:var(--accent)"></i> Переименовать чат</button>
-    <button onclick="togglePin('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-thumbtack w-4" style="color:var(--accent)"></i> ${chat.pinned ? 'Открепить чат' : 'Закрепить чат'}</button>
-    <button onclick="duplicateChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-copy w-4" style="color:var(--accent)"></i> Дублировать чат</button>
-    <button onclick="clearActiveChatMessages()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-broom w-4" style="color:var(--accent)"></i> Очистить сообщения</button>
-    <button onclick="exportChat(); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-download w-4" style="color:var(--accent)"></i> Экспортировать (.txt)</button>
-    <button onclick="deleteChat('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style="color:#f87171"><i class="fa-solid fa-trash w-4"></i> Удалить чат</button>
+    <button onclick="renameActiveChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-pen w-4" style="color:var(--accent)"></i> ${t('more_rename')}</button>
+    <button onclick="togglePin('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-thumbtack w-4" style="color:var(--accent)"></i> ${chat.pinned ? t('more_unpin') : t('more_pin')}</button>
+    <button onclick="duplicateChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-copy w-4" style="color:var(--accent)"></i> ${t('more_duplicate')}</button>
+    <button onclick="clearActiveChatMessages()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-broom w-4" style="color:var(--accent)"></i> ${t('more_clear')}</button>
+    <button onclick="exportChat(); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-download w-4" style="color:var(--accent)"></i> ${t('more_export')}</button>
+    <button onclick="deleteChat('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style="color:#f87171"><i class="fa-solid fa-trash w-4"></i> ${t('more_delete')}</button>
   `;
   menu.classList.remove('hidden'); backdrop.classList.remove('hidden');
 }
@@ -1530,27 +1926,41 @@ function duplicateChat(){
   copy.id = 'c'+Date.now(); copy.title = chat.title + ' (копия)'; copy.date = new Date().toISOString(); copy.pinned = false;
   state.chats.unshift(copy); state.activeChatId = copy.id;
   persistChats(); renderHistory(); renderMessages();
-  toast('Чат продублирован','success');
+  toast(tt('chat_duplicated'),'success');
 }
 function clearActiveChatMessages(){
   closeMoreMenu();
   const chat = getActiveChat();
   if(state.settings.confirmDelete && !confirm('Очистить все сообщения в этом чате?')) return;
   chat.messages = []; persistChats(); renderMessages(); renderHistory();
-  toast('Сообщения очищены','info');
+  toast(tt('messages_cleared'),'info');
 }
 
 /* ================= Settings modal ================= */
+const MODEL_AUTO_I18N = {
+  en:{ title:'Auto-select', sub:'Automatically picks an available free model' },
+  ru:{ title:'Автовыбор', sub:'Автоматически подбирает доступную бесплатную модель' },
+  es:{ title:'Selección automática', sub:'Elige automáticamente un modelo gratuito disponible' },
+  de:{ title:'Automatische Auswahl', sub:'Wählt automatisch ein verfügbares kostenloses Modell' },
+  fr:{ title:'Sélection automatique', sub:'Choisit automatiquement un modèle gratuit disponible' },
+  zh:{ title:'自动选择', sub:'自动选择可用的免费模型' },
+};
 function renderModelPicker(){
   const current = localStorage.getItem('nova_model') || 'openrouter/free';
   const wrap = document.getElementById('model-picker');
   const isPreset = AVAILABLE_MODELS.some(m => m.id === current);
-  wrap.innerHTML = AVAILABLE_MODELS.map(m => `
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  wrap.innerHTML = AVAILABLE_MODELS.map(m => {
+    const isAuto = m.id === 'openrouter/free';
+    const title = isAuto ? (MODEL_AUTO_I18N[lang] || MODEL_AUTO_I18N.en).title : m.title;
+    const subtitle = isAuto ? (MODEL_AUTO_I18N[lang] || MODEL_AUTO_I18N.en).sub : m.subtitle;
+    return `
     <div class="model-card${m.id === current ? ' selected':''}" onclick="selectModel('${m.id}', event)">
       <div class="radio"></div>
       <div class="icon-box"><i class="fa-solid ${m.icon}" style="color:var(--accent)"></i></div>
-      <div class="flex-1 min-w-0"><div class="title">${escapeHtml(m.title)}</div><div class="subtitle">${escapeHtml(m.subtitle)}</div></div>
-    </div>`).join('');
+      <div class="flex-1 min-w-0"><div class="title">${escapeHtml(title)}</div><div class="subtitle">${escapeHtml(subtitle)}</div></div>
+    </div>`;
+  }).join('');
   const advWrap = document.getElementById('advanced-model-wrap'); const modelInput = document.getElementById('model-input');
   modelInput.value = current;
   advWrap.classList.toggle('hidden', isPreset);
@@ -1594,12 +2004,12 @@ function toggleIntegration(id){
 function renderPromptsLibrary(){
   let prompts = []; try{ prompts = JSON.parse(localStorage.getItem('nova_prompts') || '[]'); }catch(e){}
   const wrap = document.getElementById('prompts-list');
-  if(prompts.length === 0){ wrap.innerHTML = `<div class="text-center text-xs py-6" style="color:var(--text-lo)">Пока нет сохранённых промптов</div>`; return; }
+  if(prompts.length === 0){ wrap.innerHTML = `<div class="text-center text-xs py-6" style="color:var(--text-lo)">${t('prompts_empty')}</div>`; return; }
   wrap.innerHTML = prompts.map((p,i) => `
     <div class="rounded-xl p-3 flex items-center gap-3" style="background:var(--bg-2); border:1px solid var(--border)">
       <div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">${escapeHtml(p.title)}</div><div class="text-xs truncate" style="color:var(--text-lo)">${escapeHtml(p.text)}</div></div>
-      <button onclick="usePromptEntry(${i})" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--accent)" title="Использовать"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
-      <button onclick="deletePromptEntry(${i})" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" title="Удалить"><i class="fa-solid fa-trash text-xs"></i></button>
+      <button onclick="usePromptEntry(${i})" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--accent)" title="Use"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></button>
+      <button onclick="deletePromptEntry(${i})" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" title="${t('msg_delete')}"><i class="fa-solid fa-trash text-xs"></i></button>
     </div>`).join('');
 }
 function addPromptEntry(){
@@ -1607,7 +2017,7 @@ function addPromptEntry(){
   const text = prompt('Текст промпта:'); if(!text) return;
   let prompts = []; try{ prompts = JSON.parse(localStorage.getItem('nova_prompts') || '[]'); }catch(e){}
   prompts.push({ title, text }); localStorage.setItem('nova_prompts', JSON.stringify(prompts));
-  renderPromptsLibrary(); toast('Промпт сохранён','success');
+  renderPromptsLibrary(); toast(tt('prompt_saved'),'success');
 }
 function usePromptEntry(i){
   let prompts = []; try{ prompts = JSON.parse(localStorage.getItem('nova_prompts') || '[]'); }catch(e){}
@@ -1621,12 +2031,36 @@ function deletePromptEntry(i){
   renderPromptsLibrary();
 }
 
+let changelogPage = 0;
+const CHANGELOG_PER_PAGE = 1;
 function renderChangelog(){
-  document.getElementById('changelog-list').innerHTML = CHANGELOG.map(entry => `
+  const totalPages = Math.ceil(CHANGELOG.length / CHANGELOG_PER_PAGE);
+  if(changelogPage >= totalPages) changelogPage = totalPages - 1;
+  if(changelogPage < 0) changelogPage = 0;
+  const start = changelogPage * CHANGELOG_PER_PAGE;
+  const pageEntries = CHANGELOG.slice(start, start + CHANGELOG_PER_PAGE);
+
+  document.getElementById('changelog-list').innerHTML = pageEntries.map(entry => `
     <div class="changelog-entry">
       <div class="flex items-center gap-2 mb-1"><span class="font-display font-semibold text-sm">v${entry.version}</span><span class="text-xs" style="color:var(--text-lo)">${entry.date}</span></div>
       <ul class="text-sm space-y-1" style="color:var(--text-mid)">${entry.changes.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>
     </div>`).join('');
+
+  const pag = document.getElementById('changelog-pagination');
+  if(totalPages <= 1){ pag.innerHTML = ''; return; }
+  pag.innerHTML = `
+    <button onclick="changeChangelogPage(-1)" class="icon-btn rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-1.5 ${changelogPage===0?'opacity-30 pointer-events-none':''}" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+      <i class="fa-solid fa-chevron-left text-[10px]"></i> <span class="hidden sm:inline">${t('changelog_newer')}</span>
+    </button>
+    <span class="text-xs" style="color:var(--text-lo)">${t('changelog_page').replace('{n}', changelogPage+1).replace('{total}', totalPages)}</span>
+    <button onclick="changeChangelogPage(1)" class="icon-btn rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-1.5 ${changelogPage===totalPages-1?'opacity-30 pointer-events-none':''}" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
+      <span class="hidden sm:inline">${t('changelog_older')}</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+    </button>
+  `;
+}
+function changeChangelogPage(delta){
+  changelogPage += delta;
+  renderChangelog();
 }
 
 let pendingAvatarDataUrl = null;
@@ -1650,7 +2084,7 @@ function saveProfile(){
   else if(pendingAvatarDataUrl){ localStorage.setItem('nova_profile_avatar', pendingAvatarDataUrl); }
   pendingAvatarDataUrl = null;
   applyProfileToSidebar();
-  toast('Профиль сохранён','success');
+  toast(tt('profile_saved'),'success');
 }
 function applyProfileToSidebar(){
   const name = localStorage.getItem('nova_profile_name') || 'Гость';
@@ -1676,7 +2110,7 @@ function openSettings(){
   document.getElementById('avatar-preview-wrap').innerHTML = avatar ? `<img src="${avatar}">` : `<i class="fa-solid fa-camera" style="color:var(--text-lo)"></i>`;
   pendingAvatarDataUrl = null;
   document.getElementById('about-version').innerText = APP_VERSION;
-  renderModelPicker(); renderIntegrations(); renderPromptsLibrary(); renderChangelog(); updateContextUsage(); renderAccentPicker();
+  renderModelPicker(); renderIntegrations(); renderPromptsLibrary(); renderChangelog(); updateContextUsage(); renderAccentPicker(); renderLanguagePicker();
   document.getElementById('settings-mobile-list').classList.remove('mobile-hidden');
   document.getElementById('settings-content-wrap').classList.add('mobile-hidden');
   requestAnimationFrame(()=> modal.classList.add('show'));
@@ -1698,8 +2132,8 @@ function closeMobileSettingsPanel(){
 function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== tab));
-  const titles = { general:'Общие', model:'Модель', profile:'Профиль', interface:'Интерфейс', appearance:'Внешний вид', experimental:'Эксперименты', integrations:'Интеграции', prompts:'Промпты', changelog:'Что нового', about:'О приложении' };
-  document.getElementById('tab-title').innerText = titles[tab];
+  const titleKeys = { general:'tab_general', model:'tab_model', profile:'tab_profile', interface:'tab_interface', appearance:'tab_appearance', experimental:'tab_experimental', integrations:'tab_integrations', prompts:'tab_prompts', changelog:'tab_changelog', about:'tab_about' };
+  document.getElementById('tab-title').innerText = t(titleKeys[tab]);
 }
 function saveApiSettings(){
   const key = sanitizeKey(document.getElementById('api-key-input').value);
@@ -1712,7 +2146,7 @@ function saveApiSettings(){
   localStorage.setItem('nova_system_prompt', systemPrompt);
   localStorage.setItem('nova_temperature', temperature);
   localStorage.setItem('nova_top_p', topP);
-  toast('Настройки сохранены','success');
+  toast(tt('settings_saved'),'success');
   closeSettings();
 }
 function toggleSwitch(el, key){
@@ -1774,6 +2208,43 @@ function applySavedAccent(){
   if(saved) setAccentColor(saved);
 }
 
+/* ================= Language picker / i18n apply ================= */
+function renderLanguagePicker(){
+  const current = localStorage.getItem('nova_lang') || 'en';
+  const wrap = document.getElementById('language-picker');
+  if(!wrap) return;
+  wrap.innerHTML = LANGUAGES.map(l => `<button type="button" class="lang-flag${l.code===current?' selected':''}" title="${l.label}" onclick="setLanguage('${l.code}')">${l.flag}</button>`).join('');
+}
+function setLanguage(code){
+  localStorage.setItem('nova_lang', code);
+  document.documentElement.lang = code;
+  renderLanguagePicker();
+  applyLanguage();
+  toast(t('save') + ': ' + (LANGUAGES.find(l=>l.code===code)||{}).label, 'success');
+}
+function applyLanguage(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if(I18N.en[key] !== undefined) el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if(I18N.en[key] !== undefined) el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    if(I18N.en[key] !== undefined) el.title = t(key);
+  });
+  // Re-render dynamic JS-generated pieces that embed translated strings
+  if(document.getElementById('changelog-list')) renderChangelog();
+  if(document.getElementById('integrations-list')) renderIntegrations();
+  if(document.getElementById('prompts-list')) renderPromptsLibrary();
+  if(document.getElementById('model-picker')) renderModelPicker();
+  const activeTabBtn = document.querySelector('.tab-btn.active');
+  if(activeTabBtn) switchTab(activeTabBtn.dataset.tab);
+  updateProviderDetection();
+}
+
 /* ================= Backup export/import ================= */
 function exportBackup(){
   const backup = {
@@ -1794,7 +2265,7 @@ function exportBackup(){
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'barbosovai-backup.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  toast('Резервная копия скачана','success');
+  toast(tt('backup_downloaded'),'success');
 }
 function importBackup(file){
   if(!file) return;
@@ -1820,7 +2291,7 @@ function importBackup(file){
       state.activeChatId = state.chats[0]?.id;
       applyProfileToSidebar(); applyGlobalSettingEffects(); applySavedAccent();
       renderHistory(); renderMessages();
-      toast('Резервная копия импортирована','success');
+      toast(tt('backup_imported'),'success');
       closeSettings();
     }catch(err){
       toast('Не удалось прочитать файл: ' + err.message, 'error');
@@ -1915,6 +2386,8 @@ function init(){
   applyProfileToSidebar();
   applyGlobalSettingEffects();
   applySavedAccent();
+  document.documentElement.lang = localStorage.getItem('nova_lang') || 'en';
+  applyLanguage();
   renderHistory();
   renderMessages();
   loadDraftForActiveChat();

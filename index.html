@@ -670,45 +670,48 @@
 
 <script>
 /* ================= CONSTANTS ================= */
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.1';
 const CHANGELOG = [
-  { version:'1.4.0', date:'9 июля 2026', changes:[
-    'Выбор языка интерфейса с флагами (по умолчанию — английский)',
-    'Пагинация в разделе «Что нового», адаптированная под телефон',
-    'Более надёжные отступы у сообщений (защита от сбоев вёрстки)',
-    'Осмысленные имена файлов при скачивании кода вместо code.ext'
+  { version:'1.4.1', date:'July 9, 2026', changes:[
+    'Restored the previous "What\'s new" layout — all versions listed at once, no more one-at-a-time paging'
   ]},
-  { version:'1.3.0', date:'9 июля 2026', changes:[
-    'Полная перестройка мобильной версии: всплывающие меню — как нижние шторки',
-    'Настройки на телефоне — список разделов с «проваливанием», как в нативных приложениях',
-    'Обновлён список моделей: убрана слабая модель Poolside, добавлена Google Gemma 4 31B'
+  { version:'1.4.0', date:'July 9, 2026', changes:[
+    'Interface language selector with flags (defaults to English)',
+    'Pagination added to the "What\'s new" section, adapted for mobile',
+    'More reliable message spacing (protection against layout glitches)',
+    'Meaningful file names when downloading code instead of code.ext'
   ]},
-  { version:'1.2.0', date:'9 июля 2026', changes:[
-    'Автоопределение сервиса по API-ключу: OpenRouter, OpenAI, Anthropic, Groq',
-    'Убраны упоминания OpenRouter из текстов интерфейса',
-    'Убраны теги «Работа»/«Личное»',
-    'Горячие клавиши, перетаскивание файлов в composer, черновики по чатам',
-    'Резервная копия (экспорт/импорт всех чатов и настроек)',
-    'Акцентный цвет на выбор, время сообщений, звук получения ответа'
+  { version:'1.3.0', date:'July 9, 2026', changes:[
+    'Full mobile rebuild: popup menus now behave as bottom sheets',
+    'Settings on mobile became a drill-down category list, like native apps',
+    'Updated model list: removed a weaker Poolside model, added Google Gemma 4 31B'
   ]},
-  { version:'1.1.0', date:'8 июля 2026', changes:[
-    'Новое имя проекта — BarbosovAI',
-    'Редактирование и удаление отдельных сообщений',
-    'Закреплённые чаты',
-    'Системный промпт, Temperature и Top-P',
-    'Счётчик токенов контекста',
-    'Озвучка ответов ИИ (Text-to-Speech)',
-    'Библиотека промптов',
-    'Интеграции со сторонними сервисами',
-    'Постоянные лайки/дизлайки на сообщение',
-    'Рабочая камера с запросом разрешения',
-    'Рабочее меню «три точки» и меню «Поделиться»',
-    'Профиль пользователя: имя и фото',
-    'Исправлено распознавание речи (автоперезапуск)'
+  { version:'1.2.0', date:'July 9, 2026', changes:[
+    'Automatic service detection from the API key: OpenRouter, OpenAI, Anthropic, Groq',
+    'Removed OpenRouter mentions from the interface text',
+    'Removed the "Work"/"Personal" tags',
+    'Keyboard shortcuts, drag-and-drop file attachments, per-chat drafts',
+    'Backup (export/import all chats and settings)',
+    'Selectable accent color, message timestamps, receive sound'
   ]},
-  { version:'1.0.0', date:'8 июля 2026', changes:[
-    'Первый релиз интерфейса',
-    'История чатов, потоковая генерация, вложения, голосовой ввод'
+  { version:'1.1.0', date:'July 8, 2026', changes:[
+    'New project name — BarbosovAI',
+    'Editing and deleting individual messages',
+    'Pinned chats',
+    'System prompt, Temperature, and Top-P',
+    'Context token counter',
+    'AI reply read-aloud (text-to-speech)',
+    'Prompt library',
+    'Third-party integrations',
+    'Permanent like/dislike per message',
+    'Working camera with permission prompt',
+    'Working "more" menu and "Share" menu',
+    'User profile: name and photo',
+    'Fixed speech recognition (auto-restart)'
+  ]},
+  { version:'1.0.0', date:'July 8, 2026', changes:[
+    'First release of the interface',
+    'Chat history, streaming replies, attachments, voice input'
   ]}
 ];
 
@@ -2031,36 +2034,14 @@ function deletePromptEntry(i){
   renderPromptsLibrary();
 }
 
-let changelogPage = 0;
-const CHANGELOG_PER_PAGE = 1;
 function renderChangelog(){
-  const totalPages = Math.ceil(CHANGELOG.length / CHANGELOG_PER_PAGE);
-  if(changelogPage >= totalPages) changelogPage = totalPages - 1;
-  if(changelogPage < 0) changelogPage = 0;
-  const start = changelogPage * CHANGELOG_PER_PAGE;
-  const pageEntries = CHANGELOG.slice(start, start + CHANGELOG_PER_PAGE);
-
-  document.getElementById('changelog-list').innerHTML = pageEntries.map(entry => `
+  document.getElementById('changelog-list').innerHTML = CHANGELOG.map(entry => `
     <div class="changelog-entry">
       <div class="flex items-center gap-2 mb-1"><span class="font-display font-semibold text-sm">v${entry.version}</span><span class="text-xs" style="color:var(--text-lo)">${entry.date}</span></div>
       <ul class="text-sm space-y-1" style="color:var(--text-mid)">${entry.changes.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>
     </div>`).join('');
-
   const pag = document.getElementById('changelog-pagination');
-  if(totalPages <= 1){ pag.innerHTML = ''; return; }
-  pag.innerHTML = `
-    <button onclick="changeChangelogPage(-1)" class="icon-btn rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-1.5 ${changelogPage===0?'opacity-30 pointer-events-none':''}" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
-      <i class="fa-solid fa-chevron-left text-[10px]"></i> <span class="hidden sm:inline">${t('changelog_newer')}</span>
-    </button>
-    <span class="text-xs" style="color:var(--text-lo)">${t('changelog_page').replace('{n}', changelogPage+1).replace('{total}', totalPages)}</span>
-    <button onclick="changeChangelogPage(1)" class="icon-btn rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-1.5 ${changelogPage===totalPages-1?'opacity-30 pointer-events-none':''}" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)">
-      <span class="hidden sm:inline">${t('changelog_older')}</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
-    </button>
-  `;
-}
-function changeChangelogPage(delta){
-  changelogPage += delta;
-  renderChangelog();
+  if(pag) pag.innerHTML = '';
 }
 
 let pendingAvatarDataUrl = null;

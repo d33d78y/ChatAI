@@ -11,6 +11,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --bg-0:#09090B; --bg-1:#111113; --bg-2:#18181B; --bg-3:#202024;
@@ -198,6 +201,22 @@
 
   .changelog-entry{ border-left:2px solid var(--border); padding-left:14px; padding-bottom:18px; position:relative; }
   .changelog-entry::before{ content:''; position:absolute; left:-5px; top:2px; width:8px; height:8px; border-radius:50%; background:var(--accent); }
+
+  .tool-card{
+    display:flex; align-items:center; gap:12px; background:var(--bg-2); border:1px solid var(--border);
+    border-radius:16px; padding:12px 14px; max-width:320px;
+  }
+  .tool-card-icon{
+    width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    background: var(--accent-dim); color: var(--accent); flex-shrink:0; font-size:15px;
+  }
+  .tool-card-name{ font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tool-card-sub{ font-size:11px; color:var(--text-lo); }
+  .tool-card-btn{
+    width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.05); color:var(--text-mid); flex-shrink:0; transition: background .2s var(--ease), color .2s var(--ease);
+  }
+  .tool-card-btn:hover{ background:var(--accent-dim); color:var(--accent); }
   .changelog-entry:last-child{ padding-bottom:0; }
 
   .camera-modal video{ width:100%; border-radius:20px; background:#000; }
@@ -334,12 +353,16 @@
             <filter id="blurSoft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
           </defs>
           <circle cx="60" cy="60" r="40" fill="none" stroke="url(#ringGrad)" stroke-width="12"/>
-          <path d="M85.24 23.96 A44 44 0 0 1 85.24 96.04" stroke="#f97316" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.28" filter="url(#blurSoft)"/>
-          <path d="M85.24 23.96 A44 44 0 0 1 85.24 96.04" stroke="url(#crescentGrad)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+          <g>
+            <path d="M85.24 23.96 A44 44 0 0 1 85.24 96.04" stroke="#f97316" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.28" filter="url(#blurSoft)"/>
+            <path d="M85.24 23.96 A44 44 0 0 1 85.24 96.04" stroke="url(#crescentGrad)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="4s" repeatCount="indefinite"/>
+          </g>
           <g filter="url(#softShadow)">
             <path d="M60 34 L82.52 47 V73 L60 86 L37.48 73 V47 Z" fill="url(#hexRimGrad)"/>
             <path d="M60 40 L77.32 50 V70 L60 80 L42.68 70 V50 Z" fill="url(#hexFaceGrad)"/>
           </g>
+          <text x="60" y="68" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="24" fill="#fffbeb" stroke="#7c2d12" stroke-width="0.6" style="paint-order: stroke fill;">B</text>
         </svg>
         <h1 class="font-display text-3xl font-semibold mb-2" data-i18n="empty_title">Чем займёмся сегодня?</h1>
         <p class="text-sm mb-8" style="color:var(--text-mid)" data-i18n="empty_subtitle">Задай вопрос, вставь текст или обсуди идею — BarbosovAI на связи.</p>
@@ -616,6 +639,10 @@
             <div><div class="text-sm font-medium" data-i18n="reasoning_label">Режим рассуждений</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="reasoning_sub">Просить модель показывать ход мыслей (если модель поддерживает)</div></div>
             <div class="switch" onclick="toggleSwitch(this,'reasoning')"><div class="knob"></div></div>
           </div>
+          <div class="flex items-center justify-between">
+            <div><div class="text-sm font-medium" data-i18n="tools_label">ИИ может создавать файлы</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="tools_sub">Архивы, таблицы и файлы — по своей инициативе. Отключите, если это ломает ответы конкретной модели.</div></div>
+            <div class="switch on" onclick="toggleSwitch(this,'enableTools')"><div class="knob"></div></div>
+          </div>
         </div>
 
         <!-- Integrations -->
@@ -670,49 +697,82 @@
 
 <script>
 /* ================= CONSTANTS ================= */
-const APP_VERSION = '1.4.1';
+const APP_VERSION = '1.6.0';
 const CHANGELOG = [
-  { version:'1.4.1', date:'July 9, 2026', changes:[
-    'Restored the previous "What\'s new" layout — all versions listed at once, no more one-at-a-time paging'
-  ]},
-  { version:'1.4.0', date:'July 9, 2026', changes:[
-    'Interface language selector with flags (defaults to English)',
-    'Pagination added to the "What\'s new" section, adapted for mobile',
-    'More reliable message spacing (protection against layout glitches)',
-    'Meaningful file names when downloading code instead of code.ext'
-  ]},
-  { version:'1.3.0', date:'July 9, 2026', changes:[
-    'Full mobile rebuild: popup menus now behave as bottom sheets',
-    'Settings on mobile became a drill-down category list, like native apps',
-    'Updated model list: removed a weaker Poolside model, added Google Gemma 4 31B'
-  ]},
-  { version:'1.2.0', date:'July 9, 2026', changes:[
-    'Automatic service detection from the API key: OpenRouter, OpenAI, Anthropic, Groq',
-    'Removed OpenRouter mentions from the interface text',
-    'Removed the "Work"/"Personal" tags',
-    'Keyboard shortcuts, drag-and-drop file attachments, per-chat drafts',
-    'Backup (export/import all chats and settings)',
-    'Selectable accent color, message timestamps, receive sound'
-  ]},
-  { version:'1.1.0', date:'July 8, 2026', changes:[
-    'New project name — BarbosovAI',
-    'Editing and deleting individual messages',
-    'Pinned chats',
-    'System prompt, Temperature, and Top-P',
-    'Context token counter',
-    'AI reply read-aloud (text-to-speech)',
-    'Prompt library',
-    'Third-party integrations',
-    'Permanent like/dislike per message',
-    'Working camera with permission prompt',
-    'Working "more" menu and "Share" menu',
-    'User profile: name and photo',
-    'Fixed speech recognition (auto-restart)'
-  ]},
-  { version:'1.0.0', date:'July 8, 2026', changes:[
-    'First release of the interface',
-    'Chat history, streaming replies, attachments, voice input'
-  ]}
+  { version:'1.6.0', date:'2026-07-09', changes:{
+    en:{
+      features:['PDF export for chats, alongside .txt', 'The AI can now create ZIP archives, spreadsheets, and files on its own when it fits the task — no special prompt needed', '8 more interface languages added (Portuguese, Italian, Dutch, Polish, Turkish, Arabic, Japanese, Ukrainian)', 'The "What\'s new" section now supports grouped categories (bug fixes, new features, improvements)'],
+      improvements:['Added a toggle to turn off AI-generated files if it causes issues with a specific model'],
+    },
+    ru:{
+      features:['Экспорт чата в PDF, в дополнение к .txt', 'ИИ теперь может сам создавать zip-архивы, таблицы и файлы, когда это уместно — без специального промпта', 'Добавлено ещё 8 языков интерфейса (португальский, итальянский, нидерландский, польский, турецкий, арабский, японский, украинский)', 'Раздел «Что нового» теперь поддерживает категории (исправления, новое, улучшения)'],
+      improvements:['Добавлен переключатель, чтобы отключить создание файлов ИИ, если это ломает ответы конкретной модели'],
+    },
+  }},
+  { version:'1.5.1', date:'2026-07-09', changes:{
+    en:['"What\'s new" is now fully translated into the selected interface language'],
+    ru:['Раздел «Что нового» теперь полностью переводится на выбранный язык интерфейса'],
+    es:['«Novedades» ahora se traduce por completo al idioma de interfaz seleccionado'],
+    de:['„Neuigkeiten“ wird jetzt vollständig in die gewählte Oberflächensprache übersetzt'],
+    fr:['« Nouveautés » est désormais entièrement traduit dans la langue d\'interface choisie'],
+    zh:['"更新日志"现在会完整翻译为所选的界面语言'],
+  }},
+  { version:'1.5.0', date:'2026-07-09', changes:{
+    en:['The accent arc on the main logo now spins clockwise continuously','Added the letter "B" inside the hexagon on the main logo'],
+    ru:['Акцентная дуга на главном лого теперь непрерывно вращается по часовой стрелке','В центр шестигранника на главном лого добавлена буква «B»'],
+    es:['El arco de acento del logo principal ahora gira continuamente en sentido horario','Se añadió la letra «B» dentro del hexágono del logo principal'],
+    de:['Der Akzentbogen im Hauptlogo dreht sich jetzt fortlaufend im Uhrzeigersinn','Der Buchstabe „B“ wurde im Sechseck des Hauptlogos ergänzt'],
+    fr:['L\'arc d\'accent du logo principal tourne désormais en continu dans le sens horaire','La lettre « B » a été ajoutée au centre de l\'hexagone du logo principal'],
+    zh:['主标志上的强调弧线现在会持续顺时针旋转','在主标志的六边形中央添加了字母 "B"'],
+  }},
+  { version:'1.4.1', date:'2026-07-09', changes:{
+    en:['Restored the previous "What\'s new" layout — all versions listed at once, no more one-at-a-time paging'],
+    ru:['Возвращён прежний вид раздела «Что нового» — все версии показываются сразу списком, без пролистывания по одной'],
+    es:['Se restauró el diseño anterior de «Novedades»: todas las versiones se muestran a la vez, sin paginación una por una'],
+    de:['Das vorherige Layout von „Neuigkeiten“ wurde wiederhergestellt — alle Versionen werden auf einmal aufgelistet, kein Blättern mehr',],
+    fr:['L\'ancienne présentation des « Nouveautés » a été rétablie — toutes les versions sont affichées en une seule liste, sans pagination une par une'],
+    zh:['恢复了"更新日志"之前的样式——所有版本一次性列出，不再逐条翻页'],
+  }},
+  { version:'1.4.0', date:'2026-07-09', changes:{
+    en:['Interface language selector with flags (defaults to English)','Pagination added to the "What\'s new" section, adapted for mobile','More reliable message spacing (protection against layout glitches)','Meaningful file names when downloading code instead of code.ext'],
+    ru:['Выбор языка интерфейса с флагами (по умолчанию — английский)','В раздел «Что нового» добавлена пагинация, адаптированная под телефон','Более надёжные отступы у сообщений (защита от сбоев вёрстки)','Осмысленные имена файлов при скачивании кода вместо code.ext'],
+    es:['Selector de idioma de la interfaz con banderas (inglés por defecto)','Se añadió paginación a la sección «Novedades», adaptada a móviles','Espaciado de mensajes más fiable (protección contra fallos de diseño)','Nombres de archivo con sentido al descargar código en vez de code.ext'],
+    de:['Sprachauswahl der Oberfläche mit Flaggen (Standard: Englisch)','Paginierung im Bereich „Neuigkeiten“ hinzugefügt, für Mobilgeräte angepasst','Zuverlässigere Nachrichtenabstände (Schutz vor Layout-Fehlern)','Sinnvolle Dateinamen beim Herunterladen von Code statt code.ext'],
+    fr:['Sélecteur de langue de l\'interface avec drapeaux (anglais par défaut)','Pagination ajoutée à la section « Nouveautés », adaptée au mobile','Espacement des messages plus fiable (protection contre les bugs de mise en page)','Noms de fichiers pertinents lors du téléchargement de code au lieu de code.ext'],
+    zh:['带国旗图标的界面语言选择（默认英语）','"更新日志"部分新增分页，已适配移动端','消息间距更加可靠（防止排版错乱）','下载代码时使用有意义的文件名，而不是 code.ext'],
+  }},
+  { version:'1.3.0', date:'2026-07-09', changes:{
+    en:['Full mobile rebuild: popup menus now behave as bottom sheets','Settings on mobile became a drill-down category list, like native apps','Updated model list: removed a weaker Poolside model, added Google Gemma 4 31B'],
+    ru:['Полная перестройка мобильной версии: всплывающие меню теперь ведут себя как нижние шторки','Настройки на телефоне стали списком разделов с «проваливанием», как в нативных приложениях','Обновлён список моделей: убрана более слабая модель Poolside, добавлена Google Gemma 4 31B'],
+    es:['Rediseño completo para móviles: los menús emergentes ahora son hojas inferiores','Los ajustes en móvil pasaron a ser una lista de categorías con navegación en profundidad, como en apps nativas','Lista de modelos actualizada: se quitó un modelo Poolside más débil y se añadió Google Gemma 4 31B'],
+    de:['Vollständige Mobil-Überarbeitung: Popup-Menüs verhalten sich jetzt wie Bottom Sheets','Einstellungen auf dem Handy wurden zu einer aufklappbaren Kategorieliste, wie bei nativen Apps','Modellliste aktualisiert: ein schwächeres Poolside-Modell entfernt, Google Gemma 4 31B hinzugefügt'],
+    fr:['Refonte mobile complète : les menus contextuels se comportent désormais comme des feuilles inférieures','Les paramètres sur mobile sont devenus une liste de catégories à navigation en profondeur, comme dans les applications natives','Liste de modèles mise à jour : un modèle Poolside plus faible retiré, Google Gemma 4 31B ajouté'],
+    zh:['移动端全面重构：弹出菜单现在表现为底部抽屉','手机上的设置变成了可逐级进入的分类列表，就像原生应用一样','更新了模型列表：移除了较弱的 Poolside 模型，新增 Google Gemma 4 31B'],
+  }},
+  { version:'1.2.0', date:'2026-07-09', changes:{
+    en:['Automatic service detection from the API key: OpenRouter, OpenAI, Anthropic, Groq','Removed OpenRouter mentions from the interface text','Removed the "Work"/"Personal" tags','Keyboard shortcuts, drag-and-drop file attachments, per-chat drafts','Backup (export/import all chats and settings)','Selectable accent color, message timestamps, receive sound'],
+    ru:['Автоопределение сервиса по API-ключу: OpenRouter, OpenAI, Anthropic, Groq','Убраны упоминания OpenRouter из текстов интерфейса','Убраны теги «Работа»/«Личное»','Горячие клавиши, перетаскивание файлов в поле ввода, черновики по чатам','Резервная копия (экспорт/импорт всех чатов и настроек)','Акцентный цвет на выбор, время сообщений, звук получения ответа'],
+    es:['Detección automática del servicio a partir de la clave API: OpenRouter, OpenAI, Anthropic, Groq','Se eliminaron las menciones a OpenRouter en los textos de la interfaz','Se eliminaron las etiquetas «Trabajo»/«Personal»','Atajos de teclado, arrastrar y soltar archivos, borradores por chat','Copia de seguridad (exportar/importar todos los chats y ajustes)','Color de acento seleccionable, hora de los mensajes, sonido al recibir'],
+    de:['Automatische Diensterkennung anhand des API-Schlüssels: OpenRouter, OpenAI, Anthropic, Groq','OpenRouter-Erwähnungen aus den Oberflächentexten entfernt','Tags „Arbeit“/„Privat“ entfernt','Tastenkürzel, Drag-and-Drop für Dateianhänge, Entwürfe pro Chat','Sicherung (Export/Import aller Chats und Einstellungen)','Wählbare Akzentfarbe, Zeitstempel für Nachrichten, Empfangston'],
+    fr:['Détection automatique du service à partir de la clé API : OpenRouter, OpenAI, Anthropic, Groq','Suppression des mentions d\'OpenRouter dans les textes de l\'interface','Suppression des étiquettes « Travail »/« Personnel »','Raccourcis clavier, glisser-déposer de fichiers, brouillons par discussion','Sauvegarde (export/import de toutes les discussions et paramètres)','Couleur d\'accent au choix, horodatage des messages, son de réception'],
+    zh:['根据 API 密钥自动识别服务：OpenRouter、OpenAI、Anthropic、Groq','从界面文本中移除了 OpenRouter 相关字样','移除了"工作"/"个人"标签','快捷键、拖放文件附件、按对话保存草稿','备份（导出/导入所有对话和设置）','可选主题色、消息时间戳、接收提示音'],
+  }},
+  { version:'1.1.0', date:'2026-07-08', changes:{
+    en:['New project name — BarbosovAI','Editing and deleting individual messages','Pinned chats','System prompt, Temperature, and Top-P','Context token counter','AI reply read-aloud (text-to-speech)','Prompt library','Third-party integrations','Permanent like/dislike per message','Working camera with permission prompt','Working "more" menu and "Share" menu','User profile: name and photo','Fixed speech recognition (auto-restart)'],
+    ru:['Новое имя проекта — BarbosovAI','Редактирование и удаление отдельных сообщений','Закреплённые чаты','Системный промпт, Temperature и Top-P','Счётчик токенов контекста','Озвучка ответов ИИ (Text-to-Speech)','Библиотека промптов','Интеграции со сторонними сервисами','Постоянные лайки/дизлайки на сообщение','Рабочая камера с запросом разрешения','Рабочее меню «три точки» и меню «Поделиться»','Профиль пользователя: имя и фото','Исправлено распознавание речи (автоперезапуск)'],
+    es:['Nuevo nombre del proyecto: BarbosovAI','Edición y eliminación de mensajes individuales','Chats fijados','Prompt de sistema, Temperature y Top-P','Contador de tokens de contexto','Lectura en voz alta de las respuestas de la IA (texto a voz)','Biblioteca de prompts','Integraciones con terceros','Me gusta/no me gusta permanente por mensaje','Cámara funcional con solicitud de permiso','Menú «más» y menú «Compartir» funcionales','Perfil de usuario: nombre y foto','Reconocimiento de voz corregido (reinicio automático)'],
+    de:['Neuer Projektname — BarbosovAI','Bearbeiten und Löschen einzelner Nachrichten','Angeheftete Chats','System-Prompt, Temperature und Top-P','Kontext-Token-Zähler','Vorlesen der KI-Antworten (Text-to-Speech)','Prompt-Bibliothek','Drittanbieter-Integrationen','Dauerhaftes Like/Dislike pro Nachricht','Funktionierende Kamera mit Berechtigungsabfrage','Funktionierendes „Mehr“-Menü und „Teilen“-Menü','Benutzerprofil: Name und Foto','Spracherkennung repariert (automatischer Neustart)'],
+    fr:['Nouveau nom de projet — BarbosovAI','Modification et suppression de messages individuels','Discussions épinglées','Prompt système, Temperature et Top-P','Compteur de jetons de contexte','Lecture à voix haute des réponses de l\'IA (synthèse vocale)','Bibliothèque de prompts','Intégrations tierces','J\'aime/Je n\'aime pas permanent par message','Caméra fonctionnelle avec demande d\'autorisation','Menu « plus » et menu « Partager » fonctionnels','Profil utilisateur : nom et photo','Reconnaissance vocale corrigée (redémarrage automatique)'],
+    zh:['项目更名为 BarbosovAI','支持编辑和删除单条消息','置顶对话','系统提示词、Temperature 和 Top-P','上下文 token 计数器','AI 回复朗读（文本转语音）','提示词库','第三方集成','每条消息可永久点赞/点踩','可正常使用的相机（含权限请求）','可正常使用的"更多"菜单和"分享"菜单','用户个人资料：姓名和头像','修复了语音识别（自动重启）'],
+  }},
+  { version:'1.0.0', date:'2026-07-08', changes:{
+    en:['First release of the interface','Chat history, streaming replies, attachments, voice input'],
+    ru:['Первый релиз интерфейса','История чатов, потоковая генерация, вложения, голосовой ввод'],
+    es:['Primera versión de la interfaz','Historial de chats, respuestas en streaming, adjuntos, entrada de voz'],
+    de:['Erste Version der Oberfläche','Chatverlauf, Streaming-Antworten, Anhänge, Spracheingabe'],
+    fr:['Première version de l\'interface','Historique des discussions, réponses en streaming, pièces jointes, saisie vocale'],
+    zh:['界面首次发布','对话历史、流式回复、附件、语音输入'],
+  }}
 ];
 
 const AVAILABLE_MODELS = [
@@ -737,6 +797,14 @@ const LANGUAGES = [
   { code:'de', flag:'🇩🇪', label:'Deutsch' },
   { code:'fr', flag:'🇫🇷', label:'Français' },
   { code:'zh', flag:'🇨🇳', label:'中文' },
+  { code:'pt', flag:'🇵🇹', label:'Português' },
+  { code:'it', flag:'🇮🇹', label:'Italiano' },
+  { code:'nl', flag:'🇳🇱', label:'Nederlands' },
+  { code:'pl', flag:'🇵🇱', label:'Polski' },
+  { code:'tr', flag:'🇹🇷', label:'Türkçe' },
+  { code:'ar', flag:'🇸🇦', label:'العربية' },
+  { code:'ja', flag:'🇯🇵', label:'日本語' },
+  { code:'uk', flag:'🇺🇦', label:'Українська' },
 ];
 const I18N = {
 en:{
@@ -776,6 +844,7 @@ en:{
   dense_label:'Dense chat list', dense_sub:'Less spacing in the left history',
   streaming_label:'Streaming', streaming_sub:'Show the reply as it is generated',
   reasoning_label:'Reasoning mode', reasoning_sub:'Ask the model to show its thinking (if supported)',
+  tools_label:'AI can create files', tools_sub:'Archives, spreadsheets, and files — on its own initiative. Turn off if it breaks replies for a specific model.',
   integrations_desc:'Connect third-party services. Tokens are stored locally only.', wip_title:'In development', wip_sub:'Integrations are coming soon',
   prompts_add:'Save a new prompt', prompts_empty:'No saved prompts yet',
   changelog_newer:'Newer', changelog_older:'Older', changelog_page:'Version {n} of {total}',
@@ -784,7 +853,7 @@ en:{
   attach_camera:'Camera', attach_photo:'Photo from gallery', attach_file:'File',
   share_via_system:'Share via...', share_copy_link:'Copy link', share_copy_text:'Copy chat text',
   more_rename:'Rename chat', more_pin:'Pin chat', more_unpin:'Unpin chat', more_duplicate:'Duplicate chat',
-  more_clear:'Clear messages', more_export:'Export (.txt)', more_delete:'Delete chat',
+  more_clear:'Clear messages', more_export:'Export (.txt)', more_export_pdf:'Export as PDF', more_delete:'Delete chat',
   camera_title:'Camera', camera_capture:'Take photo',
   provider_connected:'Connected service: {name}', provider_unknown:'Service not recognized — trying as an OpenAI-compatible API',
   provider_google:'Google Gemini key detected — direct support not implemented yet',
@@ -826,6 +895,7 @@ ru:{
   dense_label:'Плотный список чатов', dense_sub:'Меньше отступы в истории слева',
   streaming_label:'Потоковая генерация', streaming_sub:'Показывать ответ по мере генерации',
   reasoning_label:'Режим рассуждений', reasoning_sub:'Просить модель показывать ход мыслей (если поддерживает)',
+  tools_label:'ИИ может создавать файлы', tools_sub:'Архивы, таблицы и файлы — по своей инициативе. Отключите, если это ломает ответы конкретной модели.',
   integrations_desc:'Подключите сторонние сервисы. Токены хранятся только локально в вашем браузере.', wip_title:'В разработке', wip_sub:'Интеграции скоро появятся',
   prompts_add:'Сохранить новый промпт', prompts_empty:'Пока нет сохранённых промптов',
   changelog_newer:'Новее', changelog_older:'Старее', changelog_page:'Версия {n} из {total}',
@@ -834,7 +904,7 @@ ru:{
   attach_camera:'Камера', attach_photo:'Фото из галереи', attach_file:'Файл',
   share_via_system:'Поделиться через...', share_copy_link:'Скопировать ссылку', share_copy_text:'Скопировать текст чата',
   more_rename:'Переименовать чат', more_pin:'Закрепить чат', more_unpin:'Открепить чат', more_duplicate:'Дублировать чат',
-  more_clear:'Очистить сообщения', more_export:'Экспортировать (.txt)', more_delete:'Удалить чат',
+  more_clear:'Очистить сообщения', more_export:'Экспортировать (.txt)', more_export_pdf:'Экспортировать в PDF', more_delete:'Удалить чат',
   camera_title:'Камера', camera_capture:'Сделать снимок',
   provider_connected:'Подключён сервис: {name}', provider_unknown:'Сервис не определён — попробуем как OpenAI-совместимый API',
   provider_google:'Обнаружен ключ Google Gemini — прямая поддержка пока не реализована',
@@ -876,6 +946,7 @@ es:{
   dense_label:'Lista de chats compacta', dense_sub:'Menos espaciado en el historial izquierdo',
   streaming_label:'Generación en streaming', streaming_sub:'Mostrar la respuesta mientras se genera',
   reasoning_label:'Modo de razonamiento', reasoning_sub:'Pedir al modelo que muestre su razonamiento (si es compatible)',
+  tools_label:'La IA puede crear archivos', tools_sub:'Archivos ZIP, hojas de cálculo y archivos, por iniciativa propia. Desactívalo si un modelo concreto falla con esto.',
   integrations_desc:'Conecta servicios externos. Los tokens se guardan solo localmente.', wip_title:'En desarrollo', wip_sub:'Las integraciones llegarán pronto',
   prompts_add:'Guardar nuevo prompt', prompts_empty:'Aún no hay prompts guardados',
   changelog_newer:'Más reciente', changelog_older:'Más antiguo', changelog_page:'Versión {n} de {total}',
@@ -884,7 +955,7 @@ es:{
   attach_camera:'Cámara', attach_photo:'Foto de la galería', attach_file:'Archivo',
   share_via_system:'Compartir vía...', share_copy_link:'Copiar enlace', share_copy_text:'Copiar texto del chat',
   more_rename:'Renombrar chat', more_pin:'Fijar chat', more_unpin:'Desfijar chat', more_duplicate:'Duplicar chat',
-  more_clear:'Vaciar mensajes', more_export:'Exportar (.txt)', more_delete:'Eliminar chat',
+  more_clear:'Vaciar mensajes', more_export:'Exportar (.txt)', more_export_pdf:'Exportar como PDF', more_delete:'Eliminar chat',
   camera_title:'Cámara', camera_capture:'Tomar foto',
   provider_connected:'Servicio conectado: {name}', provider_unknown:'Servicio no reconocido — probaremos como API compatible con OpenAI',
   provider_google:'Se detectó una clave de Google Gemini — el soporte directo aún no está implementado',
@@ -926,6 +997,7 @@ de:{
   dense_label:'Kompakte Chatliste', dense_sub:'Weniger Abstand im linken Verlauf',
   streaming_label:'Streaming', streaming_sub:'Antwort während der Generierung anzeigen',
   reasoning_label:'Denkmodus', reasoning_sub:'Modell bitten, seine Gedankengänge zu zeigen (falls unterstützt)',
+  tools_label:'KI kann Dateien erstellen', tools_sub:'Archive, Tabellen und Dateien — aus eigener Initiative. Deaktivieren, falls dies bei einem bestimmten Modell Antworten stört.',
   integrations_desc:'Verbinde externe Dienste. Tokens werden nur lokal gespeichert.', wip_title:'In Entwicklung', wip_sub:'Integrationen folgen bald',
   prompts_add:'Neuen Prompt speichern', prompts_empty:'Noch keine gespeicherten Prompts',
   changelog_newer:'Neuer', changelog_older:'Älter', changelog_page:'Version {n} von {total}',
@@ -934,7 +1006,7 @@ de:{
   attach_camera:'Kamera', attach_photo:'Foto aus Galerie', attach_file:'Datei',
   share_via_system:'Teilen über...', share_copy_link:'Link kopieren', share_copy_text:'Chat-Text kopieren',
   more_rename:'Chat umbenennen', more_pin:'Chat anheften', more_unpin:'Anheften aufheben', more_duplicate:'Chat duplizieren',
-  more_clear:'Nachrichten löschen', more_export:'Exportieren (.txt)', more_delete:'Chat löschen',
+  more_clear:'Nachrichten löschen', more_export:'Exportieren (.txt)', more_export_pdf:'Als PDF exportieren', more_delete:'Chat löschen',
   camera_title:'Kamera', camera_capture:'Foto aufnehmen',
   provider_connected:'Verbundener Dienst: {name}', provider_unknown:'Dienst nicht erkannt — Versuch als OpenAI-kompatible API',
   provider_google:'Google-Gemini-Schlüssel erkannt — direkte Unterstützung noch nicht implementiert',
@@ -976,6 +1048,7 @@ fr:{
   dense_label:'Liste de discussions compacte', dense_sub:'Moins d’espacement dans l’historique à gauche',
   streaming_label:'Génération en streaming', streaming_sub:'Afficher la réponse au fur et à mesure',
   reasoning_label:'Mode raisonnement', reasoning_sub:'Demander au modèle de montrer son raisonnement (si pris en charge)',
+  tools_label:'L\'IA peut créer des fichiers', tools_sub:'Archives, tableurs et fichiers, de sa propre initiative. Désactivez si cela perturbe les réponses d\'un modèle donné.',
   integrations_desc:'Connectez des services tiers. Les jetons sont stockés localement uniquement.', wip_title:'En développement', wip_sub:'Les intégrations arrivent bientôt',
   prompts_add:'Enregistrer un nouveau prompt', prompts_empty:'Aucun prompt enregistré pour l’instant',
   changelog_newer:'Plus récent', changelog_older:'Plus ancien', changelog_page:'Version {n} sur {total}',
@@ -984,7 +1057,7 @@ fr:{
   attach_camera:'Caméra', attach_photo:'Photo depuis la galerie', attach_file:'Fichier',
   share_via_system:'Partager via...', share_copy_link:'Copier le lien', share_copy_text:'Copier le texte de la discussion',
   more_rename:'Renommer la discussion', more_pin:'Épingler la discussion', more_unpin:'Désépingler', more_duplicate:'Dupliquer la discussion',
-  more_clear:'Effacer les messages', more_export:'Exporter (.txt)', more_delete:'Supprimer la discussion',
+  more_clear:'Effacer les messages', more_export:'Exporter (.txt)', more_export_pdf:'Exporter en PDF', more_delete:'Supprimer la discussion',
   camera_title:'Caméra', camera_capture:'Prendre une photo',
   provider_connected:'Service connecté : {name}', provider_unknown:'Service non reconnu — tentative en tant qu’API compatible OpenAI',
   provider_google:'Clé Google Gemini détectée — prise en charge directe pas encore implémentée',
@@ -1026,6 +1099,7 @@ zh:{
   dense_label:'紧凑对话列表', dense_sub:'减少左侧历史记录的间距',
   streaming_label:'流式生成', streaming_sub:'边生成边显示回复',
   reasoning_label:'推理模式', reasoning_sub:'要求模型展示思考过程（如支持）',
+  tools_label:'AI 可以创建文件', tools_sub:'压缩包、表格和文件——由 AI 自主决定创建。如果影响某个模型的正常回复，可关闭此项。',
   integrations_desc:'连接第三方服务。密钥仅保存在本地。', wip_title:'开发中', wip_sub:'集成功能即将上线',
   prompts_add:'保存新提示词', prompts_empty:'还没有保存的提示词',
   changelog_newer:'较新', changelog_older:'较旧', changelog_page:'第 {n} 版，共 {total} 版',
@@ -1034,10 +1108,418 @@ zh:{
   attach_camera:'相机', attach_photo:'从相册选择', attach_file:'文件',
   share_via_system:'分享到...', share_copy_link:'复制链接', share_copy_text:'复制对话文本',
   more_rename:'重命名对话', more_pin:'置顶对话', more_unpin:'取消置顶', more_duplicate:'复制对话',
-  more_clear:'清空消息', more_export:'导出 (.txt)', more_delete:'删除对话',
+  more_clear:'清空消息', more_export:'导出 (.txt)', more_export_pdf:'导出为 PDF', more_delete:'删除对话',
   camera_title:'相机', camera_capture:'拍照',
   provider_connected:'已连接服务：{name}', provider_unknown:'未识别的服务 — 将尝试作为兼容 OpenAI 的接口',
   provider_google:'检测到 Google Gemini 密钥 — 尚未实现直接支持',
+},
+pt:{
+  new_chat:'Novo chat', search_placeholder:'Pesquisar chats...', history_label:'Histórico', settings:'Definições',
+  download_title:'Descarregar chat', share_title:'Partilhar', menu_title:'Menu',
+  empty_title:'O que fazemos hoje?', empty_subtitle:'Faz uma pergunta, cola um texto ou discute uma ideia — o BarbosovAI está aqui.',
+  prompt1_title:'Explica algo complexo', prompt1_sub:'em palavras simples',
+  prompt2_title:'Faz um plano', prompt2_sub:'para a próxima semana',
+  prompt3_title:'Escreve código', prompt3_sub:'em qualquer linguagem',
+  prompt4_title:'Sugere uma ideia', prompt4_sub:'para qualquer ocasião',
+  composer_placeholder:'Escreve uma mensagem...', composer_disclaimer:'O BarbosovAI pode cometer erros. Verifica os factos importantes.',
+  attach_title:'Anexar', mic_title:'Entrada de voz',
+  settings_title:'Definições', tab_general:'Geral', tab_model:'Modelo', tab_profile:'Perfil', tab_interface:'Interface',
+  tab_appearance:'Aparência', tab_experimental:'Experimental', tab_integrations:'Integrações', tab_prompts:'Prompts',
+  tab_changelog:'Novidades', tab_about:'Sobre',
+  api_key_label:'Chave API', api_key_placeholder:'Cola a tua chave API...', api_key_help:'Guardada apenas no teu navegador, enviada apenas ao serviço dono da chave.',
+  backup_label:'Cópia de segurança', backup_export:'Exportar todos os dados', backup_import:'Importar', backup_help:'Guarda todos os chats e definições num ficheiro — útil para mudar de dispositivo.',
+  error_toasts_label:'Notificações de erro', error_toasts_sub:'Mostrar avisos em erros de rede',
+  confirm_delete_label:'Confirmar eliminação', confirm_delete_sub:'Perguntar antes de eliminar um chat',
+  save:'Guardar', cancel:'Cancelar', language_label:'Idioma da interface',
+  model_label:'Modelo', model_hint:'A lista acima é para chaves OpenRouter. Se a tua chave for de outro serviço, escreve o modelo manualmente.',
+  model_manual_toggle:'Indicar modelo manualmente', model_manual_placeholder:'ex. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Se ficar vazio, será usado o modelo padrão do teu serviço.',
+  system_prompt_label:'Prompt de sistema (instruções para a IA)', system_prompt_placeholder:'Ex.: Responde sempre de forma breve. És um developer sénior.',
+  temperature_label:'Temperature (criatividade)', topp_label:'Top-P', context_label:'Contexto do chat atual', tokens_label:'tokens',
+  avatar_upload:'Carregar foto', avatar_remove:'Remover foto', your_name:'O teu nome', your_name_placeholder:'Convidado',
+  compact_label:'Modo compacto', compact_sub:'Reduzir o espaçamento nas mensagens',
+  large_font_label:'Letra grande', large_font_sub:'Aumentar o tamanho do texto das mensagens',
+  send_sound_label:'Som ao enviar', send_sound_sub:'Tocar um som ao enviar uma mensagem',
+  receive_sound_label:'Som ao receber', receive_sound_sub:'Tocar um som quando a IA acabar de responder',
+  timestamps_label:'Hora das mensagens', timestamps_sub:'Mostrar a hora por baixo de cada mensagem',
+  autoscroll_label:'Deslocamento automático', autoscroll_sub:'Deslocar automaticamente para novas mensagens',
+  shortcuts_title:'Atalhos de teclado', shortcuts_new_chat:'Novo chat', shortcuts_search:'Pesquisar chats',
+  shortcuts_send:'Enviar', shortcuts_newline:'Nova linha', shortcuts_esc:'Fechar janela/menu',
+  accent_label:'Cor de destaque', animations_label:'Animações da interface', animations_sub:'Transições e aparições suaves',
+  avatar_show_label:'Mostrar avatar da IA', avatar_show_sub:'Ícone do BarbosovAI junto às respostas',
+  dense_label:'Lista de chats compacta', dense_sub:'Menos espaçamento no histórico à esquerda',
+  streaming_label:'Geração em streaming', streaming_sub:'Mostrar a resposta enquanto é gerada',
+  reasoning_label:'Modo de raciocínio', reasoning_sub:'Pedir ao modelo para mostrar o raciocínio (se suportado)',
+  tools_label:'A IA pode criar ficheiros', tools_sub:'Arquivos, folhas de cálculo e ficheiros — por iniciativa própria. Desativa se causar problemas com um modelo específico.',
+  integrations_desc:'Liga serviços de terceiros. Os tokens ficam guardados só localmente.', wip_title:'Em desenvolvimento', wip_sub:'As integrações chegam em breve',
+  prompts_add:'Guardar novo prompt', prompts_empty:'Ainda sem prompts guardados',
+  changelog_newer:'Mais recente', changelog_older:'Mais antigo', changelog_page:'Versão {n} de {total}',
+  about_desc:'A tua própria IA através de uma chave API. Todos os dados ficam guardados localmente no teu navegador.',
+  msg_copy:'Copiar', msg_speak:'Ler em voz alta', msg_regenerate:'Regenerar', msg_like:'Gosto', msg_dislike:'Não gosto', msg_delete:'Eliminar', msg_edit:'Editar',
+  attach_camera:'Câmara', attach_photo:'Foto da galeria', attach_file:'Ficheiro',
+  share_via_system:'Partilhar via...', share_copy_link:'Copiar link', share_copy_text:'Copiar texto do chat',
+  more_rename:'Renomear chat', more_pin:'Fixar chat', more_unpin:'Desafixar chat', more_duplicate:'Duplicar chat',
+  more_clear:'Limpar mensagens', more_export:'Exportar (.txt)', more_export_pdf:'Exportar como PDF', more_delete:'Eliminar chat',
+  camera_title:'Câmara', camera_capture:'Tirar foto',
+  provider_connected:'Serviço ligado: {name}', provider_unknown:'Serviço não reconhecido — vamos tentar como API compatível com OpenAI',
+  provider_google:'Detetada chave do Google Gemini — suporte direto ainda não implementado',
+},
+it:{
+  new_chat:'Nuova chat', search_placeholder:'Cerca chat...', history_label:'Cronologia', settings:'Impostazioni',
+  download_title:'Scarica chat', share_title:'Condividi', menu_title:'Menu',
+  empty_title:'Cosa facciamo oggi?', empty_subtitle:'Fai una domanda, incolla un testo o discuti un\'idea — BarbosovAI è qui.',
+  prompt1_title:'Spiega qualcosa di complesso', prompt1_sub:'con parole semplici',
+  prompt2_title:'Fai un piano', prompt2_sub:'per la settimana prossima',
+  prompt3_title:'Scrivi del codice', prompt3_sub:'in qualsiasi linguaggio',
+  prompt4_title:'Suggerisci un\'idea', prompt4_sub:'per qualsiasi occasione',
+  composer_placeholder:'Scrivi un messaggio...', composer_disclaimer:'BarbosovAI può commettere errori. Verifica i fatti importanti.',
+  attach_title:'Allega', mic_title:'Input vocale',
+  settings_title:'Impostazioni', tab_general:'Generale', tab_model:'Modello', tab_profile:'Profilo', tab_interface:'Interfaccia',
+  tab_appearance:'Aspetto', tab_experimental:'Sperimentale', tab_integrations:'Integrazioni', tab_prompts:'Prompt',
+  tab_changelog:'Novità', tab_about:'Info',
+  api_key_label:'Chiave API', api_key_placeholder:'Incolla la tua chiave API...', api_key_help:'Salvata solo nel tuo browser, inviata solo al servizio proprietario della chiave.',
+  backup_label:'Backup', backup_export:'Esporta tutti i dati', backup_import:'Importa', backup_help:'Salva tutte le chat e le impostazioni in un file — utile per cambiare dispositivo.',
+  error_toasts_label:'Notifiche di errore', error_toasts_sub:'Mostra avvisi in caso di errori di rete',
+  confirm_delete_label:'Conferma eliminazione', confirm_delete_sub:'Chiedi prima di eliminare una chat',
+  save:'Salva', cancel:'Annulla', language_label:'Lingua dell\'interfaccia',
+  model_label:'Modello', model_hint:'L\'elenco sopra è per le chiavi OpenRouter. Se la tua chiave è di un altro servizio, inserisci il modello manualmente.',
+  model_manual_toggle:'Inserisci modello manualmente', model_manual_placeholder:'es. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Se lasciato vuoto, verrà usato il modello predefinito del tuo servizio.',
+  system_prompt_label:'Prompt di sistema (istruzioni per l\'IA)', system_prompt_placeholder:'Es.: Rispondi sempre in modo breve. Sei uno sviluppatore senior.',
+  temperature_label:'Temperature (creatività)', topp_label:'Top-P', context_label:'Contesto della chat attuale', tokens_label:'token',
+  avatar_upload:'Carica foto', avatar_remove:'Rimuovi foto', your_name:'Il tuo nome', your_name_placeholder:'Ospite',
+  compact_label:'Modalità compatta', compact_sub:'Riduce la spaziatura nei messaggi',
+  large_font_label:'Testo grande', large_font_sub:'Aumenta la dimensione del testo dei messaggi',
+  send_sound_label:'Suono di invio', send_sound_sub:'Riproduce un suono all\'invio di un messaggio',
+  receive_sound_label:'Suono di ricezione', receive_sound_sub:'Riproduce un suono quando l\'IA finisce di rispondere',
+  timestamps_label:'Orario dei messaggi', timestamps_sub:'Mostra l\'ora sotto ogni messaggio',
+  autoscroll_label:'Scorrimento automatico', autoscroll_sub:'Scorre automaticamente verso i nuovi messaggi',
+  shortcuts_title:'Scorciatoie da tastiera', shortcuts_new_chat:'Nuova chat', shortcuts_search:'Cerca chat',
+  shortcuts_send:'Invia', shortcuts_newline:'Nuova riga', shortcuts_esc:'Chiudi finestra/menu',
+  accent_label:'Colore accento', animations_label:'Animazioni interfaccia', animations_sub:'Transizioni e comparse fluide',
+  avatar_show_label:'Mostra avatar IA', avatar_show_sub:'Icona BarbosovAI accanto alle risposte',
+  dense_label:'Elenco chat compatto', dense_sub:'Meno spaziatura nella cronologia a sinistra',
+  streaming_label:'Generazione in streaming', streaming_sub:'Mostra la risposta mentre viene generata',
+  reasoning_label:'Modalità ragionamento', reasoning_sub:'Chiedi al modello di mostrare il ragionamento (se supportato)',
+  tools_label:'L\'IA può creare file', tools_sub:'Archivi, fogli di calcolo e file — di propria iniziativa. Disattiva se causa problemi con un modello specifico.',
+  integrations_desc:'Collega servizi di terze parti. I token restano solo in locale.', wip_title:'In sviluppo', wip_sub:'Le integrazioni arriveranno presto',
+  prompts_add:'Salva nuovo prompt', prompts_empty:'Nessun prompt salvato ancora',
+  changelog_newer:'Più recente', changelog_older:'Meno recente', changelog_page:'Versione {n} di {total}',
+  about_desc:'La tua IA personale tramite una chiave API. Tutti i dati restano salvati localmente nel tuo browser.',
+  msg_copy:'Copia', msg_speak:'Leggi ad alta voce', msg_regenerate:'Rigenera', msg_like:'Mi piace', msg_dislike:'Non mi piace', msg_delete:'Elimina', msg_edit:'Modifica',
+  attach_camera:'Fotocamera', attach_photo:'Foto dalla galleria', attach_file:'File',
+  share_via_system:'Condividi tramite...', share_copy_link:'Copia link', share_copy_text:'Copia testo della chat',
+  more_rename:'Rinomina chat', more_pin:'Fissa chat', more_unpin:'Rimuovi fissaggio', more_duplicate:'Duplica chat',
+  more_clear:'Cancella messaggi', more_export:'Esporta (.txt)', more_export_pdf:'Esporta come PDF', more_delete:'Elimina chat',
+  camera_title:'Fotocamera', camera_capture:'Scatta foto',
+  provider_connected:'Servizio collegato: {name}', provider_unknown:'Servizio non riconosciuto — proveremo come API compatibile con OpenAI',
+  provider_google:'Rilevata chiave Google Gemini — supporto diretto non ancora implementato',
+},
+nl:{
+  new_chat:'Nieuwe chat', search_placeholder:'Chats doorzoeken...', history_label:'Geschiedenis', settings:'Instellingen',
+  download_title:'Chat downloaden', share_title:'Delen', menu_title:'Menu',
+  empty_title:'Wat gaan we vandaag doen?', empty_subtitle:'Stel een vraag, plak tekst of bespreek een idee — BarbosovAI staat klaar.',
+  prompt1_title:'Leg iets ingewikkelds uit', prompt1_sub:'in simpele taal',
+  prompt2_title:'Maak een planning', prompt2_sub:'voor de komende week',
+  prompt3_title:'Schrijf code', prompt3_sub:'in elke taal',
+  prompt4_title:'Bedenk een idee', prompt4_sub:'voor elke gelegenheid',
+  composer_placeholder:'Typ een bericht...', composer_disclaimer:'BarbosovAI kan fouten maken. Controleer belangrijke feiten.',
+  attach_title:'Bijvoegen', mic_title:'Spraakinvoer',
+  settings_title:'Instellingen', tab_general:'Algemeen', tab_model:'Model', tab_profile:'Profiel', tab_interface:'Interface',
+  tab_appearance:'Weergave', tab_experimental:'Experimenteel', tab_integrations:'Integraties', tab_prompts:'Prompts',
+  tab_changelog:'Nieuw', tab_about:'Over',
+  api_key_label:'API-sleutel', api_key_placeholder:'Plak je API-sleutel...', api_key_help:'Wordt alleen in je browser opgeslagen en alleen naar de bijbehorende dienst gestuurd.',
+  backup_label:'Back-up', backup_export:'Alle gegevens exporteren', backup_import:'Importeren', backup_help:'Slaat alle chats en instellingen op in één bestand — handig bij het wisselen van apparaat.',
+  error_toasts_label:'Foutmeldingen', error_toasts_sub:'Meldingen tonen bij netwerkfouten',
+  confirm_delete_label:'Verwijderen bevestigen', confirm_delete_sub:'Vragen voordat een chat wordt verwijderd',
+  save:'Opslaan', cancel:'Annuleren', language_label:'Interfacetaal',
+  model_label:'Model', model_hint:'De lijst hierboven is voor OpenRouter-sleutels. Is je sleutel van een andere dienst, vul het model dan handmatig in.',
+  model_manual_toggle:'Model handmatig invoeren', model_manual_placeholder:'bijv. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Leeg laten gebruikt het standaardmodel van je dienst.',
+  system_prompt_label:'Systeemprompt (instructies voor de AI)', system_prompt_placeholder:'Bijv.: Antwoord altijd kort. Je bent een senior developer.',
+  temperature_label:'Temperature (creativiteit)', topp_label:'Top-P', context_label:'Context van huidige chat', tokens_label:'tokens',
+  avatar_upload:'Foto uploaden', avatar_remove:'Foto verwijderen', your_name:'Je naam', your_name_placeholder:'Gast',
+  compact_label:'Compacte modus', compact_sub:'Minder ruimte tussen berichten',
+  large_font_label:'Groot lettertype', large_font_sub:'Grotere tekst in berichten',
+  send_sound_label:'Verzendgeluid', send_sound_sub:'Geluid afspelen bij verzenden van een bericht',
+  receive_sound_label:'Ontvangstgeluid', receive_sound_sub:'Geluid afspelen als de AI klaar is met antwoorden',
+  timestamps_label:'Tijdstempels', timestamps_sub:'Tijd tonen onder elk bericht',
+  autoscroll_label:'Automatisch scrollen', autoscroll_sub:'Automatisch naar nieuwe berichten scrollen',
+  shortcuts_title:'Sneltoetsen', shortcuts_new_chat:'Nieuwe chat', shortcuts_search:'Chats doorzoeken',
+  shortcuts_send:'Verzenden', shortcuts_newline:'Nieuwe regel', shortcuts_esc:'Venster/menu sluiten',
+  accent_label:'Accentkleur', animations_label:'Interface-animaties', animations_sub:'Vloeiende overgangen en verschijningen',
+  avatar_show_label:'AI-avatar tonen', avatar_show_sub:'BarbosovAI-icoon naast antwoorden',
+  dense_label:'Compacte chatlijst', dense_sub:'Minder ruimte in de geschiedenis links',
+  streaming_label:'Streaming generatie', streaming_sub:'Antwoord tonen terwijl het wordt gegenereerd',
+  reasoning_label:'Redeneermodus', reasoning_sub:'Model vragen zijn redenering te tonen (indien ondersteund)',
+  tools_label:'AI kan bestanden maken', tools_sub:'Archieven, spreadsheets en bestanden — op eigen initiatief. Zet uit als dit problemen geeft bij een specifiek model.',
+  integrations_desc:'Verbind externe diensten. Tokens worden alleen lokaal opgeslagen.', wip_title:'In ontwikkeling', wip_sub:'Integraties komen binnenkort',
+  prompts_add:'Nieuwe prompt opslaan', prompts_empty:'Nog geen opgeslagen prompts',
+  changelog_newer:'Nieuwer', changelog_older:'Ouder', changelog_page:'Versie {n} van {total}',
+  about_desc:'Je eigen AI via een API-sleutel. Alle gegevens worden lokaal in je browser opgeslagen.',
+  msg_copy:'Kopiëren', msg_speak:'Voorlezen', msg_regenerate:'Opnieuw genereren', msg_like:'Vind ik leuk', msg_dislike:'Vind ik niet leuk', msg_delete:'Verwijderen', msg_edit:'Bewerken',
+  attach_camera:'Camera', attach_photo:'Foto uit galerij', attach_file:'Bestand',
+  share_via_system:'Delen via...', share_copy_link:'Link kopiëren', share_copy_text:'Chattekst kopiëren',
+  more_rename:'Chat hernoemen', more_pin:'Chat vastzetten', more_unpin:'Chat losmaken', more_duplicate:'Chat dupliceren',
+  more_clear:'Berichten wissen', more_export:'Exporteren (.txt)', more_export_pdf:'Exporteren als PDF', more_delete:'Chat verwijderen',
+  camera_title:'Camera', camera_capture:'Foto maken',
+  provider_connected:'Verbonden dienst: {name}', provider_unknown:'Dienst niet herkend — we proberen het als OpenAI-compatibele API',
+  provider_google:'Google Gemini-sleutel gedetecteerd — directe ondersteuning nog niet geïmplementeerd',
+},
+pl:{
+  new_chat:'Nowy czat', search_placeholder:'Szukaj czatów...', history_label:'Historia', settings:'Ustawienia',
+  download_title:'Pobierz czat', share_title:'Udostępnij', menu_title:'Menu',
+  empty_title:'Czym się dziś zajmiemy?', empty_subtitle:'Zadaj pytanie, wklej tekst albo omów pomysł — BarbosovAI jest gotowy.',
+  prompt1_title:'Wyjaśnij coś skomplikowanego', prompt1_sub:'prostymi słowami',
+  prompt2_title:'Ułóż plan', prompt2_sub:'na najbliższy tydzień',
+  prompt3_title:'Napisz kod', prompt3_sub:'w dowolnym języku',
+  prompt4_title:'Zaproponuj pomysł', prompt4_sub:'na dowolną okazję',
+  composer_placeholder:'Napisz wiadomość...', composer_disclaimer:'BarbosovAI może się mylić. Sprawdzaj ważne fakty.',
+  attach_title:'Dołącz', mic_title:'Wprowadzanie głosowe',
+  settings_title:'Ustawienia', tab_general:'Ogólne', tab_model:'Model', tab_profile:'Profil', tab_interface:'Interfejs',
+  tab_appearance:'Wygląd', tab_experimental:'Eksperymentalne', tab_integrations:'Integracje', tab_prompts:'Prompty',
+  tab_changelog:'Nowości', tab_about:'O aplikacji',
+  api_key_label:'Klucz API', api_key_placeholder:'Wklej swój klucz API...', api_key_help:'Przechowywany tylko w Twojej przeglądarce i wysyłany wyłącznie do usługi, do której należy klucz.',
+  backup_label:'Kopia zapasowa', backup_export:'Eksportuj wszystkie dane', backup_import:'Importuj', backup_help:'Zapisuje wszystkie czaty i ustawienia w jednym pliku — przydatne przy zmianie urządzenia.',
+  error_toasts_label:'Powiadomienia o błędach', error_toasts_sub:'Pokazuj powiadomienia przy błędach sieci',
+  confirm_delete_label:'Potwierdzenie usunięcia', confirm_delete_sub:'Pytaj przed usunięciem czatu',
+  save:'Zapisz', cancel:'Anuluj', language_label:'Język interfejsu',
+  model_label:'Model', model_hint:'Powyższa lista dotyczy kluczy OpenRouter. Jeśli Twój klucz jest z innej usługi, wpisz model ręcznie.',
+  model_manual_toggle:'Wpisz model ręcznie', model_manual_placeholder:'np. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Jeśli zostawisz puste, użyty zostanie domyślny model Twojej usługi.',
+  system_prompt_label:'Prompt systemowy (instrukcje dla AI)', system_prompt_placeholder:'Np.: Zawsze odpowiadaj krótko. Jesteś senior developerem.',
+  temperature_label:'Temperature (kreatywność)', topp_label:'Top-P', context_label:'Kontekst bieżącego czatu', tokens_label:'tokenów',
+  avatar_upload:'Wgraj zdjęcie', avatar_remove:'Usuń zdjęcie', your_name:'Twoje imię', your_name_placeholder:'Gość',
+  compact_label:'Tryb kompaktowy', compact_sub:'Mniejsze odstępy w wiadomościach',
+  large_font_label:'Duża czcionka', large_font_sub:'Większy tekst wiadomości',
+  send_sound_label:'Dźwięk wysyłania', send_sound_sub:'Odtwarzaj dźwięk przy wysyłaniu wiadomości',
+  receive_sound_label:'Dźwięk odbioru', receive_sound_sub:'Odtwarzaj dźwięk, gdy AI skończy odpowiadać',
+  timestamps_label:'Znaczniki czasu', timestamps_sub:'Pokazuj godzinę pod każdą wiadomością',
+  autoscroll_label:'Automatyczne przewijanie', autoscroll_sub:'Automatycznie przewijaj do nowych wiadomości',
+  shortcuts_title:'Skróty klawiszowe', shortcuts_new_chat:'Nowy czat', shortcuts_search:'Szukaj czatów',
+  shortcuts_send:'Wyślij', shortcuts_newline:'Nowa linia', shortcuts_esc:'Zamknij okno/menu',
+  accent_label:'Kolor akcentu', animations_label:'Animacje interfejsu', animations_sub:'Płynne przejścia i pojawienia',
+  avatar_show_label:'Pokaż awatar AI', avatar_show_sub:'Ikona BarbosovAI obok odpowiedzi',
+  dense_label:'Kompaktowa lista czatów', dense_sub:'Mniejsze odstępy w historii po lewej',
+  streaming_label:'Generowanie strumieniowe', streaming_sub:'Pokazuj odpowiedź w trakcie generowania',
+  reasoning_label:'Tryb rozumowania', reasoning_sub:'Poproś model o pokazanie toku myślenia (jeśli obsługuje)',
+  tools_label:'AI może tworzyć pliki', tools_sub:'Archiwa, arkusze i pliki — z własnej inicjatywy. Wyłącz, jeśli psuje to odpowiedzi konkretnego modelu.',
+  integrations_desc:'Połącz usługi zewnętrzne. Tokeny są przechowywane wyłącznie lokalnie.', wip_title:'W budowie', wip_sub:'Integracje pojawią się wkrótce',
+  prompts_add:'Zapisz nowy prompt', prompts_empty:'Brak zapisanych promptów',
+  changelog_newer:'Nowsze', changelog_older:'Starsze', changelog_page:'Wersja {n} z {total}',
+  about_desc:'Twoje własne AI dzięki kluczowi API. Wszystkie dane są przechowywane lokalnie w Twojej przeglądarce.',
+  msg_copy:'Kopiuj', msg_speak:'Czytaj na głos', msg_regenerate:'Wygeneruj ponownie', msg_like:'Lubię to', msg_dislike:'Nie lubię tego', msg_delete:'Usuń', msg_edit:'Edytuj',
+  attach_camera:'Aparat', attach_photo:'Zdjęcie z galerii', attach_file:'Plik',
+  share_via_system:'Udostępnij przez...', share_copy_link:'Kopiuj link', share_copy_text:'Kopiuj tekst czatu',
+  more_rename:'Zmień nazwę czatu', more_pin:'Przypnij czat', more_unpin:'Odepnij czat', more_duplicate:'Duplikuj czat',
+  more_clear:'Wyczyść wiadomości', more_export:'Eksportuj (.txt)', more_export_pdf:'Eksportuj jako PDF', more_delete:'Usuń czat',
+  camera_title:'Aparat', camera_capture:'Zrób zdjęcie',
+  provider_connected:'Połączona usługa: {name}', provider_unknown:'Nie rozpoznano usługi — spróbujemy jako API kompatybilne z OpenAI',
+  provider_google:'Wykryto klucz Google Gemini — bezpośrednia obsługa nie jest jeszcze zaimplementowana',
+},
+tr:{
+  new_chat:'Yeni sohbet', search_placeholder:'Sohbetlerde ara...', history_label:'Geçmiş', settings:'Ayarlar',
+  download_title:'Sohbeti indir', share_title:'Paylaş', menu_title:'Menü',
+  empty_title:'Bugün ne yapalım?', empty_subtitle:'Bir soru sor, metin yapıştır ya da bir fikri tartış — BarbosovAI burada.',
+  prompt1_title:'Karmaşık bir şeyi anlat', prompt1_sub:'basit kelimelerle',
+  prompt2_title:'Bir plan yap', prompt2_sub:'önümüzdeki hafta için',
+  prompt3_title:'Kod yaz', prompt3_sub:'herhangi bir dilde',
+  prompt4_title:'Bir fikir öner', prompt4_sub:'her durum için',
+  composer_placeholder:'Bir mesaj yaz...', composer_disclaimer:'BarbosovAI hata yapabilir. Önemli bilgileri kontrol et.',
+  attach_title:'Ekle', mic_title:'Sesli giriş',
+  settings_title:'Ayarlar', tab_general:'Genel', tab_model:'Model', tab_profile:'Profil', tab_interface:'Arayüz',
+  tab_appearance:'Görünüm', tab_experimental:'Deneysel', tab_integrations:'Entegrasyonlar', tab_prompts:'Promptlar',
+  tab_changelog:'Yenilikler', tab_about:'Hakkında',
+  api_key_label:'API anahtarı', api_key_placeholder:'API anahtarını yapıştır...', api_key_help:'Yalnızca tarayıcında saklanır ve yalnızca anahtarın ait olduğu servise gönderilir.',
+  backup_label:'Yedekleme', backup_export:'Tüm verileri dışa aktar', backup_import:'İçe aktar', backup_help:'Tüm sohbetleri ve ayarları tek dosyada saklar — cihaz değiştirirken kullanışlıdır.',
+  error_toasts_label:'Hata bildirimleri', error_toasts_sub:'Ağ hatalarında bildirim göster',
+  confirm_delete_label:'Silmeyi onayla', confirm_delete_sub:'Sohbeti silmeden önce sor',
+  save:'Kaydet', cancel:'İptal', language_label:'Arayüz dili',
+  model_label:'Model', model_hint:'Yukarıdaki liste OpenRouter anahtarları içindir. Anahtarın başka bir servise aitse modeli manuel gir.',
+  model_manual_toggle:'Modeli manuel gir', model_manual_placeholder:'örn. gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Boş bırakılırsa servisinin varsayılan modeli kullanılır.',
+  system_prompt_label:'Sistem promptu (AI için talimatlar)', system_prompt_placeholder:'Örn.: Her zaman kısa cevap ver. Sen kıdemli bir geliştiricisin.',
+  temperature_label:'Temperature (yaratıcılık)', topp_label:'Top-P', context_label:'Mevcut sohbet bağlamı', tokens_label:'token',
+  avatar_upload:'Fotoğraf yükle', avatar_remove:'Fotoğrafı kaldır', your_name:'Adın', your_name_placeholder:'Misafir',
+  compact_label:'Kompakt mod', compact_sub:'Mesajlarda boşluğu azalt',
+  large_font_label:'Büyük yazı tipi', large_font_sub:'Mesaj metin boyutunu büyüt',
+  send_sound_label:'Gönderme sesi', send_sound_sub:'Mesaj gönderirken ses çal',
+  receive_sound_label:'Alma sesi', receive_sound_sub:'AI cevabı bitirdiğinde ses çal',
+  timestamps_label:'Mesaj saatleri', timestamps_sub:'Her mesajın altında saati göster',
+  autoscroll_label:'Otomatik kaydırma', autoscroll_sub:'Yeni mesajlara otomatik kaydır',
+  shortcuts_title:'Klavye kısayolları', shortcuts_new_chat:'Yeni sohbet', shortcuts_search:'Sohbetlerde ara',
+  shortcuts_send:'Gönder', shortcuts_newline:'Yeni satır', shortcuts_esc:'Pencereyi/menüyü kapat',
+  accent_label:'Vurgu rengi', animations_label:'Arayüz animasyonları', animations_sub:'Yumuşak geçişler ve belirmeler',
+  avatar_show_label:'AI avatarını göster', avatar_show_sub:'Cevapların yanında BarbosovAI simgesi',
+  dense_label:'Kompakt sohbet listesi', dense_sub:'Soldaki geçmişte daha az boşluk',
+  streaming_label:'Akış halinde üretim', streaming_sub:'Cevabı üretilirken göster',
+  reasoning_label:'Muhakeme modu', reasoning_sub:'Modelden düşünce sürecini göstermesini iste (destekliyorsa)',
+  tools_label:'AI dosya oluşturabilir', tools_sub:'Arşivler, tablolar ve dosyalar — kendi inisiyatifiyle. Belirli bir modelde sorun çıkarırsa kapat.',
+  integrations_desc:'Üçüncü taraf servisleri bağla. Token\'lar yalnızca yerel olarak saklanır.', wip_title:'Geliştirme aşamasında', wip_sub:'Entegrasyonlar yakında geliyor',
+  prompts_add:'Yeni prompt kaydet', prompts_empty:'Henüz kaydedilmiş prompt yok',
+  changelog_newer:'Daha yeni', changelog_older:'Daha eski', changelog_page:'{total} sürümden {n}.',
+  about_desc:'API anahtarınla kendi AI\'ın. Tüm veriler yalnızca tarayıcında yerel olarak saklanır.',
+  msg_copy:'Kopyala', msg_speak:'Sesli oku', msg_regenerate:'Yeniden oluştur', msg_like:'Beğen', msg_dislike:'Beğenme', msg_delete:'Sil', msg_edit:'Düzenle',
+  attach_camera:'Kamera', attach_photo:'Galeriden fotoğraf', attach_file:'Dosya',
+  share_via_system:'Şununla paylaş...', share_copy_link:'Bağlantıyı kopyala', share_copy_text:'Sohbet metnini kopyala',
+  more_rename:'Sohbeti yeniden adlandır', more_pin:'Sohbeti sabitle', more_unpin:'Sabitlemeyi kaldır', more_duplicate:'Sohbeti çoğalt',
+  more_clear:'Mesajları temizle', more_export:'Dışa aktar (.txt)', more_export_pdf:'PDF olarak dışa aktar', more_delete:'Sohbeti sil',
+  camera_title:'Kamera', camera_capture:'Fotoğraf çek',
+  provider_connected:'Bağlı servis: {name}', provider_unknown:'Servis tanınmadı — OpenAI uyumlu API olarak denenecek',
+  provider_google:'Google Gemini anahtarı algılandı — doğrudan destek henüz uygulanmadı',
+},
+ar:{
+  new_chat:'محادثة جديدة', search_placeholder:'البحث في المحادثات...', history_label:'السجل', settings:'الإعدادات',
+  download_title:'تنزيل المحادثة', share_title:'مشاركة', menu_title:'القائمة',
+  empty_title:'ماذا نفعل اليوم؟', empty_subtitle:'اطرح سؤالاً، الصق نصاً، أو ناقش فكرة — BarbosovAI جاهز.',
+  prompt1_title:'اشرح شيئاً معقداً', prompt1_sub:'بكلمات بسيطة',
+  prompt2_title:'ضع خطة', prompt2_sub:'للأسبوع القادم',
+  prompt3_title:'اكتب كوداً', prompt3_sub:'بأي لغة برمجة',
+  prompt4_title:'اقترح فكرة', prompt4_sub:'لأي مناسبة',
+  composer_placeholder:'اكتب رسالة...', composer_disclaimer:'قد يخطئ BarbosovAI. تحقق من الحقائق المهمة.',
+  attach_title:'إرفاق', mic_title:'الإدخال الصوتي',
+  settings_title:'الإعدادات', tab_general:'عام', tab_model:'النموذج', tab_profile:'الملف الشخصي', tab_interface:'الواجهة',
+  tab_appearance:'المظهر', tab_experimental:'تجريبي', tab_integrations:'التكاملات', tab_prompts:'الأوامر المحفوظة',
+  tab_changelog:'الجديد', tab_about:'حول',
+  api_key_label:'مفتاح API', api_key_placeholder:'الصق مفتاح API الخاص بك...', api_key_help:'يُحفظ فقط في متصفحك ويُرسل فقط إلى الخدمة المالكة للمفتاح.',
+  backup_label:'نسخة احتياطية', backup_export:'تصدير جميع البيانات', backup_import:'استيراد', backup_help:'يحفظ جميع المحادثات والإعدادات في ملف واحد — مفيد عند تغيير الجهاز.',
+  error_toasts_label:'إشعارات الأخطاء', error_toasts_sub:'إظهار إشعارات عند أخطاء الشبكة',
+  confirm_delete_label:'تأكيد الحذف', confirm_delete_sub:'السؤال قبل حذف المحادثة',
+  save:'حفظ', cancel:'إلغاء', language_label:'لغة الواجهة',
+  model_label:'النموذج', model_hint:'القائمة أعلاه مخصصة لمفاتيح OpenRouter. إذا كان مفتاحك من خدمة أخرى، أدخل اسم النموذج يدوياً.',
+  model_manual_toggle:'إدخال النموذج يدوياً', model_manual_placeholder:'مثال gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'إذا تُرك فارغاً، سيُستخدم النموذج الافتراضي لخدمتك.',
+  system_prompt_label:'موجّه النظام (تعليمات للذكاء الاصطناعي)', system_prompt_placeholder:'مثال: أجب دائماً باختصار. أنت مطوّر أول.',
+  temperature_label:'Temperature (الإبداع)', topp_label:'Top-P', context_label:'سياق المحادثة الحالية', tokens_label:'رمزاً',
+  avatar_upload:'رفع صورة', avatar_remove:'إزالة الصورة', your_name:'اسمك', your_name_placeholder:'ضيف',
+  compact_label:'الوضع المضغوط', compact_sub:'تقليل المسافات بين الرسائل',
+  large_font_label:'خط كبير', large_font_sub:'تكبير حجم نص الرسائل',
+  send_sound_label:'صوت الإرسال', send_sound_sub:'تشغيل صوت عند إرسال رسالة',
+  receive_sound_label:'صوت الاستلام', receive_sound_sub:'تشغيل صوت عند انتهاء الذكاء الاصطناعي من الرد',
+  timestamps_label:'توقيت الرسائل', timestamps_sub:'إظهار الوقت أسفل كل رسالة',
+  autoscroll_label:'التمرير التلقائي', autoscroll_sub:'التمرير تلقائياً إلى الرسائل الجديدة',
+  shortcuts_title:'اختصارات لوحة المفاتيح', shortcuts_new_chat:'محادثة جديدة', shortcuts_search:'البحث في المحادثات',
+  shortcuts_send:'إرسال', shortcuts_newline:'سطر جديد', shortcuts_esc:'إغلاق النافذة/القائمة',
+  accent_label:'لون التمييز', animations_label:'حركات الواجهة', animations_sub:'انتقالات وظهورات سلسة',
+  avatar_show_label:'إظهار أيقونة الذكاء الاصطناعي', avatar_show_sub:'أيقونة BarbosovAI بجانب الردود',
+  dense_label:'قائمة محادثات مضغوطة', dense_sub:'مسافات أقل في السجل على اليسار',
+  streaming_label:'التوليد المتدفق', streaming_sub:'إظهار الرد أثناء توليده',
+  reasoning_label:'وضع الاستدلال', reasoning_sub:'اطلب من النموذج إظهار تفكيره (إن كان مدعوماً)',
+  tools_label:'يمكن للذكاء الاصطناعي إنشاء ملفات', tools_sub:'أرشيفات وجداول وملفات — بمبادرة منه. أوقف هذا إذا تسبب في مشاكل مع نموذج معين.',
+  integrations_desc:'اربط خدمات خارجية. تُحفظ الرموز محلياً فقط.', wip_title:'قيد التطوير', wip_sub:'التكاملات قادمة قريباً',
+  prompts_add:'حفظ أمر جديد', prompts_empty:'لا توجد أوامر محفوظة بعد',
+  changelog_newer:'أحدث', changelog_older:'أقدم', changelog_page:'الإصدار {n} من {total}',
+  about_desc:'ذكاؤك الاصطناعي الخاص عبر مفتاح API. تُحفظ جميع البيانات محلياً في متصفحك.',
+  msg_copy:'نسخ', msg_speak:'قراءة بصوت عالٍ', msg_regenerate:'إعادة التوليد', msg_like:'إعجاب', msg_dislike:'عدم إعجاب', msg_delete:'حذف', msg_edit:'تعديل',
+  attach_camera:'الكاميرا', attach_photo:'صورة من المعرض', attach_file:'ملف',
+  share_via_system:'مشاركة عبر...', share_copy_link:'نسخ الرابط', share_copy_text:'نسخ نص المحادثة',
+  more_rename:'إعادة تسمية المحادثة', more_pin:'تثبيت المحادثة', more_unpin:'إلغاء التثبيت', more_duplicate:'نسخ المحادثة',
+  more_clear:'مسح الرسائل', more_export:'تصدير (.txt)', more_export_pdf:'تصدير كـ PDF', more_delete:'حذف المحادثة',
+  camera_title:'الكاميرا', camera_capture:'التقاط صورة',
+  provider_connected:'الخدمة المتصلة: {name}', provider_unknown:'لم يتم التعرف على الخدمة — سنجرب كواجهة متوافقة مع OpenAI',
+  provider_google:'تم اكتشاف مفتاح Google Gemini — الدعم المباشر غير مطبق بعد',
+},
+ja:{
+  new_chat:'新しいチャット', search_placeholder:'チャットを検索...', history_label:'履歴', settings:'設定',
+  download_title:'チャットをダウンロード', share_title:'共有', menu_title:'メニュー',
+  empty_title:'今日は何をしましょうか？', empty_subtitle:'質問したり、テキストを貼り付けたり、アイデアを話し合ったり — BarbosovAIがお手伝いします。',
+  prompt1_title:'複雑なことを説明する', prompt1_sub:'わかりやすい言葉で',
+  prompt2_title:'計画を立てる', prompt2_sub:'来週の予定を',
+  prompt3_title:'コードを書く', prompt3_sub:'どの言語でも',
+  prompt4_title:'アイデアを提案する', prompt4_sub:'どんな場面でも',
+  composer_placeholder:'メッセージを入力...', composer_disclaimer:'BarbosovAIは間違えることがあります。重要な事実は確認してください。',
+  attach_title:'添付', mic_title:'音声入力',
+  settings_title:'設定', tab_general:'一般', tab_model:'モデル', tab_profile:'プロフィール', tab_interface:'インターフェース',
+  tab_appearance:'外観', tab_experimental:'実験的機能', tab_integrations:'連携', tab_prompts:'プロンプト集',
+  tab_changelog:'更新情報', tab_about:'アプリについて',
+  api_key_label:'APIキー', api_key_placeholder:'APIキーを貼り付け...', api_key_help:'ブラウザにのみ保存され、キーの所有元サービスにのみ送信されます。',
+  backup_label:'バックアップ', backup_export:'すべてのデータをエクスポート', backup_import:'インポート', backup_help:'すべてのチャットと設定を1つのファイルに保存します — 端末変更に便利です。',
+  error_toasts_label:'エラー通知', error_toasts_sub:'ネットワークエラー時に通知を表示',
+  confirm_delete_label:'削除の確認', confirm_delete_sub:'チャット削除前に確認する',
+  save:'保存', cancel:'キャンセル', language_label:'インターフェース言語',
+  model_label:'モデル', model_hint:'上のリストはOpenRouterキー用です。別のサービスのキーの場合はモデル名を手動で入力してください。',
+  model_manual_toggle:'モデルを手動で入力', model_manual_placeholder:'例: gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'空欄の場合、サービスのデフォルトモデルが使用されます。',
+  system_prompt_label:'システムプロンプト（AIへの指示）', system_prompt_placeholder:'例：常に簡潔に答えてください。あなたはシニア開発者です。',
+  temperature_label:'Temperature（創造性）', topp_label:'Top-P', context_label:'現在のチャットのコンテキスト', tokens_label:'トークン',
+  avatar_upload:'写真をアップロード', avatar_remove:'写真を削除', your_name:'お名前', your_name_placeholder:'ゲスト',
+  compact_label:'コンパクトモード', compact_sub:'メッセージの間隔を狭くする',
+  large_font_label:'大きい文字', large_font_sub:'メッセージの文字を大きくする',
+  send_sound_label:'送信音', send_sound_sub:'メッセージ送信時に音を鳴らす',
+  receive_sound_label:'受信音', receive_sound_sub:'AIの返信完了時に音を鳴らす',
+  timestamps_label:'メッセージの時刻', timestamps_sub:'各メッセージの下に時刻を表示',
+  autoscroll_label:'自動スクロール', autoscroll_sub:'新しいメッセージへ自動スクロール',
+  shortcuts_title:'キーボードショートカット', shortcuts_new_chat:'新しいチャット', shortcuts_search:'チャットを検索',
+  shortcuts_send:'送信', shortcuts_newline:'改行', shortcuts_esc:'ウィンドウ/メニューを閉じる',
+  accent_label:'アクセントカラー', animations_label:'インターフェースアニメーション', animations_sub:'滑らかな遷移と表示',
+  avatar_show_label:'AIアバターを表示', avatar_show_sub:'返信の横にBarbosovAIアイコンを表示',
+  dense_label:'コンパクトなチャット一覧', dense_sub:'左側の履歴の間隔を狭くする',
+  streaming_label:'ストリーミング生成', streaming_sub:'生成中の回答を表示',
+  reasoning_label:'推論モード', reasoning_sub:'モデルに思考過程を表示するよう求める（対応している場合）',
+  tools_label:'AIがファイルを作成できる', tools_sub:'アーカイブ、表、ファイルを自主的に作成します。特定のモデルで不具合が出る場合はオフにしてください。',
+  integrations_desc:'外部サービスと連携します。トークンはローカルにのみ保存されます。', wip_title:'開発中', wip_sub:'連携機能は近日公開予定',
+  prompts_add:'新しいプロンプトを保存', prompts_empty:'保存されたプロンプトはまだありません',
+  changelog_newer:'新しい', changelog_older:'古い', changelog_page:'バージョン {n} / {total}',
+  about_desc:'APIキーであなた専用のAIを。すべてのデータはブラウザにローカル保存されます。',
+  msg_copy:'コピー', msg_speak:'読み上げ', msg_regenerate:'再生成', msg_like:'いいね', msg_dislike:'よくないね', msg_delete:'削除', msg_edit:'編集',
+  attach_camera:'カメラ', attach_photo:'ギャラリーから写真', attach_file:'ファイル',
+  share_via_system:'共有方法を選択...', share_copy_link:'リンクをコピー', share_copy_text:'チャットのテキストをコピー',
+  more_rename:'チャット名を変更', more_pin:'チャットを固定', more_unpin:'固定を解除', more_duplicate:'チャットを複製',
+  more_clear:'メッセージをクリア', more_export:'エクスポート (.txt)', more_export_pdf:'PDFでエクスポート', more_delete:'チャットを削除',
+  camera_title:'カメラ', camera_capture:'撮影する',
+  provider_connected:'接続中のサービス: {name}', provider_unknown:'サービスを認識できません — OpenAI互換APIとして試みます',
+  provider_google:'Google Geminiのキーを検出 — 直接サポートは未実装です',
+},
+uk:{
+  new_chat:'Новий чат', search_placeholder:'Пошук по чатах...', history_label:'Історія', settings:'Налаштування',
+  download_title:'Завантажити чат', share_title:'Поділитися', menu_title:'Меню',
+  empty_title:'Чим займемось сьогодні?', empty_subtitle:'Постав запитання, встав текст або обговори ідею — BarbosovAI на зв\'язку.',
+  prompt1_title:'Поясни складну тему', prompt1_sub:'простими словами',
+  prompt2_title:'Склади план', prompt2_sub:'на наступний тиждень',
+  prompt3_title:'Напиши код', prompt3_sub:'будь-якою мовою',
+  prompt4_title:'Придумай ідею', prompt4_sub:'для будь-якого випадку',
+  composer_placeholder:'Напишіть повідомлення...', composer_disclaimer:'BarbosovAI може помилятися. Перевіряйте важливі факти.',
+  attach_title:'Прикріпити', mic_title:'Голосове введення',
+  settings_title:'Налаштування', tab_general:'Загальні', tab_model:'Модель', tab_profile:'Профіль', tab_interface:'Інтерфейс',
+  tab_appearance:'Зовнішній вигляд', tab_experimental:'Експерименти', tab_integrations:'Інтеграції', tab_prompts:'Промпти',
+  tab_changelog:'Що нового', tab_about:'Про застосунок',
+  api_key_label:'API ключ', api_key_placeholder:'Вставте свій API-ключ...', api_key_help:'Зберігається лише у вашому браузері й надсилається лише сервісу, якому належить ключ.',
+  backup_label:'Резервна копія', backup_export:'Експорт усіх даних', backup_import:'Імпорт', backup_help:'Зберігає всі чати й налаштування в один файл — зручно перенести на інший пристрій.',
+  error_toasts_label:'Сповіщення про помилки', error_toasts_sub:'Показувати сповіщення при мережевих помилках',
+  confirm_delete_label:'Підтвердження видалення', confirm_delete_sub:'Питати перед видаленням чату',
+  save:'Зберегти', cancel:'Скасувати', language_label:'Мова інтерфейсу',
+  model_label:'Модель', model_hint:'Список вище підходить для ключів OpenRouter. Якщо ваш ключ від іншого сервісу, впишіть назву моделі вручну.',
+  model_manual_toggle:'Вказати модель вручну', model_manual_placeholder:'наприклад gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Якщо залишити порожнім, буде використано модель за замовчуванням для вашого сервісу.',
+  system_prompt_label:'Системний промпт (інструкції для ШІ)', system_prompt_placeholder:'Наприклад: Завжди відповідай коротко. Ти — senior-розробник.',
+  temperature_label:'Temperature (креативність)', topp_label:'Top-P', context_label:'Контекст поточного чату', tokens_label:'токенів',
+  avatar_upload:'Завантажити фото', avatar_remove:'Видалити фото', your_name:'Ваше ім\'я', your_name_placeholder:'Гість',
+  compact_label:'Компактний режим', compact_sub:'Зменшити відступи в повідомленнях',
+  large_font_label:'Великий шрифт', large_font_sub:'Збільшити розмір тексту повідомлень',
+  send_sound_label:'Звук надсилання', send_sound_sub:'Відтворювати звук при надсиланні повідомлення',
+  receive_sound_label:'Звук отримання', receive_sound_sub:'Відтворювати звук, коли ШІ завершив відповідь',
+  timestamps_label:'Час повідомлень', timestamps_sub:'Показувати час під кожним повідомленням',
+  autoscroll_label:'Автопрокрутка', autoscroll_sub:'Автоматично прокручувати до нових повідомлень',
+  shortcuts_title:'Гарячі клавіші', shortcuts_new_chat:'Новий чат', shortcuts_search:'Пошук по чатах',
+  shortcuts_send:'Надіслати', shortcuts_newline:'Новий рядок', shortcuts_esc:'Закрити вікно/меню',
+  accent_label:'Акцентний колір', animations_label:'Анімації інтерфейсу', animations_sub:'Плавні переходи й появи елементів',
+  avatar_show_label:'Показувати аватар ШІ', avatar_show_sub:'Значок BarbosovAI поруч із відповідями',
+  dense_label:'Щільний список чатів', dense_sub:'Менші відступи в історії зліва',
+  streaming_label:'Потокова генерація', streaming_sub:'Показувати відповідь у міру генерації',
+  reasoning_label:'Режим міркувань', reasoning_sub:'Просити модель показувати хід думок (якщо підтримує)',
+  tools_label:'ШІ може створювати файли', tools_sub:'Архіви, таблиці й файли — з власної ініціативи. Вимкніть, якщо це ламає відповіді конкретної моделі.',
+  integrations_desc:'Підключіть сторонні сервіси. Токени зберігаються лише локально.', wip_title:'У розробці', wip_sub:'Інтеграції скоро з\'являться',
+  prompts_add:'Зберегти новий промпт', prompts_empty:'Поки що немає збережених промптів',
+  changelog_newer:'Новіше', changelog_older:'Старіше', changelog_page:'Версія {n} з {total}',
+  about_desc:'Ваш власний ШІ через API key. Усі дані зберігаються локально у вашому браузері.',
+  msg_copy:'Копіювати', msg_speak:'Озвучити', msg_regenerate:'Повторити', msg_like:'Подобається', msg_dislike:'Не подобається', msg_delete:'Видалити', msg_edit:'Редагувати',
+  attach_camera:'Камера', attach_photo:'Фото з галереї', attach_file:'Файл',
+  share_via_system:'Поділитися через...', share_copy_link:'Копіювати посилання', share_copy_text:'Копіювати текст чату',
+  more_rename:'Перейменувати чат', more_pin:'Закріпити чат', more_unpin:'Відкріпити чат', more_duplicate:'Дублювати чат',
+  more_clear:'Очистити повідомлення', more_export:'Експортувати (.txt)', more_export_pdf:'Експортувати в PDF', more_delete:'Видалити чат',
+  camera_title:'Камера', camera_capture:'Зробити знімок',
+  provider_connected:'Підключено сервіс: {name}', provider_unknown:'Сервіс не розпізнано — спробуємо як OpenAI-сумісний API',
+  provider_google:'Виявлено ключ Google Gemini — пряма підтримка ще не реалізована',
 }
 };
 function t(key){
@@ -1081,6 +1563,54 @@ const TOASTS_I18N = {
        prompt_saved:'提示词已保存', profile_saved:'个人资料已保存', settings_saved:'设置已保存',
        backup_downloaded:'备份已下载', backup_imported:'备份已导入', chat_empty:'对话为空',
        link_copied:'链接已复制（仅限本浏览器本地使用）', chat_text_copied:'对话文本已复制' },
+  pt:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Esta mensagem já tem uma avaliação',
+       message_deleted:'Mensagem eliminada', add_key_first:'Adiciona uma chave API nas definições', generation_stopped:'Geração interrompida',
+       chat_downloaded:'Chat descarregado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensagens apagadas',
+       prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Definições guardadas',
+       backup_downloaded:'Cópia de segurança descarregada', backup_imported:'Cópia de segurança importada', chat_empty:'O chat está vazio',
+       link_copied:'Link copiado (local, para este navegador)', chat_text_copied:'Texto do chat copiado' },
+  it:{ chat_deleted:'Chat eliminata', code_copied:'Codice copiato', copied:'Copiato', already_rated:'Questo messaggio ha già una valutazione',
+       message_deleted:'Messaggio eliminato', add_key_first:'Aggiungi una chiave API nelle impostazioni', generation_stopped:'Generazione interrotta',
+       chat_downloaded:'Chat scaricata', chat_duplicated:'Chat duplicata', messages_cleared:'Messaggi cancellati',
+       prompt_saved:'Prompt salvato', profile_saved:'Profilo salvato', settings_saved:'Impostazioni salvate',
+       backup_downloaded:'Backup scaricato', backup_imported:'Backup importato', chat_empty:'La chat è vuota',
+       link_copied:'Link copiato (locale, per questo browser)', chat_text_copied:'Testo della chat copiato' },
+  nl:{ chat_deleted:'Chat verwijderd', code_copied:'Code gekopieerd', copied:'Gekopieerd', already_rated:'Dit bericht heeft al een beoordeling',
+       message_deleted:'Bericht verwijderd', add_key_first:'Voeg een API-sleutel toe in instellingen', generation_stopped:'Generatie gestopt',
+       chat_downloaded:'Chat gedownload', chat_duplicated:'Chat gedupliceerd', messages_cleared:'Berichten gewist',
+       prompt_saved:'Prompt opgeslagen', profile_saved:'Profiel opgeslagen', settings_saved:'Instellingen opgeslagen',
+       backup_downloaded:'Back-up gedownload', backup_imported:'Back-up geïmporteerd', chat_empty:'Chat is leeg',
+       link_copied:'Link gekopieerd (lokaal, voor deze browser)', chat_text_copied:'Chattekst gekopieerd' },
+  pl:{ chat_deleted:'Czat usunięty', code_copied:'Kod skopiowany', copied:'Skopiowano', already_rated:'Ta wiadomość już ma ocenę',
+       message_deleted:'Wiadomość usunięta', add_key_first:'Dodaj klucz API w ustawieniach', generation_stopped:'Generowanie zatrzymane',
+       chat_downloaded:'Czat pobrany', chat_duplicated:'Czat zduplikowany', messages_cleared:'Wiadomości wyczyszczone',
+       prompt_saved:'Prompt zapisany', profile_saved:'Profil zapisany', settings_saved:'Ustawienia zapisane',
+       backup_downloaded:'Kopia zapasowa pobrana', backup_imported:'Kopia zapasowa zaimportowana', chat_empty:'Czat jest pusty',
+       link_copied:'Link skopiowany (lokalnie, dla tej przeglądarki)', chat_text_copied:'Tekst czatu skopiowany' },
+  tr:{ chat_deleted:'Sohbet silindi', code_copied:'Kod kopyalandı', copied:'Kopyalandı', already_rated:'Bu mesaj zaten değerlendirildi',
+       message_deleted:'Mesaj silindi', add_key_first:'Ayarlardan bir API anahtarı ekle', generation_stopped:'Üretim durduruldu',
+       chat_downloaded:'Sohbet indirildi', chat_duplicated:'Sohbet çoğaltıldı', messages_cleared:'Mesajlar temizlendi',
+       prompt_saved:'Prompt kaydedildi', profile_saved:'Profil kaydedildi', settings_saved:'Ayarlar kaydedildi',
+       backup_downloaded:'Yedek indirildi', backup_imported:'Yedek içe aktarıldı', chat_empty:'Sohbet boş',
+       link_copied:'Bağlantı kopyalandı (yerel, bu tarayıcı için)', chat_text_copied:'Sohbet metni kopyalandı' },
+  ar:{ chat_deleted:'تم حذف المحادثة', code_copied:'تم نسخ الكود', copied:'تم النسخ', already_rated:'تم تقييم هذه الرسالة بالفعل',
+       message_deleted:'تم حذف الرسالة', add_key_first:'أضف مفتاح API في الإعدادات', generation_stopped:'تم إيقاف التوليد',
+       chat_downloaded:'تم تنزيل المحادثة', chat_duplicated:'تم نسخ المحادثة', messages_cleared:'تم مسح الرسائل',
+       prompt_saved:'تم حفظ الأمر', profile_saved:'تم حفظ الملف الشخصي', settings_saved:'تم حفظ الإعدادات',
+       backup_downloaded:'تم تنزيل النسخة الاحتياطية', backup_imported:'تم استيراد النسخة الاحتياطية', chat_empty:'المحادثة فارغة',
+       link_copied:'تم نسخ الرابط (محلي، لهذا المتصفح)', chat_text_copied:'تم نسخ نص المحادثة' },
+  ja:{ chat_deleted:'チャットを削除しました', code_copied:'コードをコピーしました', copied:'コピーしました', already_rated:'このメッセージは既に評価済みです',
+       message_deleted:'メッセージを削除しました', add_key_first:'設定でAPIキーを追加してください', generation_stopped:'生成を停止しました',
+       chat_downloaded:'チャットをダウンロードしました', chat_duplicated:'チャットを複製しました', messages_cleared:'メッセージをクリアしました',
+       prompt_saved:'プロンプトを保存しました', profile_saved:'プロフィールを保存しました', settings_saved:'設定を保存しました',
+       backup_downloaded:'バックアップをダウンロードしました', backup_imported:'バックアップをインポートしました', chat_empty:'チャットは空です',
+       link_copied:'リンクをコピーしました（このブラウザのローカル用）', chat_text_copied:'チャットのテキストをコピーしました' },
+  uk:{ chat_deleted:'Чат видалено', code_copied:'Код скопійовано', copied:'Скопійовано', already_rated:'Це повідомлення вже оцінено',
+       message_deleted:'Повідомлення видалено', add_key_first:'Додайте API-ключ у налаштуваннях', generation_stopped:'Генерацію зупинено',
+       chat_downloaded:'Чат завантажено', chat_duplicated:'Чат продубльовано', messages_cleared:'Повідомлення очищено',
+       prompt_saved:'Промпт збережено', profile_saved:'Профіль збережено', settings_saved:'Налаштування збережено',
+       backup_downloaded:'Резервну копію завантажено', backup_imported:'Резервну копію імпортовано', chat_empty:'Чат порожній',
+       link_copied:'Посилання скопійовано (локально, для цього браузера)', chat_text_copied:'Текст чату скопійовано' },
 };
 function tt(key){
   const lang = localStorage.getItem('nova_lang') || 'en';
@@ -1090,7 +1620,7 @@ function tt(key){
 /* ================= STATE ================= */
 const state = {
   chats: [], activeChatId: null, sending: false, tagFilter: '',
-  settings: { compact:false, largeFont:false, sendSound:false, receiveSound:false, showTimestamps:false, autoscroll:true, streaming:true, reasoning:false, animations:true, showAvatar:true, denseHistory:false, errorToasts:true, confirmDelete:true },
+  settings: { compact:false, largeFont:false, sendSound:false, receiveSound:false, showTimestamps:false, autoscroll:true, streaming:true, reasoning:false, animations:true, showAvatar:true, denseHistory:false, errorToasts:true, confirmDelete:true, enableTools:true },
   pendingAttachments: []
 };
 const els = {
@@ -1224,10 +1754,12 @@ function renderMessages(){
 }
 
 function appendMessageEl(m, idx, animate){
+  if(m.role === 'tool') return null;
   const row = document.createElement('div');
   row.className = 'msg-row flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start') + (animate ? ' msg-enter':'');
   row.dataset.idx = idx;
   const timeHtml = (state.settings.showTimestamps && m.time) ? `<div class="msg-timestamp">${new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>` : '';
+  const toolCardsHtml = (m.toolCalls && m.toolCalls.length) ? `<div class="flex flex-col gap-2 mt-1">${m.toolCalls.map((tc,tci) => renderToolCard(tc, idx, tci)).join('')}</div>` : '';
 
   if(m.role === 'user'){
     const atts = m.attachments || [];
@@ -1252,8 +1784,9 @@ function appendMessageEl(m, idx, animate){
           ${state.settings.showAvatar ? `<div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style="background:var(--bg-2); border:1px solid var(--border)">
             <svg width="14" height="14" viewBox="0 0 40 40" fill="none"><path d="M20 3 L34 12 V28 L20 37 L6 28 V12 Z" fill="#c2410c"/><path d="M20 6 L32.1 13 V27 L20 34 L7.9 27 V13 Z" fill="#f97316"/></svg>
           </div>` : ''}
-          <div class="bubble-ai px-4 py-2.5 text-[15px] leading-relaxed md" data-content data-raw="${encodeURIComponent(m.content)}">${renderMarkdown(m.content)}</div>
+          ${m.content || !toolCardsHtml ? `<div class="bubble-ai px-4 py-2.5 text-[15px] leading-relaxed md" data-content data-raw="${encodeURIComponent(m.content)}">${renderMarkdown(m.content)}</div>` : ''}
         </div>
+        ${toolCardsHtml}
         ${timeHtml ? `<div class="pl-9">${timeHtml}</div>` : ''}
         <div class="msg-actions flex items-center gap-1 pl-9">
           <button class="icon-btn w-7 h-7 rounded-lg flex items-center justify-center" style="color:var(--text-lo)" onclick="copyMsg(this)" title="${t('msg_copy')}"><i class="fa-regular fa-copy text-[11px]"></i></button>
@@ -1325,6 +1858,7 @@ function downloadCode(code, lang){
 
 function copyMsg(btn){
   const el = btn.closest('.flex.flex-col').querySelector('[data-content]');
+  if(!el){ toast(tt('chat_empty'),'info'); return; }
   const raw = decodeURIComponent(el.dataset.raw || el.innerText);
   navigator.clipboard.writeText(raw).then(()=> toast(tt('copied'),'success'));
 }
@@ -1545,10 +2079,124 @@ function buildAnthropicContent(m){
   return blocks;
 }
 
-/* ================= AI request (streaming, multi-provider) ================= */
+/* ================= AI Tools (archives, spreadsheets, files) ================= */
+const AI_TOOLS_OPENAI = [
+  { type:'function', function:{
+    name:'create_archive',
+    description:'Create a downloadable ZIP archive containing one or more files with given names and text content. Use this whenever it would genuinely help to package multiple files or deliverables together for the user to download — do this on your own initiative when it fits the task, without being asked to.',
+    parameters:{ type:'object', properties:{
+      archive_name:{ type:'string', description:'Name of the zip file, without extension' },
+      files:{ type:'array', items:{ type:'object', properties:{ name:{type:'string'}, content:{type:'string'} }, required:['name','content'] } }
+    }, required:['archive_name','files'] }
+  }},
+  { type:'function', function:{
+    name:'create_spreadsheet',
+    description:'Create a downloadable spreadsheet (.xlsx) file from tabular data. Use this whenever a table of data would be genuinely more useful as a real spreadsheet than as plain text — on your own initiative, without being asked to.',
+    parameters:{ type:'object', properties:{
+      filename:{ type:'string' }, sheet_name:{ type:'string' },
+      headers:{ type:'array', items:{ type:'string' } },
+      rows:{ type:'array', items:{ type:'array', items:{ type:'string' } } }
+    }, required:['filename','headers','rows'] }
+  }},
+  { type:'function', function:{
+    name:'create_file',
+    description:'Create a single downloadable text-based file (code, markdown, config, notes, etc). Use this on your own initiative when producing a real file would serve the user better than a chat code block.',
+    parameters:{ type:'object', properties:{ filename:{type:'string'}, content:{type:'string'} }, required:['filename','content'] }
+  }}
+];
+const AI_TOOLS_ANTHROPIC = AI_TOOLS_OPENAI.map(t => ({ name:t.function.name, description:t.function.description, input_schema:t.function.parameters }));
+
+function triggerBlobDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 2000);
+}
+
+function toolCardFilename(tc){
+  if(tc.name === 'create_archive') return ((tc.args.archive_name || 'archive').replace(/[^\w\-]/g,'_')) + '.zip';
+  if(tc.name === 'create_spreadsheet') return ((tc.args.filename || 'table').replace(/\.\w+$/,'').replace(/[^\w\-]/g,'_')) + '.xlsx';
+  if(tc.name === 'create_file') return tc.args.filename || 'file.txt';
+  return 'file';
+}
+
+async function executeToolCall(name, args){
+  try{
+    if(name === 'create_archive'){
+      if(!window.JSZip) throw new Error('JSZip failed to load');
+      const zip = new JSZip();
+      (args.files || []).forEach(f => zip.file(f.name, f.content || ''));
+      const blob = await zip.generateAsync({ type:'blob' });
+      const filename = toolCardFilename({ name, args });
+      triggerBlobDownload(blob, filename);
+      return { ok:true, filename, summary:`Created ${filename} with ${(args.files||[]).length} file(s).` };
+    }
+    if(name === 'create_spreadsheet'){
+      if(!window.XLSX) throw new Error('XLSX failed to load');
+      const wsData = [args.headers || [], ...(args.rows || [])];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, (args.sheet_name || 'Sheet1').slice(0,30));
+      const wbout = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+      const blob = new Blob([wbout], { type:'application/octet-stream' });
+      const filename = toolCardFilename({ name, args });
+      triggerBlobDownload(blob, filename);
+      return { ok:true, filename, summary:`Created spreadsheet ${filename} with ${(args.rows||[]).length} row(s).` };
+    }
+    if(name === 'create_file'){
+      const blob = new Blob([args.content || ''], { type:'text/plain;charset=utf-8' });
+      const filename = toolCardFilename({ name, args });
+      triggerBlobDownload(blob, filename);
+      return { ok:true, filename, summary:`Created file ${filename}.` };
+    }
+    return { ok:false, summary:`Unknown tool "${name}".` };
+  }catch(err){
+    return { ok:false, summary:`Failed to run ${name}: ${err.message}` };
+  }
+}
+
+function renderToolCard(tc, msgIdx, tcIdx){
+  const iconMap = { create_archive:'fa-file-zipper', create_spreadsheet:'fa-file-excel', create_file:'fa-file-lines' };
+  const filename = toolCardFilename(tc);
+  const sub = tc.name === 'create_archive' ? `${(tc.args.files||[]).length} files`
+    : tc.name === 'create_spreadsheet' ? `${(tc.args.rows||[]).length} rows`
+    : 'file';
+  return `<div class="tool-card">
+    <div class="tool-card-icon"><i class="fa-solid ${iconMap[tc.name]||'fa-file'}"></i></div>
+    <div class="flex-1 min-w-0"><div class="tool-card-name">${escapeHtml(filename)}</div><div class="tool-card-sub">${escapeHtml(sub)}</div></div>
+    <button class="tool-card-btn" onclick="redownloadTool(${msgIdx}, ${tcIdx})" title="Download"><i class="fa-solid fa-download"></i></button>
+  </div>`;
+}
+function redownloadTool(msgIdx, tcIdx){
+  const chat = getActiveChat();
+  const tc = chat.messages[msgIdx]?.toolCalls?.[tcIdx];
+  if(!tc) return;
+  executeToolCall(tc.name, tc.args);
+}
+
+function toOpenAIMessage(m){
+  if(m.role === 'tool') return { role:'tool', tool_call_id: m.tool_call_id, content: m.content };
+  if(m.role === 'assistant' && m.toolCalls && m.toolCalls.length){
+    return { role:'assistant', content: m.content || null, tool_calls: m.toolCalls.map(tc => ({ id:tc.id, type:'function', function:{ name:tc.name, arguments: JSON.stringify(tc.args) } })) };
+  }
+  return { role: m.role, content: buildApiContent(m) };
+}
+function toAnthropicMessage(m){
+  if(m.role === 'tool') return { role:'user', content:[{ type:'tool_result', tool_use_id: m.tool_call_id, content: m.content }] };
+  if(m.role === 'assistant' && m.toolCalls && m.toolCalls.length){
+    const blocks = [];
+    if(m.content) blocks.push({ type:'text', text:m.content });
+    m.toolCalls.forEach(tc => blocks.push({ type:'tool_use', id:tc.id, name:tc.name, input:tc.args }));
+    return { role:'assistant', content: blocks };
+  }
+  return { role:m.role, content: buildAnthropicContent(m) };
+}
+
+/* ================= AI request (streaming, multi-provider, tool-calling) ================= */
 let currentAbortController = null;
 
-async function requestAIReply(chat){
+async function requestAIReply(chat, opts){
+  opts = opts || {};
   state.sending = true; setSendButtonState(true);
   const apiKey = sanitizeKey(localStorage.getItem('nova_api_key') || '');
   const systemPrompt = localStorage.getItem('nova_system_prompt') || '';
@@ -1573,28 +2221,31 @@ async function requestAIReply(chat){
 
   const model = customModel || providerCfg.defaultModel || 'gpt-4o-mini';
 
-  showTyping();
+  if(!opts.isFollowUp) showTyping();
   currentAbortController = new AbortController();
   chat.messages.push({ role:'assistant', content:'', time:new Date().toISOString() });
   const msgIndex = chat.messages.length - 1;
   let liveRow = null, liveContentEl = null, accumulated = '';
+  const toolCallsMap = {};
 
   try{
     let endpoint, headers, payload;
 
     if(providerCfg.api === 'anthropic'){
-      const apiMessages = chat.messages.slice(0, msgIndex).map(m => ({ role:m.role, content: buildAnthropicContent(m) }));
+      const apiMessages = chat.messages.slice(0, msgIndex).map(toAnthropicMessage);
       endpoint = providerCfg.baseUrl;
       headers = { 'Content-Type':'application/json', 'x-api-key': apiKey, 'anthropic-version':'2023-06-01' };
       payload = { model, stream:true, max_tokens:4096, messages: apiMessages, temperature, top_p: topP };
       if(systemPrompt.trim()) payload.system = systemPrompt.trim();
+      if(!opts.noTools && state.settings.enableTools) payload.tools = AI_TOOLS_ANTHROPIC;
     } else {
-      const apiMessages = chat.messages.slice(0, msgIndex).map(m => ({ role:m.role, content: buildApiContent(m) }));
+      const apiMessages = chat.messages.slice(0, msgIndex).map(toOpenAIMessage);
       if(systemPrompt.trim()) apiMessages.unshift({ role:'system', content: systemPrompt.trim() });
       endpoint = providerCfg.baseUrl;
       headers = { 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey };
       payload = { model, stream:true, messages: apiMessages, temperature, top_p: topP };
       if(state.settings.reasoning && provider === 'openrouter') payload.reasoning = { enabled: true };
+      if(!opts.noTools && state.settings.enableTools) payload.tools = AI_TOOLS_OPENAI;
     }
 
     let res;
@@ -1628,8 +2279,24 @@ async function requestAIReply(chat){
         let delta = null;
         if(providerCfg.api === 'anthropic'){
           if(json.type === 'content_block_delta' && json.delta?.type === 'text_delta') delta = json.delta.text;
+          if(json.type === 'content_block_start' && json.content_block?.type === 'tool_use'){
+            toolCallsMap[json.index] = { id: json.content_block.id, name: json.content_block.name, args:'' };
+          }
+          if(json.type === 'content_block_delta' && json.delta?.type === 'input_json_delta'){
+            if(toolCallsMap[json.index]) toolCallsMap[json.index].args += json.delta.partial_json;
+          }
         } else {
           delta = json?.choices?.[0]?.delta?.content;
+          const tcDeltas = json?.choices?.[0]?.delta?.tool_calls;
+          if(tcDeltas){
+            tcDeltas.forEach(tc => {
+              const idx = tc.index ?? 0;
+              if(!toolCallsMap[idx]) toolCallsMap[idx] = { id:'', name:'', args:'' };
+              if(tc.id) toolCallsMap[idx].id = tc.id;
+              if(tc.function?.name) toolCallsMap[idx].name += tc.function.name;
+              if(tc.function?.arguments) toolCallsMap[idx].args += tc.function.arguments;
+            });
+          }
         }
 
         if(delta){
@@ -1644,6 +2311,28 @@ async function requestAIReply(chat){
     }
 
     hideTyping();
+    const toolCallsArr = Object.keys(toolCallsMap).sort((a,b)=>a-b).map(k => toolCallsMap[k]).filter(tc => tc.name);
+
+    if(toolCallsArr.length){
+      // Parse arguments and execute each tool call locally
+      const parsedCalls = toolCallsArr.map(tc => { let argsObj = {}; try{ argsObj = JSON.parse(tc.args || '{}'); }catch(e){} return { id: tc.id || ('call_'+Date.now()), name: tc.name, args: argsObj }; });
+      const execResults = [];
+      for(const tc of parsedCalls){ execResults.push({ ...tc, result: await executeToolCall(tc.name, tc.args) }); }
+
+      chat.messages[msgIndex] = { role:'assistant', content: accumulated, time:new Date().toISOString(), toolCalls: parsedCalls };
+      execResults.forEach(r => chat.messages.push({ role:'tool', tool_call_id:r.id, name:r.name, content: JSON.stringify(r.result), time:new Date().toISOString() }));
+      persistChats();
+
+      if(liveRow) liveRow.remove();
+      appendMessageEl(chat.messages[msgIndex], msgIndex, true);
+      scrollToBottom(); updateContextUsage();
+
+      // One bounded follow-up call (tools disabled) so the model can comment on the result in natural language
+      state.sending = false; setSendButtonState(false); currentAbortController = null;
+      await requestAIReply(chat, { noTools:true, isFollowUp:true });
+      return;
+    }
+
     if(!accumulated){ accumulated = 'Пустой ответ от модели.'; chat.messages[msgIndex].content = accumulated; }
     if(!liveRow){ liveRow = appendMessageEl({role:'assistant', content: accumulated}, msgIndex, true); }
     else { liveContentEl.innerHTML = renderMarkdown(accumulated); decorateCodeBlocks(liveRow); }
@@ -1845,16 +2534,66 @@ function startRecognizer(Ctor){
 function exportChat(){
   const chat = getActiveChat();
   if(!chat || chat.messages.length === 0){ toast(tt('chat_empty'),'info'); return; }
+  const youLabel = localStorage.getItem('nova_lang')==='ru' ? 'Вы' : 'You';
   const lines = [`BarbosovAI — ${chat.title}`, ''];
   chat.messages.forEach(m => {
-    lines.push(m.role === 'user' ? 'Вы:' : 'BarbosovAI:');
-    lines.push(m.content || '(вложение без текста)');
+    if(m.role === 'tool') return;
+    lines.push(m.role === 'user' ? youLabel + ':' : 'BarbosovAI:');
+    lines.push(m.content || (m.toolCalls ? summarizeToolCalls(m.toolCalls) : '(attachment, no text)'));
     lines.push('');
   });
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = chat.title.replace(/[^\w\u0400-\u04FF\- ]/g,'').trim().slice(0,50) + '.txt';
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast(tt('chat_downloaded'),'success');
+}
+
+function summarizeToolCalls(toolCalls){
+  return toolCalls.map(tc => `[${toolCardFilename(tc)}]`).join(' ');
+}
+
+function exportChatPDF(){
+  closeMoreMenu();
+  const chat = getActiveChat();
+  if(!chat || chat.messages.length === 0){ toast(tt('chat_empty'),'info'); return; }
+  if(!window.jspdf){ toast('PDF library failed to load','error'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 48;
+  const maxWidth = pageWidth - margin * 2;
+  let y = 56;
+  const youLabel = localStorage.getItem('nova_lang')==='ru' ? 'Вы' : 'You';
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(16);
+  doc.text(chat.title, margin, y);
+  y += 22;
+  doc.setFontSize(9); doc.setTextColor(140);
+  doc.text('BarbosovAI', margin, y);
+  y += 26;
+  doc.setTextColor(20);
+
+  chat.messages.forEach(m => {
+    if(m.role === 'tool') return;
+    const label = m.role === 'user' ? youLabel : 'BarbosovAI';
+    if(y > pageHeight - 70){ doc.addPage(); y = 56; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+    doc.text(label, margin, y);
+    y += 15;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+    const text = m.content || (m.toolCalls ? summarizeToolCalls(m.toolCalls) : '(attachment, no text)');
+    const lines = doc.splitTextToSize(text, maxWidth);
+    lines.forEach(line => {
+      if(y > pageHeight - 56){ doc.addPage(); y = 56; }
+      doc.text(line, margin, y);
+      y += 14;
+    });
+    y += 14;
+  });
+
+  doc.save(chat.title.replace(/[^\w\u0400-\u04FF\- ]/g,'').trim().slice(0,50) + '.pdf');
   toast(tt('chat_downloaded'),'success');
 }
 
@@ -1911,6 +2650,7 @@ function toggleMoreMenu(e){
     <button onclick="duplicateChat()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-copy w-4" style="color:var(--accent)"></i> ${t('more_duplicate')}</button>
     <button onclick="clearActiveChatMessages()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-broom w-4" style="color:var(--accent)"></i> ${t('more_clear')}</button>
     <button onclick="exportChat(); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-download w-4" style="color:var(--accent)"></i> ${t('more_export')}</button>
+    <button onclick="exportChatPDF()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left"><i class="fa-solid fa-file-pdf w-4" style="color:var(--accent)"></i> ${t('more_export_pdf')}</button>
     <button onclick="deleteChat('${chat.id}'); closeMoreMenu();" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-left" style="color:#f87171"><i class="fa-solid fa-trash w-4"></i> ${t('more_delete')}</button>
   `;
   menu.classList.remove('hidden'); backdrop.classList.remove('hidden');
@@ -1947,6 +2687,14 @@ const MODEL_AUTO_I18N = {
   de:{ title:'Automatische Auswahl', sub:'Wählt automatisch ein verfügbares kostenloses Modell' },
   fr:{ title:'Sélection automatique', sub:'Choisit automatiquement un modèle gratuit disponible' },
   zh:{ title:'自动选择', sub:'自动选择可用的免费模型' },
+  pt:{ title:'Seleção automática', sub:'Escolhe automaticamente um modelo gratuito disponível' },
+  it:{ title:'Selezione automatica', sub:'Sceglie automaticamente un modello gratuito disponibile' },
+  nl:{ title:'Automatische selectie', sub:'Kiest automatisch een beschikbaar gratis model' },
+  pl:{ title:'Wybór automatyczny', sub:'Automatycznie wybiera dostępny darmowy model' },
+  tr:{ title:'Otomatik seçim', sub:'Kullanılabilir ücretsiz bir modeli otomatik seçer' },
+  ar:{ title:'اختيار تلقائي', sub:'يختار تلقائياً نموذجاً مجانياً متاحاً' },
+  ja:{ title:'自動選択', sub:'利用可能な無料モデルを自動的に選びます' },
+  uk:{ title:'Автовибір', sub:'Автоматично підбирає доступну безкоштовну модель' },
 };
 function renderModelPicker(){
   const current = localStorage.getItem('nova_model') || 'openrouter/free';
@@ -2034,12 +2782,46 @@ function deletePromptEntry(i){
   renderPromptsLibrary();
 }
 
+const CATEGORY_I18N = {
+  en:{ fixes:'Fixed bugs', features:'New features', improvements:'Improvements' },
+  ru:{ fixes:'Исправлены баги', features:'Новое', improvements:'Улучшения' },
+  es:{ fixes:'Errores corregidos', features:'Novedades', improvements:'Mejoras' },
+  de:{ fixes:'Behobene Fehler', features:'Neue Funktionen', improvements:'Verbesserungen' },
+  fr:{ fixes:'Bugs corrigés', features:'Nouveautés', improvements:'Améliorations' },
+  zh:{ fixes:'已修复的问题', features:'新功能', improvements:'改进' },
+  pt:{ fixes:'Correções de erros', features:'Novidades', improvements:'Melhorias' },
+  it:{ fixes:'Bug corretti', features:'Novità', improvements:'Miglioramenti' },
+  nl:{ fixes:'Opgeloste fouten', features:'Nieuwe functies', improvements:'Verbeteringen' },
+  pl:{ fixes:'Naprawione błędy', features:'Nowości', improvements:'Ulepszenia' },
+  tr:{ fixes:'Düzeltilen hatalar', features:'Yenilikler', improvements:'İyileştirmeler' },
+  ar:{ fixes:'تم إصلاح الأخطاء', features:'ميزات جديدة', improvements:'تحسينات' },
+  ja:{ fixes:'修正されたバグ', features:'新機能', improvements:'改善点' },
+  uk:{ fixes:'Виправлені помилки', features:'Новини', improvements:'Покращення' },
+};
+function categoryLabel(cat){
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  return (CATEGORY_I18N[lang] && CATEGORY_I18N[lang][cat]) || CATEGORY_I18N.en[cat] || cat;
+}
 function renderChangelog(){
-  document.getElementById('changelog-list').innerHTML = CHANGELOG.map(entry => `
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  document.getElementById('changelog-list').innerHTML = CHANGELOG.map(entry => {
+    const changes = entry.changes[lang] || entry.changes.en;
+    let body;
+    if(Array.isArray(changes)){
+      body = `<ul class="text-sm space-y-1" style="color:var(--text-mid)">${changes.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>`;
+    } else {
+      body = Object.keys(changes).map(cat => `
+        <div class="mb-2 last:mb-0">
+          <div class="text-xs font-semibold mb-1" style="color:var(--text-hi)">${escapeHtml(categoryLabel(cat))}:</div>
+          <ul class="text-sm space-y-1" style="color:var(--text-mid)">${changes[cat].map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>
+        </div>`).join('');
+    }
+    return `
     <div class="changelog-entry">
       <div class="flex items-center gap-2 mb-1"><span class="font-display font-semibold text-sm">v${entry.version}</span><span class="text-xs" style="color:var(--text-lo)">${entry.date}</span></div>
-      <ul class="text-sm space-y-1" style="color:var(--text-mid)">${entry.changes.map(c => `<li>• ${escapeHtml(c)}</li>`).join('')}</ul>
-    </div>`).join('');
+      ${body}
+    </div>`;
+  }).join('');
   const pag = document.getElementById('changelog-pagination');
   if(pag) pag.innerHTML = '';
 }

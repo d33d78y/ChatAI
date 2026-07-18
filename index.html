@@ -286,7 +286,8 @@
     <div class="px-3 pb-2 pt-1">
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:var(--text-lo)"></i>
-        <input id="history-search" type="text" placeholder="Поиск по чатам..." data-i18n-placeholder="search_placeholder" class="w-full rounded-lg pl-8 pr-3 py-2 text-[13px]" oninput="renderHistory()">
+        <input id="history-search" type="text" placeholder="Поиск по чатам..." data-i18n-placeholder="search_placeholder" class="w-full rounded-lg pl-8 pr-7 py-2 text-[13px]" oninput="onHistorySearchInput()">
+        <button id="history-search-clear" onclick="clearHistorySearch()" class="hidden icon-btn absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md flex items-center justify-center" style="color:var(--text-lo)"><i class="fa-solid fa-xmark text-[11px]"></i></button>
       </div>
     </div>
 
@@ -332,6 +333,8 @@
         </div>
       </div>
     </header>
+
+    <button id="scroll-bottom-btn" onclick="scrollToBottom(); hideScrollBottomBtn();" class="hidden absolute left-1/2 -translate-x-1/2 z-40 w-9 h-9 rounded-full items-center justify-center glass" style="bottom:96px; background:var(--bg-2);" title="Scroll to bottom"><i class="fa-solid fa-arrow-down text-xs" style="color:var(--text-hi)"></i></button>
 
     <div id="chat-scroll" class="flex-1 overflow-y-auto">
       <div id="empty-state" class="h-full flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto" style="max-width:672px; margin-left:auto; margin-right:auto;">
@@ -697,8 +700,18 @@
 
 <script>
 /* ================= CONSTANTS ================= */
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.6.1';
 const CHANGELOG = [
+  { version:'1.6.1', date:'2026-07-16', changes:{
+    en:{
+      fixes:['Typing indicator no longer disappears during the AI\'s follow-up reply after creating a file', 'Deleting an AI message that created a file no longer leaves orphaned data behind', 'Voice input, read-aloud, timestamps, and the token counter now use the selected interface language instead of always Russian', 'Translated the remaining error messages (unsupported service, empty response, unavailable model, request errors)'],
+      features:['A "clear search" button in the chat history search box', 'A floating "scroll to bottom" button appears when you\'ve scrolled up in a long chat'],
+    },
+    ru:{
+      fixes:['Индикатор «печатает» больше не пропадает во время дополнительного ответа ИИ после создания файла', 'Удаление сообщения ИИ, создавшего файл, больше не оставляет «осиротевшие» данные', 'Голосовой ввод, озвучка, метки времени и счётчик токенов теперь используют выбранный язык интерфейса, а не всегда русский', 'Переведены оставшиеся сообщения об ошибках (неподдерживаемый сервис, пустой ответ, недоступная модель, ошибки запроса)'],
+      features:['Кнопка очистки поиска по истории чатов', 'Плавающая кнопка «прокрутить вниз», когда пролистал вверх в длинном чате'],
+    },
+  }},
   { version:'1.6.0', date:'2026-07-09', changes:{
     en:{
       features:['PDF export for chats, alongside .txt', 'The AI can now create ZIP archives, spreadsheets, and files on its own when it fits the task — no special prompt needed', '8 more interface languages added (Portuguese, Italian, Dutch, Polish, Turkish, Arabic, Japanese, Ukrainian)', 'The "What\'s new" section now supports grouped categories (bug fixes, new features, improvements)'],
@@ -1532,85 +1545,85 @@ const TOASTS_I18N = {
        chat_downloaded:'Chat downloaded', chat_duplicated:'Chat duplicated', messages_cleared:'Messages cleared',
        prompt_saved:'Prompt saved', profile_saved:'Profile saved', settings_saved:'Settings saved',
        backup_downloaded:'Backup downloaded', backup_imported:'Backup imported', chat_empty:'Chat is empty',
-       link_copied:'Link copied (local, for this browser)', chat_text_copied:'Chat text copied' },
+       link_copied:'Link copied (local, for this browser)', provider_unsupported:'{name} is not directly supported yet. Use an OpenRouter, OpenAI, Anthropic, or Groq key.', empty_response:'Empty response from the model.', model_unavailable:'This model is not available, choose another one or select auto-select', request_error:'Request error: ', no_reply:'Could not get a reply: ' },
   ru:{ chat_deleted:'Чат удалён', code_copied:'Код скопирован', copied:'Скопировано', already_rated:'Оценка уже поставлена для этого сообщения',
        message_deleted:'Сообщение удалено', add_key_first:'Добавьте API-ключ в настройках', generation_stopped:'Генерация остановлена',
        chat_downloaded:'Чат скачан', chat_duplicated:'Чат продублирован', messages_cleared:'Сообщения очищены',
        prompt_saved:'Промпт сохранён', profile_saved:'Профиль сохранён', settings_saved:'Настройки сохранены',
        backup_downloaded:'Резервная копия скачана', backup_imported:'Резервная копия импортирована', chat_empty:'Чат пока пуст',
-       link_copied:'Ссылка скопирована (локальная, для этого браузера)', chat_text_copied:'Текст чата скопирован' },
+       link_copied:'Ссылка скопирована (локальная, для этого браузера)', provider_unsupported:'{name} пока не поддерживается напрямую. Используйте ключ OpenRouter, OpenAI, Anthropic или Groq.', empty_response:'Пустой ответ от модели.', model_unavailable:'Данная модель не доступна, выберите другую или выберите автовыбор', request_error:'Ошибка запроса: ', no_reply:'Не удалось получить ответ: ' },
   es:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Este mensaje ya tiene una valoración',
        message_deleted:'Mensaje eliminado', add_key_first:'Añade una clave API en ajustes', generation_stopped:'Generación detenida',
        chat_downloaded:'Chat descargado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensajes borrados',
        prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Ajustes guardados',
        backup_downloaded:'Copia de seguridad descargada', backup_imported:'Copia de seguridad importada', chat_empty:'El chat está vacío',
-       link_copied:'Enlace copiado (local, para este navegador)', chat_text_copied:'Texto del chat copiado' },
+       link_copied:'Enlace copiado (local, para este navegador)', provider_unsupported:'{name} aún no es compatible directamente. Usa una clave de OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Respuesta vacía del modelo.', model_unavailable:'Este modelo no está disponible, elige otro o selecciona la selección automática', request_error:'Error de solicitud: ', no_reply:'No se pudo obtener respuesta: ' },
   de:{ chat_deleted:'Chat gelöscht', code_copied:'Code kopiert', copied:'Kopiert', already_rated:'Diese Nachricht wurde bereits bewertet',
        message_deleted:'Nachricht gelöscht', add_key_first:'Füge einen API-Schlüssel in den Einstellungen hinzu', generation_stopped:'Generierung gestoppt',
        chat_downloaded:'Chat heruntergeladen', chat_duplicated:'Chat dupliziert', messages_cleared:'Nachrichten gelöscht',
        prompt_saved:'Prompt gespeichert', profile_saved:'Profil gespeichert', settings_saved:'Einstellungen gespeichert',
        backup_downloaded:'Sicherung heruntergeladen', backup_imported:'Sicherung importiert', chat_empty:'Chat ist leer',
-       link_copied:'Link kopiert (lokal, für diesen Browser)', chat_text_copied:'Chat-Text kopiert' },
+       link_copied:'Link kopiert (lokal, für diesen Browser)', provider_unsupported:'{name} wird noch nicht direkt unterstützt. Verwende einen OpenRouter-, OpenAI-, Anthropic- oder Groq-Schlüssel.', empty_response:'Leere Antwort vom Modell.', model_unavailable:'Dieses Modell ist nicht verfügbar, wähle ein anderes oder die automatische Auswahl', request_error:'Anfragefehler: ', no_reply:'Antwort konnte nicht abgerufen werden: ' },
   fr:{ chat_deleted:'Discussion supprimée', code_copied:'Code copié', copied:'Copié', already_rated:'Ce message a déjà une note',
        message_deleted:'Message supprimé', add_key_first:'Ajoutez une clé API dans les paramètres', generation_stopped:'Génération arrêtée',
        chat_downloaded:'Discussion téléchargée', chat_duplicated:'Discussion dupliquée', messages_cleared:'Messages effacés',
        prompt_saved:'Prompt enregistré', profile_saved:'Profil enregistré', settings_saved:'Paramètres enregistrés',
        backup_downloaded:'Sauvegarde téléchargée', backup_imported:'Sauvegarde importée', chat_empty:'La discussion est vide',
-       link_copied:'Lien copié (local, pour ce navigateur)', chat_text_copied:'Texte de la discussion copié' },
+       link_copied:'Lien copié (local, pour ce navigateur)', provider_unsupported:'{name} n\'est pas encore pris en charge directement. Utilisez une clé OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Réponse vide du modèle.', model_unavailable:'Ce modèle n\'est pas disponible, choisissez-en un autre ou la sélection automatique', request_error:'Erreur de requête : ', no_reply:'Impossible d\'obtenir une réponse : ' },
   zh:{ chat_deleted:'对话已删除', code_copied:'代码已复制', copied:'已复制', already_rated:'该消息已评价过',
        message_deleted:'消息已删除', add_key_first:'请在设置中添加 API 密钥', generation_stopped:'已停止生成',
        chat_downloaded:'对话已下载', chat_duplicated:'对话已复制', messages_cleared:'消息已清空',
        prompt_saved:'提示词已保存', profile_saved:'个人资料已保存', settings_saved:'设置已保存',
        backup_downloaded:'备份已下载', backup_imported:'备份已导入', chat_empty:'对话为空',
-       link_copied:'链接已复制（仅限本浏览器本地使用）', chat_text_copied:'对话文本已复制' },
+       link_copied:'链接已复制（仅限本浏览器本地使用）', provider_unsupported:'{name} 目前尚不支持直接使用。请使用 OpenRouter、OpenAI、Anthropic 或 Groq 的密钥。', empty_response:'模型返回了空响应。', model_unavailable:'该模型不可用，请选择其他模型或自动选择', request_error:'请求错误：', no_reply:'无法获取回复：' },
   pt:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Esta mensagem já tem uma avaliação',
        message_deleted:'Mensagem eliminada', add_key_first:'Adiciona uma chave API nas definições', generation_stopped:'Geração interrompida',
        chat_downloaded:'Chat descarregado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensagens apagadas',
        prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Definições guardadas',
        backup_downloaded:'Cópia de segurança descarregada', backup_imported:'Cópia de segurança importada', chat_empty:'O chat está vazio',
-       link_copied:'Link copiado (local, para este navegador)', chat_text_copied:'Texto do chat copiado' },
+       link_copied:'Link copiado (local, para este navegador)', provider_unsupported:'{name} ainda não é suportado diretamente. Usa uma chave OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Resposta vazia do modelo.', model_unavailable:'Este modelo não está disponível, escolhe outro ou a seleção automática', request_error:'Erro no pedido: ', no_reply:'Não foi possível obter resposta: ' },
   it:{ chat_deleted:'Chat eliminata', code_copied:'Codice copiato', copied:'Copiato', already_rated:'Questo messaggio ha già una valutazione',
        message_deleted:'Messaggio eliminato', add_key_first:'Aggiungi una chiave API nelle impostazioni', generation_stopped:'Generazione interrotta',
        chat_downloaded:'Chat scaricata', chat_duplicated:'Chat duplicata', messages_cleared:'Messaggi cancellati',
        prompt_saved:'Prompt salvato', profile_saved:'Profilo salvato', settings_saved:'Impostazioni salvate',
        backup_downloaded:'Backup scaricato', backup_imported:'Backup importato', chat_empty:'La chat è vuota',
-       link_copied:'Link copiato (locale, per questo browser)', chat_text_copied:'Testo della chat copiato' },
+       link_copied:'Link copiato (locale, per questo browser)', provider_unsupported:'{name} non è ancora supportato direttamente. Usa una chiave OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Risposta vuota dal modello.', model_unavailable:'Questo modello non è disponibile, scegline un altro o la selezione automatica', request_error:'Errore richiesta: ', no_reply:'Impossibile ottenere una risposta: ' },
   nl:{ chat_deleted:'Chat verwijderd', code_copied:'Code gekopieerd', copied:'Gekopieerd', already_rated:'Dit bericht heeft al een beoordeling',
        message_deleted:'Bericht verwijderd', add_key_first:'Voeg een API-sleutel toe in instellingen', generation_stopped:'Generatie gestopt',
        chat_downloaded:'Chat gedownload', chat_duplicated:'Chat gedupliceerd', messages_cleared:'Berichten gewist',
        prompt_saved:'Prompt opgeslagen', profile_saved:'Profiel opgeslagen', settings_saved:'Instellingen opgeslagen',
        backup_downloaded:'Back-up gedownload', backup_imported:'Back-up geïmporteerd', chat_empty:'Chat is leeg',
-       link_copied:'Link gekopieerd (lokaal, voor deze browser)', chat_text_copied:'Chattekst gekopieerd' },
+       link_copied:'Link gekopieerd (lokaal, voor deze browser)', provider_unsupported:'{name} wordt nog niet direct ondersteund. Gebruik een OpenRouter-, OpenAI-, Anthropic- of Groq-sleutel.', empty_response:'Leeg antwoord van het model.', model_unavailable:'Dit model is niet beschikbaar, kies een ander of de automatische selectie', request_error:'Verzoekfout: ', no_reply:'Kon geen antwoord krijgen: ' },
   pl:{ chat_deleted:'Czat usunięty', code_copied:'Kod skopiowany', copied:'Skopiowano', already_rated:'Ta wiadomość już ma ocenę',
        message_deleted:'Wiadomość usunięta', add_key_first:'Dodaj klucz API w ustawieniach', generation_stopped:'Generowanie zatrzymane',
        chat_downloaded:'Czat pobrany', chat_duplicated:'Czat zduplikowany', messages_cleared:'Wiadomości wyczyszczone',
        prompt_saved:'Prompt zapisany', profile_saved:'Profil zapisany', settings_saved:'Ustawienia zapisane',
        backup_downloaded:'Kopia zapasowa pobrana', backup_imported:'Kopia zapasowa zaimportowana', chat_empty:'Czat jest pusty',
-       link_copied:'Link skopiowany (lokalnie, dla tej przeglądarki)', chat_text_copied:'Tekst czatu skopiowany' },
+       link_copied:'Link skopiowany (lokalnie, dla tej przeglądarki)', provider_unsupported:'{name} nie jest jeszcze obsługiwany bezpośrednio. Użyj klucza OpenRouter, OpenAI, Anthropic lub Groq.', empty_response:'Pusta odpowiedź od modelu.', model_unavailable:'Ten model jest niedostępny, wybierz inny lub wybór automatyczny', request_error:'Błąd żądania: ', no_reply:'Nie udało się uzyskać odpowiedzi: ' },
   tr:{ chat_deleted:'Sohbet silindi', code_copied:'Kod kopyalandı', copied:'Kopyalandı', already_rated:'Bu mesaj zaten değerlendirildi',
        message_deleted:'Mesaj silindi', add_key_first:'Ayarlardan bir API anahtarı ekle', generation_stopped:'Üretim durduruldu',
        chat_downloaded:'Sohbet indirildi', chat_duplicated:'Sohbet çoğaltıldı', messages_cleared:'Mesajlar temizlendi',
        prompt_saved:'Prompt kaydedildi', profile_saved:'Profil kaydedildi', settings_saved:'Ayarlar kaydedildi',
        backup_downloaded:'Yedek indirildi', backup_imported:'Yedek içe aktarıldı', chat_empty:'Sohbet boş',
-       link_copied:'Bağlantı kopyalandı (yerel, bu tarayıcı için)', chat_text_copied:'Sohbet metni kopyalandı' },
+       link_copied:'Bağlantı kopyalandı (yerel, bu tarayıcı için)', provider_unsupported:'{name} henüz doğrudan desteklenmiyor. Bir OpenRouter, OpenAI, Anthropic veya Groq anahtarı kullan.', empty_response:'Modelden boş yanıt.', model_unavailable:'Bu model kullanılamıyor, başka birini veya otomatik seçimi seç', request_error:'İstek hatası: ', no_reply:'Yanıt alınamadı: ' },
   ar:{ chat_deleted:'تم حذف المحادثة', code_copied:'تم نسخ الكود', copied:'تم النسخ', already_rated:'تم تقييم هذه الرسالة بالفعل',
        message_deleted:'تم حذف الرسالة', add_key_first:'أضف مفتاح API في الإعدادات', generation_stopped:'تم إيقاف التوليد',
        chat_downloaded:'تم تنزيل المحادثة', chat_duplicated:'تم نسخ المحادثة', messages_cleared:'تم مسح الرسائل',
        prompt_saved:'تم حفظ الأمر', profile_saved:'تم حفظ الملف الشخصي', settings_saved:'تم حفظ الإعدادات',
        backup_downloaded:'تم تنزيل النسخة الاحتياطية', backup_imported:'تم استيراد النسخة الاحتياطية', chat_empty:'المحادثة فارغة',
-       link_copied:'تم نسخ الرابط (محلي، لهذا المتصفح)', chat_text_copied:'تم نسخ نص المحادثة' },
+       link_copied:'تم نسخ الرابط (محلي، لهذا المتصفح)', provider_unsupported:'{name} غير مدعوم مباشرة بعد. استخدم مفتاح OpenRouter أو OpenAI أو Anthropic أو Groq.', empty_response:'استجابة فارغة من النموذج.', model_unavailable:'هذا النموذج غير متاح، اختر آخر أو اختر التحديد التلقائي', request_error:'خطأ في الطلب: ', no_reply:'تعذر الحصول على رد: ' },
   ja:{ chat_deleted:'チャットを削除しました', code_copied:'コードをコピーしました', copied:'コピーしました', already_rated:'このメッセージは既に評価済みです',
        message_deleted:'メッセージを削除しました', add_key_first:'設定でAPIキーを追加してください', generation_stopped:'生成を停止しました',
        chat_downloaded:'チャットをダウンロードしました', chat_duplicated:'チャットを複製しました', messages_cleared:'メッセージをクリアしました',
        prompt_saved:'プロンプトを保存しました', profile_saved:'プロフィールを保存しました', settings_saved:'設定を保存しました',
        backup_downloaded:'バックアップをダウンロードしました', backup_imported:'バックアップをインポートしました', chat_empty:'チャットは空です',
-       link_copied:'リンクをコピーしました（このブラウザのローカル用）', chat_text_copied:'チャットのテキストをコピーしました' },
+       link_copied:'リンクをコピーしました（このブラウザのローカル用）', provider_unsupported:'{name}はまだ直接サポートされていません。OpenRouter、OpenAI、Anthropic、またはGroqのキーを使用してください。', empty_response:'モデルからの応答が空でした。', model_unavailable:'このモデルは利用できません。別のモデルか自動選択を選んでください', request_error:'リクエストエラー: ', no_reply:'返信を取得できませんでした: ' },
   uk:{ chat_deleted:'Чат видалено', code_copied:'Код скопійовано', copied:'Скопійовано', already_rated:'Це повідомлення вже оцінено',
        message_deleted:'Повідомлення видалено', add_key_first:'Додайте API-ключ у налаштуваннях', generation_stopped:'Генерацію зупинено',
        chat_downloaded:'Чат завантажено', chat_duplicated:'Чат продубльовано', messages_cleared:'Повідомлення очищено',
        prompt_saved:'Промпт збережено', profile_saved:'Профіль збережено', settings_saved:'Налаштування збережено',
        backup_downloaded:'Резервну копію завантажено', backup_imported:'Резервну копію імпортовано', chat_empty:'Чат порожній',
-       link_copied:'Посилання скопійовано (локально, для цього браузера)', chat_text_copied:'Текст чату скопійовано' },
+       link_copied:'Посилання скопійовано (локально, для цього браузера)', provider_unsupported:'{name} поки не підтримується напряму. Використайте ключ OpenRouter, OpenAI, Anthropic або Groq.', empty_response:'Порожня відповідь від моделі.', model_unavailable:'Ця модель недоступна, виберіть іншу або автовибір', request_error:'Помилка запиту: ', no_reply:'Не вдалося отримати відповідь: ' },
 };
 function tt(key){
   const lang = localStorage.getItem('nova_lang') || 'en';
@@ -1647,14 +1660,30 @@ function sanitizeKey(raw){
   return raw.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim().split('').filter(ch => ch.charCodeAt(0) <= 255).join('');
 }
 function escapeHtml(str){ const d = document.createElement('div'); d.innerText = str; return d.innerHTML; }
+function currentLocale(){
+  return SPEECH_LOCALES[localStorage.getItem('nova_lang') || 'en'] || 'en-US';
+}
 function fmtDate(iso){
   const d = new Date(iso); const today = new Date();
-  if(d.toDateString() === today.toDateString()) return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-  return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'short'});
+  if(d.toDateString() === today.toDateString()) return d.toLocaleTimeString(currentLocale(),{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString(currentLocale(),{day:'2-digit',month:'short'});
 }
 function estimateTokens(text){ return Math.ceil((text||'').length / 4); }
 
 /* ================= SIDEBAR / HISTORY ================= */
+function onHistorySearchInput(){
+  const input = document.getElementById('history-search');
+  const clearBtn = document.getElementById('history-search-clear');
+  clearBtn.classList.toggle('hidden', !input.value);
+  renderHistory();
+}
+function clearHistorySearch(){
+  const input = document.getElementById('history-search');
+  input.value = '';
+  document.getElementById('history-search-clear').classList.add('hidden');
+  renderHistory();
+  input.focus();
+}
 function renderHistory(){
   els.historyList.innerHTML = '';
   const query = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
@@ -1712,7 +1741,7 @@ function togglePin(chatId){
   toast(chat.pinned ? 'Чат закреплён' : 'Чат откреплён', 'success');
 }
 
-function selectChat(id){ state.activeChatId = id; renderHistory(); renderMessages(); closeSidebar(); loadDraftForActiveChat(); }
+function selectChat(id){ state.activeChatId = id; renderHistory(); renderMessages(); closeSidebar(); loadDraftForActiveChat(); hideScrollBottomBtn(); }
 
 function deleteChat(id){
   const doDelete = () => {
@@ -1731,7 +1760,7 @@ function createNewChat(){
   const chat = { id:'c'+Date.now(), title:'Новый чат', date:new Date().toISOString(), messages:[], pinned:false, tag:null };
   state.chats.unshift(chat);
   state.activeChatId = chat.id;
-  persistChats(); renderHistory(); renderMessages(); closeSidebar();
+  persistChats(); renderHistory(); renderMessages(); closeSidebar(); hideScrollBottomBtn();
   els.input.value = ''; els.input.style.height = 'auto';
   els.input.dispatchEvent(new Event('input'));
   els.input.focus();
@@ -1758,7 +1787,7 @@ function appendMessageEl(m, idx, animate){
   const row = document.createElement('div');
   row.className = 'msg-row flex ' + (m.role === 'user' ? 'justify-end' : 'justify-start') + (animate ? ' msg-enter':'');
   row.dataset.idx = idx;
-  const timeHtml = (state.settings.showTimestamps && m.time) ? `<div class="msg-timestamp">${new Date(m.time).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>` : '';
+  const timeHtml = (state.settings.showTimestamps && m.time) ? `<div class="msg-timestamp">${new Date(m.time).toLocaleTimeString(currentLocale(),{hour:'2-digit',minute:'2-digit'})}</div>` : '';
   const toolCardsHtml = (m.toolCalls && m.toolCalls.length) ? `<div class="flex flex-col gap-2 mt-1">${m.toolCalls.map((tc,tci) => renderToolCard(tc, idx, tci)).join('')}</div>` : '';
 
   if(m.role === 'user'){
@@ -1911,8 +1940,18 @@ function saveEditMessage(idx){
 
 function deleteMessageAt(idx){
   const chat = getActiveChat();
-  if(!chat.messages[idx]) return;
-  chat.messages.splice(idx, 1);
+  const target = chat.messages[idx];
+  if(!target) return;
+  let removeCount = 1;
+  // If this assistant message made tool calls, its tool-result messages
+  // immediately follow it — remove them together so we never leave an
+  // orphaned tool_call_id referencing a deleted assistant turn.
+  if(target.role === 'assistant' && target.toolCalls && target.toolCalls.length){
+    while(chat.messages[idx + removeCount] && chat.messages[idx + removeCount].role === 'tool'){
+      removeCount++;
+    }
+  }
+  chat.messages.splice(idx, removeCount);
   persistChats();
   renderMessages();
   toast(tt('message_deleted'),'info');
@@ -1920,10 +1959,11 @@ function deleteMessageAt(idx){
 
 /* -------- Text-to-speech -------- */
 let currentUtterance = null;
+const SPEECH_LOCALES = { en:'en-US', ru:'ru-RU', es:'es-ES', de:'de-DE', fr:'fr-FR', zh:'zh-CN', pt:'pt-PT', it:'it-IT', nl:'nl-NL', pl:'pl-PL', tr:'tr-TR', ar:'ar-SA', ja:'ja-JP', uk:'uk-UA' };
 function speakMessage(btn, idx){
   const chat = getActiveChat();
   const msg = chat.messages[idx];
-  if(!msg) return;
+  if(!msg || !msg.content) { toast(tt('chat_empty'),'info'); return; }
   if(window.speechSynthesis.speaking){
     window.speechSynthesis.cancel();
     document.querySelectorAll('.speaking').forEach(b => b.classList.remove('speaking'));
@@ -1931,7 +1971,7 @@ function speakMessage(btn, idx){
   }
   const plain = msg.content.replace(/[#*`_>~-]/g,'').replace(/\n+/g,'. ');
   const utter = new SpeechSynthesisUtterance(plain);
-  utter.lang = 'ru-RU';
+  utter.lang = SPEECH_LOCALES[localStorage.getItem('nova_lang') || 'en'] || 'en-US';
   utter.onstart = () => btn.classList.add('speaking');
   utter.onend = () => { btn.classList.remove('speaking'); currentUtterance = null; };
   currentUtterance = utter;
@@ -2214,14 +2254,14 @@ async function requestAIReply(chat, opts){
 
   if(providerCfg.api === 'unsupported'){
     state.sending = false; setSendButtonState(false);
-    toast(`${providerCfg.name} пока не поддерживается напрямую. Используйте ключ OpenRouter, OpenAI, Anthropic или Groq.`, 'error');
+    toast(tt('provider_unsupported').replace('{name}', providerCfg.name), 'error');
     openSettings();
     return;
   }
 
   const model = customModel || providerCfg.defaultModel || 'gpt-4o-mini';
 
-  if(!opts.isFollowUp) showTyping();
+  showTyping();
   currentAbortController = new AbortController();
   chat.messages.push({ role:'assistant', content:'', time:new Date().toISOString() });
   const msgIndex = chat.messages.length - 1;
@@ -2333,7 +2373,7 @@ async function requestAIReply(chat, opts){
       return;
     }
 
-    if(!accumulated){ accumulated = 'Пустой ответ от модели.'; chat.messages[msgIndex].content = accumulated; }
+    if(!accumulated){ accumulated = tt('empty_response'); chat.messages[msgIndex].content = accumulated; }
     if(!liveRow){ liveRow = appendMessageEl({role:'assistant', content: accumulated}, msgIndex, true); }
     else { liveContentEl.innerHTML = renderMarkdown(accumulated); decorateCodeBlocks(liveRow); }
     persistChats(); scrollToBottom(); updateContextUsage();
@@ -2344,13 +2384,13 @@ async function requestAIReply(chat, opts){
       if(!accumulated){ chat.messages.pop(); } else { chat.messages[msgIndex].content = accumulated; if(liveContentEl) liveContentEl.innerHTML = renderMarkdown(accumulated); }
       persistChats(); toast(tt('generation_stopped'),'info');
     } else if(err.isModelError){
-      toast('Данная модель не доступна, выберите другую или выберите автовыбор', 'error');
-      chat.messages[msgIndex] = { role:'assistant', content: '⚠️ Данная модель не доступна, выберите другую или выберите автовыбор.' };
+      toast(tt('model_unavailable'), 'error');
+      chat.messages[msgIndex] = { role:'assistant', content: '⚠️ ' + tt('model_unavailable') + '.' };
       persistChats(); if(liveRow) liveRow.remove(); appendMessageEl(chat.messages[msgIndex], msgIndex, true);
       openSettings(); switchTab('model');
     } else {
-      if(state.settings.errorToasts) toast('Ошибка запроса: ' + err.message, 'error');
-      chat.messages[msgIndex] = { role:'assistant', content: '⚠️ Не удалось получить ответ: ' + err.message };
+      if(state.settings.errorToasts) toast(tt('request_error') + err.message, 'error');
+      chat.messages[msgIndex] = { role:'assistant', content: '⚠️ ' + tt('no_reply') + err.message };
       persistChats(); if(liveRow) liveRow.remove(); appendMessageEl(chat.messages[msgIndex], msgIndex, true);
     }
   }finally{
@@ -2372,11 +2412,11 @@ function updateContextUsage(){
   const MAX = 128000;
   const pct = Math.min(100, (total / MAX) * 100);
   const counterEl = document.getElementById('token-counter');
-  if(counterEl) counterEl.innerText = total > 0 ? `· ~${total.toLocaleString('ru-RU')} токенов` : '';
+  if(counterEl) counterEl.innerText = total > 0 ? `· ~${total.toLocaleString(currentLocale())} ${t('tokens_label')}` : '';
   const barEl = document.getElementById('context-usage-bar');
   const textEl = document.getElementById('context-usage-text');
   if(barEl) barEl.style.width = pct + '%';
-  if(textEl) textEl.innerText = `~${total.toLocaleString('ru-RU')} / ${MAX.toLocaleString('ru-RU')} токенов`;
+  if(textEl) textEl.innerText = `~${total.toLocaleString(currentLocale())} / ${MAX.toLocaleString(currentLocale())} ${t('tokens_label')}`;
 }
 
 /* ================= Attachments ================= */
@@ -2500,7 +2540,7 @@ function toggleVoiceInput(){
 }
 function startRecognizer(Ctor){
   recognizer = new (Ctor || window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognizer.lang = 'ru-RU'; recognizer.interimResults = true; recognizer.continuous = true;
+  recognizer.lang = SPEECH_LOCALES[localStorage.getItem('nova_lang') || 'en'] || 'en-US'; recognizer.interimResults = true; recognizer.continuous = true;
   const micBtn = document.getElementById('mic-btn');
   let finalTranscript = '';
 
@@ -3064,6 +3104,20 @@ function importBackup(file){
 }
 
 /* ================= Drag & drop attachments onto composer ================= */
+(function setupScrollBottomButton(){
+  const scrollEl = document.getElementById('chat-scroll');
+  const btn = document.getElementById('scroll-bottom-btn');
+  scrollEl.addEventListener('scroll', () => {
+    const distanceFromBottom = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight;
+    if(distanceFromBottom > 300){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
+    else { hideScrollBottomBtn(); }
+  });
+})();
+function hideScrollBottomBtn(){
+  const btn = document.getElementById('scroll-bottom-btn');
+  btn.classList.add('hidden'); btn.classList.remove('flex');
+}
+
 (function setupDragDrop(){
   const wrap = document.getElementById('composer-wrap');
   let dragCounter = 0;

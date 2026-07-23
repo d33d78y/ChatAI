@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/7.2.3/css/flag-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -195,6 +196,20 @@
   .slider::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; }
 
   .integration-card{ background: var(--bg-2); border:1px solid var(--border); border-radius:16px; padding:14px; display:flex; align-items:center; gap:12px; }
+  .info-badge{
+    width:20px; height:20px; border-radius:7px; background:#000000; border:1px solid rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; flex-shrink:0;
+    transition: transform .15s var(--ease), background .2s var(--ease);
+  }
+  .info-badge:hover{ background:#1a1a1a; transform: scale(1.08); }
+  .provider-help-card{ background:var(--bg-2); border:1px solid var(--border); border-radius:16px; padding:14px; }
+  .provider-help-card .ph-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .provider-help-card .ph-icon{ width:30px; height:30px; border-radius:9px; background:var(--accent-dim); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .provider-help-card .ph-name{ font-size:13.5px; font-weight:600; color:var(--text-hi); }
+  .provider-help-card .ph-prefix{ font-size:10.5px; color:var(--text-lo); font-family:monospace; }
+  .provider-help-card ol{ margin:0 0 8px 18px; padding:0; }
+  .provider-help-card ol li{ font-size:12.5px; color:var(--text-mid); line-height:1.6; }
+  .provider-help-card a{ font-size:12px; color:var(--accent); text-decoration:underline; }
   .avatar-upload{ width:64px; height:64px; border-radius:50%; background:var(--bg-2); border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; flex-shrink:0; transition: border-color .2s var(--ease); }
   .avatar-upload:hover{ border-color: var(--accent); }
   .avatar-upload img{ width:100%; height:100%; object-fit:cover; }
@@ -224,7 +239,10 @@
   @media (min-width: 640px){ #settings-panel{ height:600px; max-height:85vh; } }
 
   .accent-swatch{ width:36px; height:36px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); }
-  .lang-flag{ width:44px; height:36px; border-radius:10px; cursor:pointer; border:2px solid transparent; display:flex; align-items:center; justify-content:center; font-size:20px; background:var(--bg-2); transition: transform .15s var(--ease), border-color .15s var(--ease); }
+  .lang-flag{ width:48px; height:44px; border-radius:10px; cursor:pointer; border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:var(--bg-2); transition: transform .15s var(--ease), border-color .15s var(--ease); padding:4px 0; }
+  .lang-flag .fi{ border-radius:3px; width:20px; height:14px; background-size:cover; }
+  .lang-flag .lang-code{ font-size:9px; font-weight:600; color:var(--text-lo); letter-spacing:.03em; }
+  .lang-flag.selected .lang-code{ color:var(--accent); }
   .lang-flag:hover{ transform: scale(1.06); }
   .lang-flag.selected{ border-color: var(--accent); }
   .accent-swatch:hover{ transform: scale(1.1); }
@@ -442,6 +460,26 @@
   </div>
 </div>
 
+<!-- API KEY HELP MODAL -->
+<div id="api-key-help-modal" class="fixed inset-0 z-[110] modal-backdrop hidden items-center justify-center px-4" onclick="if(event.target===this) closeApiKeyHelp()">
+  <div class="modal-panel glass rounded-3xl w-full max-w-lg p-5" style="background:var(--bg-1); max-height:85vh; overflow-y:auto;">
+    <div class="flex items-center justify-between mb-4">
+      <div class="font-medium text-sm" data-i18n="api_key_help_modal_title">Как получить и вставить API-ключ</div>
+      <button onclick="closeApiKeyHelp()" class="icon-btn w-8 h-8 rounded-lg flex items-center justify-center" style="color:var(--text-mid)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <svg viewBox="0 0 340 90" class="w-full mb-4" style="max-height:90px;">
+      <rect x="10" y="34" width="230" height="30" rx="9" fill="#18181B" stroke="#f97316" stroke-width="1.5"/>
+      <text x="24" y="53" font-size="11" fill="#71717a" font-family="monospace">sk-••••••••••••••••</text>
+      <path d="M250 49 H300" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>
+      <path d="M292 42 L302 49 L292 56" stroke="#f97316" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="248" y="25" font-size="10.5" fill="#f4f4f5" font-family="sans-serif" text-anchor="middle" data-i18n="api_key_help_diagram_label">Вставьте ключ сюда</text>
+    </svg>
+
+    <div class="space-y-4" id="api-key-help-providers"></div>
+  </div>
+</div>
+
 <!-- MESSAGE EDIT MODAL removed: inline editing used instead -->
 
 <!-- SETTINGS MODAL -->
@@ -493,7 +531,12 @@
             <div id="language-picker" class="flex flex-wrap items-center gap-2"></div>
           </div>
           <div>
-            <label class="text-xs font-medium block mb-1.5" style="color:var(--text-mid)" data-i18n="api_key_label">API ключ</label>
+            <div class="flex items-center gap-2 mb-1.5">
+              <label class="text-xs font-medium" style="color:var(--text-mid)" data-i18n="api_key_label">API ключ</label>
+              <button onclick="openApiKeyHelp()" class="info-badge" title="Как получить ключ?" data-i18n-title="api_key_help_title">
+                <i class="fa-solid fa-circle-exclamation"></i>
+              </button>
+            </div>
             <input id="api-key-input" type="password" placeholder="Вставьте свой API-ключ..." data-i18n-placeholder="api_key_placeholder" class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-hi)" oninput="updateProviderDetection()">
             <div id="provider-detection" class="text-[11px] mt-1.5 flex items-center gap-1.5" style="color:var(--text-lo)"></div>
             <p class="text-[11px] mt-1.5" style="color:var(--text-lo)" data-i18n="api_key_help">Хранится только в вашем браузере (localStorage) и никуда, кроме сервиса, которому принадлежит ключ, не отправляется.</p>
@@ -603,13 +646,6 @@
             <div><div class="text-sm font-medium" data-i18n="autoscroll_label">Автоскролл</div><div class="text-xs" style="color:var(--text-lo)" data-i18n="autoscroll_sub">Автоматически прокручивать к новым сообщениям</div></div>
             <div class="switch on" onclick="toggleSwitch(this,'autoscroll')"><div class="knob"></div></div>
           </div>
-          <div class="rounded-xl p-3 text-xs space-y-1.5" style="background:var(--bg-2); border:1px solid var(--border); color:var(--text-lo)">
-            <div class="font-medium mb-1" style="color:var(--text-mid)" data-i18n="shortcuts_title">Горячие клавиши</div>
-            <div>Ctrl/⌘ + K — <span data-i18n="shortcuts_new_chat">новый чат</span></div>
-            <div>Ctrl/⌘ + F — <span data-i18n="shortcuts_search">поиск по чатам</span></div>
-            <div>Enter — <span data-i18n="shortcuts_send">отправить</span> · Shift+Enter — <span data-i18n="shortcuts_newline">новая строка</span></div>
-            <div>Esc — <span data-i18n="shortcuts_esc">закрыть окно/меню</span></div>
-          </div>
         </div>
 
         <!-- Appearance -->
@@ -700,8 +736,20 @@
 
 <script>
 /* ================= CONSTANTS ================= */
-const APP_VERSION = '1.6.1';
+const APP_VERSION = '1.7.0';
 const CHANGELOG = [
+  { version:'1.7.0', date:'2026-07-24', changes:{
+    en:{
+      features:['Info button next to the API key field with step-by-step instructions for OpenRouter/OpenAI/Anthropic/Groq', 'Language flags now render as real images instead of emoji text (fixes them showing as "GB"/"RU" on Windows)', '4 more languages: Belarusian, Kazakh, Korean, Hindi (18 total)', 'Update-check banner: shows when a newer version is live and offers a one-click refresh'],
+      fixes:['Requests no longer fail outright when a model/service doesn\'t support file-creation tools — retried automatically without them', 'Raw JSON/HTTP error dumps for invalid or misconfigured API keys replaced with a clear message pointing to Settings → General → API key field'],
+      improvements:['Removed the on-screen "Keyboard shortcuts" text block (the shortcuts themselves still work)'],
+    },
+    ru:{
+      features:['Кнопка-подсказка рядом с полем API-ключа с пошаговой инструкцией для OpenRouter/OpenAI/Anthropic/Groq', 'Флаги языков теперь настоящие картинки, а не эмодзи-текст (раньше на Windows показывались как "GB"/"RU")', 'Ещё 4 языка: белорусский, казахский, корейский, хинди (всего 18)', 'Баннер проверки обновлений: показывает, когда вышла новая версия, с кнопкой обновить страницу'],
+      fixes:['Запросы больше не падают с ошибкой, если модель/сервис не поддерживает создание файлов — автоматически повторяются без этой функции', 'Сырой JSON/HTTP-дамп ошибки при неверном или ненастроенном ключе заменён понятным сообщением со ссылкой на Настройки → Общие → поле API-ключа'],
+      improvements:['Убран текстовый блок "Горячие клавиши" с экрана (сами сочетания клавиш продолжают работать)'],
+    },
+  }},
   { version:'1.6.1', date:'2026-07-16', changes:{
     en:{
       fixes:['Typing indicator no longer disappears during the AI\'s follow-up reply after creating a file', 'Deleting an AI message that created a file no longer leaves orphaned data behind', 'Voice input, read-aloud, timestamps, and the token counter now use the selected interface language instead of always Russian', 'Translated the remaining error messages (unsupported service, empty response, unavailable model, request errors)'],
@@ -804,20 +852,24 @@ const DEFAULT_INTEGRATIONS = [
 
 /* ================= I18N ================= */
 const LANGUAGES = [
-  { code:'en', flag:'🇬🇧', label:'English' },
-  { code:'ru', flag:'🇷🇺', label:'Русский' },
-  { code:'es', flag:'🇪🇸', label:'Español' },
-  { code:'de', flag:'🇩🇪', label:'Deutsch' },
-  { code:'fr', flag:'🇫🇷', label:'Français' },
-  { code:'zh', flag:'🇨🇳', label:'中文' },
-  { code:'pt', flag:'🇵🇹', label:'Português' },
-  { code:'it', flag:'🇮🇹', label:'Italiano' },
-  { code:'nl', flag:'🇳🇱', label:'Nederlands' },
-  { code:'pl', flag:'🇵🇱', label:'Polski' },
-  { code:'tr', flag:'🇹🇷', label:'Türkçe' },
-  { code:'ar', flag:'🇸🇦', label:'العربية' },
-  { code:'ja', flag:'🇯🇵', label:'日本語' },
-  { code:'uk', flag:'🇺🇦', label:'Українська' },
+  { code:'en', country:'gb', short:'EN', label:'English' },
+  { code:'ru', country:'ru', short:'RU', label:'Русский' },
+  { code:'es', country:'es', short:'ES', label:'Español' },
+  { code:'de', country:'de', short:'DE', label:'Deutsch' },
+  { code:'fr', country:'fr', short:'FR', label:'Français' },
+  { code:'zh', country:'cn', short:'ZH', label:'中文' },
+  { code:'pt', country:'pt', short:'PT', label:'Português' },
+  { code:'it', country:'it', short:'IT', label:'Italiano' },
+  { code:'nl', country:'nl', short:'NL', label:'Nederlands' },
+  { code:'pl', country:'pl', short:'PL', label:'Polski' },
+  { code:'tr', country:'tr', short:'TR', label:'Türkçe' },
+  { code:'ar', country:'sa', short:'AR', label:'العربية' },
+  { code:'ja', country:'jp', short:'JA', label:'日本語' },
+  { code:'uk', country:'ua', short:'UK', label:'Українська' },
+  { code:'be', country:'by', short:'BE', label:'Беларуская' },
+  { code:'kk', country:'kz', short:'KK', label:'Қазақша' },
+  { code:'ko', country:'kr', short:'KO', label:'한국어' },
+  { code:'hi', country:'in', short:'HI', label:'हिन्दी' },
 ];
 const I18N = {
 en:{
@@ -833,7 +885,7 @@ en:{
   settings_title:'Settings', tab_general:'General', tab_model:'Model', tab_profile:'Profile', tab_interface:'Interface',
   tab_appearance:'Appearance', tab_experimental:'Experimental', tab_integrations:'Integrations', tab_prompts:'Prompts',
   tab_changelog:"What's new", tab_about:'About',
-  api_key_label:'API key', api_key_placeholder:'Paste your API key...', api_key_help:'Stored only in your browser and sent only to the service the key belongs to.',
+  api_key_label:'API key', api_key_placeholder:'Paste your API key...', api_key_help:'Stored only in your browser and sent only to the service the key belongs to.', api_key_help_title:'How to get a key?', api_key_help_modal_title:'How to get and paste an API key', api_key_help_diagram_label:'Paste your key here',
   backup_label:'Backup', backup_export:'Export all data', backup_import:'Import', backup_help:'Saves all chats and settings into one file — handy for moving to another device.',
   error_toasts_label:'Error notifications', error_toasts_sub:'Show toasts on network errors',
   confirm_delete_label:'Confirm deletion', confirm_delete_sub:'Ask before deleting a chat',
@@ -884,7 +936,7 @@ ru:{
   settings_title:'Настройки', tab_general:'Общие', tab_model:'Модель', tab_profile:'Профиль', tab_interface:'Интерфейс',
   tab_appearance:'Внешний вид', tab_experimental:'Эксперименты', tab_integrations:'Интеграции', tab_prompts:'Промпты',
   tab_changelog:'Что нового', tab_about:'О приложении',
-  api_key_label:'API ключ', api_key_placeholder:'Вставьте свой API-ключ...', api_key_help:'Хранится только в вашем браузере и отправляется только сервису, которому принадлежит ключ.',
+  api_key_label:'API ключ', api_key_placeholder:'Вставьте свой API-ключ...', api_key_help:'Хранится только в вашем браузере и отправляется только сервису, которому принадлежит ключ.', api_key_help_title:'Как получить ключ?', api_key_help_modal_title:'Как получить и вставить API-ключ', api_key_help_diagram_label:'Вставьте ключ сюда',
   backup_label:'Резервная копия', backup_export:'Экспорт всех данных', backup_import:'Импорт', backup_help:'Сохраняет все чаты и настройки в один файл — удобно перенести на другое устройство.',
   error_toasts_label:'Звук уведомлений об ошибках', error_toasts_sub:'Показывать тосты при сетевых ошибках',
   confirm_delete_label:'Подтверждение удаления', confirm_delete_sub:'Спрашивать перед удалением чата',
@@ -935,7 +987,7 @@ es:{
   settings_title:'Ajustes', tab_general:'General', tab_model:'Modelo', tab_profile:'Perfil', tab_interface:'Interfaz',
   tab_appearance:'Apariencia', tab_experimental:'Experimental', tab_integrations:'Integraciones', tab_prompts:'Prompts',
   tab_changelog:'Novedades', tab_about:'Acerca de',
-  api_key_label:'Clave API', api_key_placeholder:'Pega tu clave API...', api_key_help:'Se guarda solo en tu navegador y se envía solo al servicio dueño de la clave.',
+  api_key_label:'Clave API', api_key_placeholder:'Pega tu clave API...', api_key_help:'Se guarda solo en tu navegador y se envía solo al servicio dueño de la clave.', api_key_help_title:'¿Cómo obtener una clave?', api_key_help_modal_title:'Cómo obtener y pegar una clave API', api_key_help_diagram_label:'Pega tu clave aquí',
   backup_label:'Copia de seguridad', backup_export:'Exportar todos los datos', backup_import:'Importar', backup_help:'Guarda todos los chats y ajustes en un archivo — útil para cambiar de dispositivo.',
   error_toasts_label:'Notificaciones de error', error_toasts_sub:'Mostrar avisos ante errores de red',
   confirm_delete_label:'Confirmar eliminación', confirm_delete_sub:'Preguntar antes de eliminar un chat',
@@ -986,7 +1038,7 @@ de:{
   settings_title:'Einstellungen', tab_general:'Allgemein', tab_model:'Modell', tab_profile:'Profil', tab_interface:'Oberfläche',
   tab_appearance:'Erscheinungsbild', tab_experimental:'Experimentell', tab_integrations:'Integrationen', tab_prompts:'Prompts',
   tab_changelog:'Neuigkeiten', tab_about:'Über',
-  api_key_label:'API-Schlüssel', api_key_placeholder:'API-Schlüssel einfügen...', api_key_help:'Wird nur in deinem Browser gespeichert und nur an den zugehörigen Dienst gesendet.',
+  api_key_label:'API-Schlüssel', api_key_placeholder:'API-Schlüssel einfügen...', api_key_help:'Wird nur in deinem Browser gespeichert und nur an den zugehörigen Dienst gesendet.', api_key_help_title:'Wie bekomme ich einen Schlüssel?', api_key_help_modal_title:'API-Schlüssel erhalten und einfügen', api_key_help_diagram_label:'Schlüssel hier einfügen',
   backup_label:'Sicherung', backup_export:'Alle Daten exportieren', backup_import:'Importieren', backup_help:'Speichert alle Chats und Einstellungen in einer Datei — praktisch für den Gerätewechsel.',
   error_toasts_label:'Fehlerbenachrichtigungen', error_toasts_sub:'Hinweise bei Netzwerkfehlern anzeigen',
   confirm_delete_label:'Löschen bestätigen', confirm_delete_sub:'Vor dem Löschen eines Chats nachfragen',
@@ -1037,7 +1089,7 @@ fr:{
   settings_title:'Paramètres', tab_general:'Général', tab_model:'Modèle', tab_profile:'Profil', tab_interface:'Interface',
   tab_appearance:'Apparence', tab_experimental:'Expérimental', tab_integrations:'Intégrations', tab_prompts:'Prompts',
   tab_changelog:'Nouveautés', tab_about:'À propos',
-  api_key_label:'Clé API', api_key_placeholder:'Collez votre clé API...', api_key_help:'Stockée uniquement dans votre navigateur, envoyée uniquement au service propriétaire de la clé.',
+  api_key_label:'Clé API', api_key_placeholder:'Collez votre clé API...', api_key_help:'Stockée uniquement dans votre navigateur, envoyée uniquement au service propriétaire de la clé.', api_key_help_title:'Comment obtenir une clé ?', api_key_help_modal_title:'Comment obtenir et coller une clé API', api_key_help_diagram_label:'Collez votre clé ici',
   backup_label:'Sauvegarde', backup_export:'Exporter toutes les données', backup_import:'Importer', backup_help:'Enregistre toutes les discussions et paramètres dans un fichier — pratique pour changer d’appareil.',
   error_toasts_label:'Notifications d’erreur', error_toasts_sub:'Afficher des messages en cas d’erreur réseau',
   confirm_delete_label:'Confirmer la suppression', confirm_delete_sub:'Demander avant de supprimer une discussion',
@@ -1088,7 +1140,7 @@ zh:{
   settings_title:'设置', tab_general:'通用', tab_model:'模型', tab_profile:'个人资料', tab_interface:'界面',
   tab_appearance:'外观', tab_experimental:'实验性', tab_integrations:'集成', tab_prompts:'提示词库',
   tab_changelog:'更新日志', tab_about:'关于',
-  api_key_label:'API 密钥', api_key_placeholder:'粘贴你的 API 密钥...', api_key_help:'仅保存在你的浏览器中，只发送给密钥所属的服务。',
+  api_key_label:'API 密钥', api_key_placeholder:'粘贴你的 API 密钥...', api_key_help:'仅保存在你的浏览器中，只发送给密钥所属的服务。', api_key_help_title:'如何获取密钥？', api_key_help_modal_title:'如何获取并粘贴 API 密钥', api_key_help_diagram_label:'将密钥粘贴到这里',
   backup_label:'备份', backup_export:'导出全部数据', backup_import:'导入', backup_help:'将所有对话和设置保存到一个文件中，方便更换设备。',
   error_toasts_label:'错误提示', error_toasts_sub:'网络出错时显示提示',
   confirm_delete_label:'删除前确认', confirm_delete_sub:'删除对话前先询问',
@@ -1139,7 +1191,7 @@ pt:{
   settings_title:'Definições', tab_general:'Geral', tab_model:'Modelo', tab_profile:'Perfil', tab_interface:'Interface',
   tab_appearance:'Aparência', tab_experimental:'Experimental', tab_integrations:'Integrações', tab_prompts:'Prompts',
   tab_changelog:'Novidades', tab_about:'Sobre',
-  api_key_label:'Chave API', api_key_placeholder:'Cola a tua chave API...', api_key_help:'Guardada apenas no teu navegador, enviada apenas ao serviço dono da chave.',
+  api_key_label:'Chave API', api_key_placeholder:'Cola a tua chave API...', api_key_help:'Guardada apenas no teu navegador, enviada apenas ao serviço dono da chave.', api_key_help_title:'Como obter uma chave?', api_key_help_modal_title:'Como obter e colar uma chave API', api_key_help_diagram_label:'Cola a tua chave aqui',
   backup_label:'Cópia de segurança', backup_export:'Exportar todos os dados', backup_import:'Importar', backup_help:'Guarda todos os chats e definições num ficheiro — útil para mudar de dispositivo.',
   error_toasts_label:'Notificações de erro', error_toasts_sub:'Mostrar avisos em erros de rede',
   confirm_delete_label:'Confirmar eliminação', confirm_delete_sub:'Perguntar antes de eliminar um chat',
@@ -1190,7 +1242,7 @@ it:{
   settings_title:'Impostazioni', tab_general:'Generale', tab_model:'Modello', tab_profile:'Profilo', tab_interface:'Interfaccia',
   tab_appearance:'Aspetto', tab_experimental:'Sperimentale', tab_integrations:'Integrazioni', tab_prompts:'Prompt',
   tab_changelog:'Novità', tab_about:'Info',
-  api_key_label:'Chiave API', api_key_placeholder:'Incolla la tua chiave API...', api_key_help:'Salvata solo nel tuo browser, inviata solo al servizio proprietario della chiave.',
+  api_key_label:'Chiave API', api_key_placeholder:'Incolla la tua chiave API...', api_key_help:'Salvata solo nel tuo browser, inviata solo al servizio proprietario della chiave.', api_key_help_title:'Come ottenere una chiave?', api_key_help_modal_title:'Come ottenere e incollare una chiave API', api_key_help_diagram_label:'Incolla qui la tua chiave',
   backup_label:'Backup', backup_export:'Esporta tutti i dati', backup_import:'Importa', backup_help:'Salva tutte le chat e le impostazioni in un file — utile per cambiare dispositivo.',
   error_toasts_label:'Notifiche di errore', error_toasts_sub:'Mostra avvisi in caso di errori di rete',
   confirm_delete_label:'Conferma eliminazione', confirm_delete_sub:'Chiedi prima di eliminare una chat',
@@ -1241,7 +1293,7 @@ nl:{
   settings_title:'Instellingen', tab_general:'Algemeen', tab_model:'Model', tab_profile:'Profiel', tab_interface:'Interface',
   tab_appearance:'Weergave', tab_experimental:'Experimenteel', tab_integrations:'Integraties', tab_prompts:'Prompts',
   tab_changelog:'Nieuw', tab_about:'Over',
-  api_key_label:'API-sleutel', api_key_placeholder:'Plak je API-sleutel...', api_key_help:'Wordt alleen in je browser opgeslagen en alleen naar de bijbehorende dienst gestuurd.',
+  api_key_label:'API-sleutel', api_key_placeholder:'Plak je API-sleutel...', api_key_help:'Wordt alleen in je browser opgeslagen en alleen naar de bijbehorende dienst gestuurd.', api_key_help_title:'Hoe kom ik aan een sleutel?', api_key_help_modal_title:'Een API-sleutel verkrijgen en plakken', api_key_help_diagram_label:'Plak je sleutel hier',
   backup_label:'Back-up', backup_export:'Alle gegevens exporteren', backup_import:'Importeren', backup_help:'Slaat alle chats en instellingen op in één bestand — handig bij het wisselen van apparaat.',
   error_toasts_label:'Foutmeldingen', error_toasts_sub:'Meldingen tonen bij netwerkfouten',
   confirm_delete_label:'Verwijderen bevestigen', confirm_delete_sub:'Vragen voordat een chat wordt verwijderd',
@@ -1292,7 +1344,7 @@ pl:{
   settings_title:'Ustawienia', tab_general:'Ogólne', tab_model:'Model', tab_profile:'Profil', tab_interface:'Interfejs',
   tab_appearance:'Wygląd', tab_experimental:'Eksperymentalne', tab_integrations:'Integracje', tab_prompts:'Prompty',
   tab_changelog:'Nowości', tab_about:'O aplikacji',
-  api_key_label:'Klucz API', api_key_placeholder:'Wklej swój klucz API...', api_key_help:'Przechowywany tylko w Twojej przeglądarce i wysyłany wyłącznie do usługi, do której należy klucz.',
+  api_key_label:'Klucz API', api_key_placeholder:'Wklej swój klucz API...', api_key_help:'Przechowywany tylko w Twojej przeglądarce i wysyłany wyłącznie do usługi, do której należy klucz.', api_key_help_title:'Jak zdobyć klucz?', api_key_help_modal_title:'Jak zdobyć i wkleić klucz API', api_key_help_diagram_label:'Wklej tutaj swój klucz',
   backup_label:'Kopia zapasowa', backup_export:'Eksportuj wszystkie dane', backup_import:'Importuj', backup_help:'Zapisuje wszystkie czaty i ustawienia w jednym pliku — przydatne przy zmianie urządzenia.',
   error_toasts_label:'Powiadomienia o błędach', error_toasts_sub:'Pokazuj powiadomienia przy błędach sieci',
   confirm_delete_label:'Potwierdzenie usunięcia', confirm_delete_sub:'Pytaj przed usunięciem czatu',
@@ -1343,7 +1395,7 @@ tr:{
   settings_title:'Ayarlar', tab_general:'Genel', tab_model:'Model', tab_profile:'Profil', tab_interface:'Arayüz',
   tab_appearance:'Görünüm', tab_experimental:'Deneysel', tab_integrations:'Entegrasyonlar', tab_prompts:'Promptlar',
   tab_changelog:'Yenilikler', tab_about:'Hakkında',
-  api_key_label:'API anahtarı', api_key_placeholder:'API anahtarını yapıştır...', api_key_help:'Yalnızca tarayıcında saklanır ve yalnızca anahtarın ait olduğu servise gönderilir.',
+  api_key_label:'API anahtarı', api_key_placeholder:'API anahtarını yapıştır...', api_key_help:'Yalnızca tarayıcında saklanır ve yalnızca anahtarın ait olduğu servise gönderilir.', api_key_help_title:'Anahtar nasıl alınır?', api_key_help_modal_title:'API anahtarı nasıl alınır ve yapıştırılır', api_key_help_diagram_label:'Anahtarını buraya yapıştır',
   backup_label:'Yedekleme', backup_export:'Tüm verileri dışa aktar', backup_import:'İçe aktar', backup_help:'Tüm sohbetleri ve ayarları tek dosyada saklar — cihaz değiştirirken kullanışlıdır.',
   error_toasts_label:'Hata bildirimleri', error_toasts_sub:'Ağ hatalarında bildirim göster',
   confirm_delete_label:'Silmeyi onayla', confirm_delete_sub:'Sohbeti silmeden önce sor',
@@ -1394,7 +1446,7 @@ ar:{
   settings_title:'الإعدادات', tab_general:'عام', tab_model:'النموذج', tab_profile:'الملف الشخصي', tab_interface:'الواجهة',
   tab_appearance:'المظهر', tab_experimental:'تجريبي', tab_integrations:'التكاملات', tab_prompts:'الأوامر المحفوظة',
   tab_changelog:'الجديد', tab_about:'حول',
-  api_key_label:'مفتاح API', api_key_placeholder:'الصق مفتاح API الخاص بك...', api_key_help:'يُحفظ فقط في متصفحك ويُرسل فقط إلى الخدمة المالكة للمفتاح.',
+  api_key_label:'مفتاح API', api_key_placeholder:'الصق مفتاح API الخاص بك...', api_key_help:'يُحفظ فقط في متصفحك ويُرسل فقط إلى الخدمة المالكة للمفتاح.', api_key_help_title:'كيف تحصل على مفتاح؟', api_key_help_modal_title:'كيفية الحصول على مفتاح API ولصقه', api_key_help_diagram_label:'الصق مفتاحك هنا',
   backup_label:'نسخة احتياطية', backup_export:'تصدير جميع البيانات', backup_import:'استيراد', backup_help:'يحفظ جميع المحادثات والإعدادات في ملف واحد — مفيد عند تغيير الجهاز.',
   error_toasts_label:'إشعارات الأخطاء', error_toasts_sub:'إظهار إشعارات عند أخطاء الشبكة',
   confirm_delete_label:'تأكيد الحذف', confirm_delete_sub:'السؤال قبل حذف المحادثة',
@@ -1445,7 +1497,7 @@ ja:{
   settings_title:'設定', tab_general:'一般', tab_model:'モデル', tab_profile:'プロフィール', tab_interface:'インターフェース',
   tab_appearance:'外観', tab_experimental:'実験的機能', tab_integrations:'連携', tab_prompts:'プロンプト集',
   tab_changelog:'更新情報', tab_about:'アプリについて',
-  api_key_label:'APIキー', api_key_placeholder:'APIキーを貼り付け...', api_key_help:'ブラウザにのみ保存され、キーの所有元サービスにのみ送信されます。',
+  api_key_label:'APIキー', api_key_placeholder:'APIキーを貼り付け...', api_key_help:'ブラウザにのみ保存され、キーの所有元サービスにのみ送信されます。', api_key_help_title:'キーの取得方法は？', api_key_help_modal_title:'APIキーの取得と貼り付け方法', api_key_help_diagram_label:'ここにキーを貼り付け',
   backup_label:'バックアップ', backup_export:'すべてのデータをエクスポート', backup_import:'インポート', backup_help:'すべてのチャットと設定を1つのファイルに保存します — 端末変更に便利です。',
   error_toasts_label:'エラー通知', error_toasts_sub:'ネットワークエラー時に通知を表示',
   confirm_delete_label:'削除の確認', confirm_delete_sub:'チャット削除前に確認する',
@@ -1496,7 +1548,7 @@ uk:{
   settings_title:'Налаштування', tab_general:'Загальні', tab_model:'Модель', tab_profile:'Профіль', tab_interface:'Інтерфейс',
   tab_appearance:'Зовнішній вигляд', tab_experimental:'Експерименти', tab_integrations:'Інтеграції', tab_prompts:'Промпти',
   tab_changelog:'Що нового', tab_about:'Про застосунок',
-  api_key_label:'API ключ', api_key_placeholder:'Вставте свій API-ключ...', api_key_help:'Зберігається лише у вашому браузері й надсилається лише сервісу, якому належить ключ.',
+  api_key_label:'API ключ', api_key_placeholder:'Вставте свій API-ключ...', api_key_help:'Зберігається лише у вашому браузері й надсилається лише сервісу, якому належить ключ.', api_key_help_title:'Як отримати ключ?', api_key_help_modal_title:'Як отримати та вставити API-ключ', api_key_help_diagram_label:'Вставте ключ сюди',
   backup_label:'Резервна копія', backup_export:'Експорт усіх даних', backup_import:'Імпорт', backup_help:'Зберігає всі чати й налаштування в один файл — зручно перенести на інший пристрій.',
   error_toasts_label:'Сповіщення про помилки', error_toasts_sub:'Показувати сповіщення при мережевих помилках',
   confirm_delete_label:'Підтвердження видалення', confirm_delete_sub:'Питати перед видаленням чату',
@@ -1533,11 +1585,243 @@ uk:{
   camera_title:'Камера', camera_capture:'Зробити знімок',
   provider_connected:'Підключено сервіс: {name}', provider_unknown:'Сервіс не розпізнано — спробуємо як OpenAI-сумісний API',
   provider_google:'Виявлено ключ Google Gemini — пряма підтримка ще не реалізована',
+},
+be:{
+  new_chat:'Новы чат', search_placeholder:'Пошук па чатах...', history_label:'Гісторыя', settings:'Налады',
+  download_title:'Спампаваць чат', share_title:'Падзяліцца', menu_title:'Меню',
+  empty_title:'Чым зоймемся сёння?', empty_subtitle:'Задай пытанне, устаў тэкст або абмяркуй ідэю — BarbosovAI на сувязі.',
+  prompt1_title:'Патлумач складаную тэму', prompt1_sub:'простымі словамі',
+  prompt2_title:'Складзі план', prompt2_sub:'на наступны тыдзень',
+  prompt3_title:'Напішы код', prompt3_sub:'на любой мове',
+  prompt4_title:'Прыдумай ідэю', prompt4_sub:'для любога выпадку',
+  composer_placeholder:'Напішыце паведамленне...', composer_disclaimer:'BarbosovAI можа памыляцца. Правярайце важныя факты.',
+  attach_title:'Дадаць', mic_title:'Галасавы ўвод',
+  settings_title:'Налады', tab_general:'Агульныя', tab_model:'Мадэль', tab_profile:'Профіль', tab_interface:'Інтэрфейс',
+  tab_appearance:'Знешні выгляд', tab_experimental:'Эксперыменты', tab_integrations:'Інтэграцыі', tab_prompts:'Промпты',
+  tab_changelog:'Што новага', tab_about:'Пра праграму',
+  api_key_label:'API ключ', api_key_placeholder:'Устаўце свой API-ключ...', api_key_help:'Захоўваецца толькі ў вашым браўзеры і адпраўляецца толькі сэрвісу, якому належыць ключ.',
+  api_key_help_title:'Як атрымаць ключ?', api_key_help_modal_title:'Як атрымаць і ўставіць API-ключ', api_key_help_diagram_label:'Устаўце ключ сюды',
+  backup_label:'Рэзервовая копія', backup_export:'Экспарт усіх даных', backup_import:'Імпарт', backup_help:'Захоўвае ўсе чаты і налады ў адзін файл — зручна перанесці на іншую прыладу.',
+  error_toasts_label:'Гук апавяшчэнняў пра памылкі', error_toasts_sub:'Паказваць апавяшчэнні пры сеткавых памылках',
+  confirm_delete_label:'Пацвярджэнне выдалення', confirm_delete_sub:'Пытаць перад выдаленнем чата',
+  save:'Захаваць', cancel:'Скасаваць', language_label:'Мова інтэрфейсу',
+  model_label:'Мадэль', model_hint:'Спіс вышэй падыходзіць для ключоў OpenRouter. Калі ваш ключ ад іншага сэрвісу, увядзіце назву мадэлі ўручную.',
+  model_manual_toggle:'Увесці мадэль уручную', model_manual_placeholder:'напрыклад gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Калі пакінуць пустым, будзе выкарыстана мадэль па змаўчанні для вашага сэрвісу.',
+  system_prompt_label:'Сістэмны промпт (інструкцыі для ШІ)', system_prompt_placeholder:'Напрыклад: Заўсёды адказвай коратка. Ты — senior-распрацоўшчык.',
+  temperature_label:'Temperature (крэатыўнасць)', topp_label:'Top-P', context_label:'Кантэкст бягучага чата', tokens_label:'токенаў',
+  avatar_upload:'Загрузіць фота', avatar_remove:'Выдаліць фота', your_name:'Ваша імя', your_name_placeholder:'Госць',
+  compact_label:'Кампактны рэжым', compact_sub:'Паменшыць адступы ў паведамленнях',
+  large_font_label:'Вялікі шрыфт', large_font_sub:'Павялічыць памер тэксту паведамленняў',
+  send_sound_label:'Гук адпраўкі', send_sound_sub:'Прайграваць гук пры адпраўцы паведамлення',
+  receive_sound_label:'Гук атрымання', receive_sound_sub:'Прайграваць гук, калі ШІ скончыў адказваць',
+  timestamps_label:'Час паведамленняў', timestamps_sub:'Паказваць час пад кожным паведамленнем',
+  autoscroll_label:'Аўтапракрутка', autoscroll_sub:'Аўтаматычна пракручваць да новых паведамленняў',
+  shortcuts_title:'Гарачыя клавішы', shortcuts_new_chat:'Новы чат', shortcuts_search:'Пошук па чатах',
+  shortcuts_send:'Адправіць', shortcuts_newline:'Новы радок', shortcuts_esc:'Закрыць акно/меню',
+  accent_label:'Акцэнтны колер', animations_label:'Анімацыі інтэрфейсу', animations_sub:'Плаўныя пераходы і з\'яўленні элементаў',
+  avatar_show_label:'Паказваць аватар ШІ', avatar_show_sub:'Значок BarbosovAI побач з адказамі',
+  dense_label:'Шчыльны спіс чатаў', dense_sub:'Меншыя адступы ў гісторыі злева',
+  streaming_label:'Патокавая генерацыя', streaming_sub:'Паказваць адказ у працэсе генерацыі',
+  reasoning_label:'Рэжым разважанняў', reasoning_sub:'Прасіць мадэль паказваць ход думак (калі падтрымлівае)',
+  tools_label:'ШІ можа ствараць файлы', tools_sub:'Архівы, табліцы і файлы — па ўласнай ініцыятыве. Адключыце, калі гэта ломіць адказы канкрэтнай мадэлі.',
+  integrations_desc:'Падключыце староннія сэрвісы. Токены захоўваюцца толькі лакальна.', wip_title:'У распрацоўцы', wip_sub:'Інтэграцыі неўзабаве з\'явяцца',
+  prompts_add:'Захаваць новы промпт', prompts_empty:'Пакуль няма захаваных промптаў',
+  changelog_newer:'Навейшае', changelog_older:'Старэйшае', changelog_page:'Версія {n} з {total}',
+  about_desc:'Ваш уласны ШІ праз API key. Усе даныя захоўваюцца лакальна ў вашым браўзеры.',
+  msg_copy:'Капіяваць', msg_speak:'Агучыць', msg_regenerate:'Паўтарыць', msg_like:'Падабаецца', msg_dislike:'Не падабаецца', msg_delete:'Выдаліць', msg_edit:'Рэдагаваць',
+  attach_camera:'Камера', attach_photo:'Фота з галерэі', attach_file:'Файл',
+  share_via_system:'Падзяліцца праз...', share_copy_link:'Капіяваць спасылку', share_copy_text:'Капіяваць тэкст чата',
+  more_rename:'Перайменаваць чат', more_pin:'Замацаваць чат', more_unpin:'Адмацаваць чат', more_duplicate:'Дубляваць чат',
+  more_clear:'Ачысціць паведамленні', more_export:'Экспартаваць (.txt)', more_export_pdf:'Экспартаваць у PDF', more_delete:'Выдаліць чат',
+  camera_title:'Камера', camera_capture:'Зрабіць здымак',
+  provider_connected:'Падключаны сэрвіс: {name}', provider_unknown:'Сэрвіс не распазнаны — паспрабуем як OpenAI-сумяшчальны API',
+  provider_google:'Выяўлены ключ Google Gemini — прамая падтрымка яшчэ не рэалізавана',
+},
+kk:{
+  new_chat:'Жаңа чат', search_placeholder:'Чаттардан іздеу...', history_label:'Тарих', settings:'Параметрлер',
+  download_title:'Чатты жүктеу', share_title:'Бөлісу', menu_title:'Мәзір',
+  empty_title:'Бүгін немен айналысамыз?', empty_subtitle:'Сұрақ қой, мәтін қой немесе идеяны талқыла — BarbosovAI дайын.',
+  prompt1_title:'Күрделі тақырыпты түсіндір', prompt1_sub:'қарапайым сөздермен',
+  prompt2_title:'Жоспар құр', prompt2_sub:'келесі аптаға',
+  prompt3_title:'Код жаз', prompt3_sub:'кез келген тілде',
+  prompt4_title:'Идея ұсын', prompt4_sub:'кез келген жағдайға',
+  composer_placeholder:'Хабарлама жазыңыз...', composer_disclaimer:'BarbosovAI қателесуі мүмкін. Маңызды деректерді тексеріңіз.',
+  attach_title:'Тіркеу', mic_title:'Дауыстық енгізу',
+  settings_title:'Параметрлер', tab_general:'Жалпы', tab_model:'Модель', tab_profile:'Профиль', tab_interface:'Интерфейс',
+  tab_appearance:'Сыртқы түрі', tab_experimental:'Эксперименттер', tab_integrations:'Интеграциялар', tab_prompts:'Промпттар',
+  tab_changelog:'Не жаңалық', tab_about:'Қолданба туралы',
+  api_key_label:'API кілті', api_key_placeholder:'API кілтіңізді қойыңыз...', api_key_help:'Тек браузеріңізде сақталады және тек кілт тиесілі сервиске жіберіледі.',
+  api_key_help_title:'Кілтті қалай алуға болады?', api_key_help_modal_title:'API кілтін алу және қою жолы', api_key_help_diagram_label:'Кілтті осында қойыңыз',
+  backup_label:'Сақтық көшірме', backup_export:'Барлық деректерді экспорттау', backup_import:'Импорттау', backup_help:'Барлық чаттар мен параметрлерді бір файлға сақтайды — құрылғыны ауыстырғанда ыңғайлы.',
+  error_toasts_label:'Қате туралы хабарламалар', error_toasts_sub:'Желі қателерінде хабарлама көрсету',
+  confirm_delete_label:'Жоюды растау', confirm_delete_sub:'Чатты жоймас бұрын сұрау',
+  save:'Сақтау', cancel:'Бас тарту', language_label:'Интерфейс тілі',
+  model_label:'Модель', model_hint:'Жоғарыдағы тізім OpenRouter кілттеріне арналған. Кілтіңіз басқа сервистен болса, модель атын қолмен енгізіңіз.',
+  model_manual_toggle:'Модельді қолмен енгізу', model_manual_placeholder:'мысалы gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'Бос қалдырса, сіздің сервисіңіздің әдепкі моделі қолданылады.',
+  system_prompt_label:'Жүйелік промпт (ЖИ үшін нұсқаулар)', system_prompt_placeholder:'Мысалы: Әрқашан қысқа жауап бер. Сен senior-әзірлеушісің.',
+  temperature_label:'Temperature (креативтілік)', topp_label:'Top-P', context_label:'Ағымдағы чат контексі', tokens_label:'токен',
+  avatar_upload:'Фото жүктеу', avatar_remove:'Фотоны өшіру', your_name:'Атыңыз', your_name_placeholder:'Қонақ',
+  compact_label:'Ықшам режим', compact_sub:'Хабарламалардағы аралықты азайту',
+  large_font_label:'Үлкен қаріп', large_font_sub:'Хабарлама мәтінінің өлшемін ұлғайту',
+  send_sound_label:'Жіберу дыбысы', send_sound_sub:'Хабарлама жіберу кезінде дыбыс ойнату',
+  receive_sound_label:'Қабылдау дыбысы', receive_sound_sub:'ЖИ жауап беруді аяқтағанда дыбыс ойнату',
+  timestamps_label:'Хабарлама уақыты', timestamps_sub:'Әр хабарламаның астында уақытты көрсету',
+  autoscroll_label:'Автоайналдыру', autoscroll_sub:'Жаңа хабарламаларға автоматты түрде айналдыру',
+  shortcuts_title:'Пернетақта таңбашалары', shortcuts_new_chat:'Жаңа чат', shortcuts_search:'Чаттардан іздеу',
+  shortcuts_send:'Жіберу', shortcuts_newline:'Жаңа жол', shortcuts_esc:'Терезені/мәзірді жабу',
+  accent_label:'Акцент түсі', animations_label:'Интерфейс анимациялары', animations_sub:'Жұмсақ өтулер мен пайда болулар',
+  avatar_show_label:'ЖИ аватарын көрсету', avatar_show_sub:'Жауаптардың жанындағы BarbosovAI белгішесі',
+  dense_label:'Ықшам чат тізімі', dense_sub:'Сол жақтағы тарихта аз аралық',
+  streaming_label:'Ағындық генерация', streaming_sub:'Жауапты генерация барысында көрсету',
+  reasoning_label:'Пайымдау режимі', reasoning_sub:'Модельден ойлау барысын көрсетуді сұрау (қолдаса)',
+  tools_label:'ЖИ файлдар жасай алады', tools_sub:'Архивтер, кестелер және файлдар — өз бастамасымен. Белгілі бір модельде жауаптарды бұзса, өшіріңіз.',
+  integrations_desc:'Сыртқы сервистерді қосыңыз. Токендер тек жергілікті сақталады.', wip_title:'Әзірленуде', wip_sub:'Интеграциялар жақында қосылады',
+  prompts_add:'Жаңа промпт сақтау', prompts_empty:'Әзірге сақталған промпттар жоқ',
+  changelog_newer:'Жаңарақ', changelog_older:'Ескірек', changelog_page:'{total} ішінен {n}-нұсқа',
+  about_desc:'API кілті арқылы өз ЖИ-ыңыз. Барлық деректер браузеріңізде жергілікті сақталады.',
+  msg_copy:'Көшіру', msg_speak:'Дауыстап оқу', msg_regenerate:'Қайта жасау', msg_like:'Ұнайды', msg_dislike:'Ұнамайды', msg_delete:'Жою', msg_edit:'Өңдеу',
+  attach_camera:'Камера', attach_photo:'Галереядан фото', attach_file:'Файл',
+  share_via_system:'Арқылы бөлісу...', share_copy_link:'Сілтемені көшіру', share_copy_text:'Чат мәтінін көшіру',
+  more_rename:'Чат атын өзгерту', more_pin:'Чатты бекіту', more_unpin:'Бекітуден алу', more_duplicate:'Чатты көшіру',
+  more_clear:'Хабарламаларды тазарту', more_export:'Экспорттау (.txt)', more_export_pdf:'PDF ретінде экспорттау', more_delete:'Чатты жою',
+  camera_title:'Камера', camera_capture:'Сурет түсіру',
+  provider_connected:'Қосылған сервис: {name}', provider_unknown:'Сервис танылмады — OpenAI-мен үйлесімді API ретінде байқап көреміз',
+  provider_google:'Google Gemini кілті анықталды — тікелей қолдау әлі іске асырылмаған',
+},
+ko:{
+  new_chat:'새 채팅', search_placeholder:'채팅 검색...', history_label:'기록', settings:'설정',
+  download_title:'채팅 다운로드', share_title:'공유', menu_title:'메뉴',
+  empty_title:'오늘은 무엇을 할까요?', empty_subtitle:'질문하거나, 텍스트를 붙여넣거나, 아이디어를 논의해 보세요 — BarbosovAI가 함께합니다.',
+  prompt1_title:'복잡한 것을 설명해줘', prompt1_sub:'쉬운 말로',
+  prompt2_title:'계획을 세워줘', prompt2_sub:'다음 한 주를 위해',
+  prompt3_title:'코드를 작성해줘', prompt3_sub:'어떤 언어로든',
+  prompt4_title:'아이디어를 제안해줘', prompt4_sub:'어떤 상황에도',
+  composer_placeholder:'메시지를 입력하세요...', composer_disclaimer:'BarbosovAI는 실수를 할 수 있습니다. 중요한 정보는 확인하세요.',
+  attach_title:'첨부', mic_title:'음성 입력',
+  settings_title:'설정', tab_general:'일반', tab_model:'모델', tab_profile:'프로필', tab_interface:'인터페이스',
+  tab_appearance:'외관', tab_experimental:'실험적 기능', tab_integrations:'연동', tab_prompts:'프롬프트',
+  tab_changelog:'새 소식', tab_about:'정보',
+  api_key_label:'API 키', api_key_placeholder:'API 키를 붙여넣으세요...', api_key_help:'브라우저에만 저장되며 키가 속한 서비스로만 전송됩니다.',
+  api_key_help_title:'키는 어떻게 받나요?', api_key_help_modal_title:'API 키 받고 붙여넣는 방법', api_key_help_diagram_label:'여기에 키를 붙여넣으세요',
+  backup_label:'백업', backup_export:'모든 데이터 내보내기', backup_import:'가져오기', backup_help:'모든 채팅과 설정을 하나의 파일로 저장합니다 — 기기를 바꿀 때 유용합니다.',
+  error_toasts_label:'오류 알림', error_toasts_sub:'네트워크 오류 시 알림 표시',
+  confirm_delete_label:'삭제 확인', confirm_delete_sub:'채팅 삭제 전에 확인하기',
+  save:'저장', cancel:'취소', language_label:'인터페이스 언어',
+  model_label:'모델', model_hint:'위 목록은 OpenRouter 키용입니다. 다른 서비스의 키라면 모델명을 직접 입력하세요.',
+  model_manual_toggle:'모델 직접 입력', model_manual_placeholder:'예: gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'비워두면 해당 서비스의 기본 모델이 사용됩니다.',
+  system_prompt_label:'시스템 프롬프트 (AI에게 주는 지침)', system_prompt_placeholder:'예: 항상 간결하게 답변해줘. 너는 시니어 개발자야.',
+  temperature_label:'Temperature (창의성)', topp_label:'Top-P', context_label:'현재 채팅 컨텍스트', tokens_label:'토큰',
+  avatar_upload:'사진 업로드', avatar_remove:'사진 삭제', your_name:'이름', your_name_placeholder:'게스트',
+  compact_label:'컴팩트 모드', compact_sub:'메시지 간격 줄이기',
+  large_font_label:'큰 글꼴', large_font_sub:'메시지 글자 크기 키우기',
+  send_sound_label:'전송음', send_sound_sub:'메시지 전송 시 소리 재생',
+  receive_sound_label:'수신음', receive_sound_sub:'AI 응답이 끝나면 소리 재생',
+  timestamps_label:'메시지 시간', timestamps_sub:'각 메시지 아래에 시간 표시',
+  autoscroll_label:'자동 스크롤', autoscroll_sub:'새 메시지로 자동 스크롤',
+  shortcuts_title:'키보드 단축키', shortcuts_new_chat:'새 채팅', shortcuts_search:'채팅 검색',
+  shortcuts_send:'전송', shortcuts_newline:'줄바꿈', shortcuts_esc:'창/메뉴 닫기',
+  accent_label:'강조 색상', animations_label:'인터페이스 애니메이션', animations_sub:'부드러운 전환 및 표시 효과',
+  avatar_show_label:'AI 아바타 표시', avatar_show_sub:'답변 옆에 BarbosovAI 아이콘 표시',
+  dense_label:'조밀한 채팅 목록', dense_sub:'왼쪽 기록의 간격 줄이기',
+  streaming_label:'스트리밍 생성', streaming_sub:'생성되는 동안 응답 표시',
+  reasoning_label:'추론 모드', reasoning_sub:'모델에게 사고 과정을 보여달라고 요청 (지원 시)',
+  tools_label:'AI가 파일을 만들 수 있음', tools_sub:'압축 파일, 표, 파일을 AI가 스스로 생성합니다. 특정 모델에서 문제가 생기면 꺼주세요.',
+  integrations_desc:'외부 서비스를 연결하세요. 토큰은 로컬에만 저장됩니다.', wip_title:'개발 중', wip_sub:'연동 기능은 곧 제공됩니다',
+  prompts_add:'새 프롬프트 저장', prompts_empty:'저장된 프롬프트가 아직 없습니다',
+  changelog_newer:'최신', changelog_older:'이전', changelog_page:'{total}개 중 {n}번째 버전',
+  about_desc:'API 키로 사용하는 나만의 AI. 모든 데이터는 브라우저에 로컬로 저장됩니다.',
+  msg_copy:'복사', msg_speak:'읽어주기', msg_regenerate:'다시 생성', msg_like:'좋아요', msg_dislike:'싫어요', msg_delete:'삭제', msg_edit:'수정',
+  attach_camera:'카메라', attach_photo:'갤러리에서 사진', attach_file:'파일',
+  share_via_system:'다음으로 공유...', share_copy_link:'링크 복사', share_copy_text:'채팅 텍스트 복사',
+  more_rename:'채팅 이름 변경', more_pin:'채팅 고정', more_unpin:'고정 해제', more_duplicate:'채팅 복제',
+  more_clear:'메시지 지우기', more_export:'내보내기 (.txt)', more_export_pdf:'PDF로 내보내기', more_delete:'채팅 삭제',
+  camera_title:'카메라', camera_capture:'사진 찍기',
+  provider_connected:'연결된 서비스: {name}', provider_unknown:'서비스를 인식하지 못했습니다 — OpenAI 호환 API로 시도합니다',
+  provider_google:'Google Gemini 키가 감지되었습니다 — 직접 지원은 아직 구현되지 않았습니다',
+},
+hi:{
+  new_chat:'नई चैट', search_placeholder:'चैट खोजें...', history_label:'इतिहास', settings:'सेटिंग्स',
+  download_title:'चैट डाउनलोड करें', share_title:'शेयर करें', menu_title:'मेन्यू',
+  empty_title:'आज क्या करें?', empty_subtitle:'सवाल पूछें, टेक्स्ट पेस्ट करें, या कोई आइडिया डिस्कस करें — BarbosovAI तैयार है।',
+  prompt1_title:'कोई जटिल बात समझाएं', prompt1_sub:'आसान शब्दों में',
+  prompt2_title:'एक योजना बनाएं', prompt2_sub:'अगले हफ्ते के लिए',
+  prompt3_title:'कोड लिखें', prompt3_sub:'किसी भी भाषा में',
+  prompt4_title:'एक आइडिया सुझाएं', prompt4_sub:'किसी भी मौके के लिए',
+  composer_placeholder:'मैसेज लिखें...', composer_disclaimer:'BarbosovAI गलतियाँ कर सकता है। महत्वपूर्ण तथ्यों की जांच करें।',
+  attach_title:'अटैच करें', mic_title:'वॉइस इनपुट',
+  settings_title:'सेटिंग्स', tab_general:'सामान्य', tab_model:'मॉडल', tab_profile:'प्रोफ़ाइल', tab_interface:'इंटरफ़ेस',
+  tab_appearance:'दिखावट', tab_experimental:'प्रयोगात्मक', tab_integrations:'इंटीग्रेशन', tab_prompts:'प्रॉम्प्ट्स',
+  tab_changelog:'नया क्या है', tab_about:'ऐप के बारे में',
+  api_key_label:'API कुंजी', api_key_placeholder:'अपनी API कुंजी पेस्ट करें...', api_key_help:'यह केवल आपके ब्राउज़र में सेव होती है और केवल उसी सेवा को भेजी जाती है जिसकी यह कुंजी है।',
+  api_key_help_title:'कुंजी कैसे प्राप्त करें?', api_key_help_modal_title:'API कुंजी कैसे प्राप्त करें और पेस्ट करें', api_key_help_diagram_label:'अपनी कुंजी यहाँ पेस्ट करें',
+  backup_label:'बैकअप', backup_export:'सभी डेटा एक्सपोर्ट करें', backup_import:'इम्पोर्ट करें', backup_help:'सभी चैट और सेटिंग्स को एक फ़ाइल में सेव करता है — डिवाइस बदलने पर सुविधाजनक।',
+  error_toasts_label:'त्रुटि सूचनाएं', error_toasts_sub:'नेटवर्क त्रुटि होने पर सूचना दिखाएं',
+  confirm_delete_label:'डिलीट की पुष्टि', confirm_delete_sub:'चैट डिलीट करने से पहले पूछें',
+  save:'सेव करें', cancel:'रद्द करें', language_label:'इंटरफ़ेस की भाषा',
+  model_label:'मॉडल', model_hint:'ऊपर दी गई सूची OpenRouter कुंजियों के लिए है। अगर आपकी कुंजी किसी और सेवा की है, तो मॉडल का नाम खुद लिखें।',
+  model_manual_toggle:'मॉडल खुद लिखें', model_manual_placeholder:'जैसे gpt-4o-mini, claude-3-5-sonnet-20241022',
+  model_manual_help:'खाली छोड़ने पर आपकी सेवा का डिफ़ॉल्ट मॉडल इस्तेमाल होगा।',
+  system_prompt_label:'सिस्टम प्रॉम्प्ट (AI के लिए निर्देश)', system_prompt_placeholder:'उदाहरण: हमेशा छोटा जवाब दो। तुम एक सीनियर डेवलपर हो।',
+  temperature_label:'Temperature (रचनात्मकता)', topp_label:'Top-P', context_label:'मौजूदा चैट का संदर्भ', tokens_label:'टोकन',
+  avatar_upload:'फोटो अपलोड करें', avatar_remove:'फोटो हटाएं', your_name:'आपका नाम', your_name_placeholder:'गेस्ट',
+  compact_label:'कॉम्पैक्ट मोड', compact_sub:'मैसेज के बीच स्पेस कम करें',
+  large_font_label:'बड़ा फॉन्ट', large_font_sub:'मैसेज के टेक्स्ट का आकार बढ़ाएं',
+  send_sound_label:'भेजने की ध्वनि', send_sound_sub:'मैसेज भेजते समय ध्वनि चलाएं',
+  receive_sound_label:'प्राप्ति ध्वनि', receive_sound_sub:'AI का जवाब पूरा होने पर ध्वनि चलाएं',
+  timestamps_label:'मैसेज का समय', timestamps_sub:'हर मैसेज के नीचे समय दिखाएं',
+  autoscroll_label:'ऑटो-स्क्रॉल', autoscroll_sub:'नए मैसेज तक अपने आप स्क्रॉल करें',
+  shortcuts_title:'कीबोर्ड शॉर्टकट', shortcuts_new_chat:'नई चैट', shortcuts_search:'चैट खोजें',
+  shortcuts_send:'भेजें', shortcuts_newline:'नई लाइन', shortcuts_esc:'विंडो/मेन्यू बंद करें',
+  accent_label:'एक्सेंट रंग', animations_label:'इंटरफ़ेस एनिमेशन', animations_sub:'स्मूद ट्रांज़िशन और दिखावट',
+  avatar_show_label:'AI अवतार दिखाएं', avatar_show_sub:'जवाबों के बगल में BarbosovAI आइकन',
+  dense_label:'सघन चैट सूची', dense_sub:'बाईं ओर इतिहास में कम स्पेस',
+  streaming_label:'स्ट्रीमिंग जनरेशन', streaming_sub:'जनरेट होते समय जवाब दिखाएं',
+  reasoning_label:'रीज़निंग मोड', reasoning_sub:'मॉडल से सोचने की प्रक्रिया दिखाने को कहें (अगर सपोर्ट करे)',
+  tools_label:'AI फ़ाइलें बना सकता है', tools_sub:'आर्काइव, स्प्रेडशीट और फ़ाइलें — अपनी पहल पर। अगर किसी खास मॉडल के जवाब बिगड़ें तो इसे बंद करें।',
+  integrations_desc:'थर्ड-पार्टी सेवाएं कनेक्ट करें। टोकन केवल लोकल रूप से सेव होते हैं।', wip_title:'निर्माणाधीन', wip_sub:'इंटीग्रेशन जल्द आ रहे हैं',
+  prompts_add:'नया प्रॉम्प्ट सेव करें', prompts_empty:'अभी तक कोई प्रॉम्प्ट सेव नहीं हुआ',
+  changelog_newer:'नया', changelog_older:'पुराना', changelog_page:'संस्करण {n} / {total}',
+  about_desc:'API कुंजी के ज़रिए आपका अपना AI। सारा डेटा आपके ब्राउज़र में लोकल रूप से सेव होता है।',
+  msg_copy:'कॉपी करें', msg_speak:'ज़ोर से पढ़ें', msg_regenerate:'फिर से जनरेट करें', msg_like:'पसंद', msg_dislike:'नापसंद', msg_delete:'हटाएं', msg_edit:'बदलें',
+  attach_camera:'कैमरा', attach_photo:'गैलरी से फोटो', attach_file:'फ़ाइल',
+  share_via_system:'इसके ज़रिए शेयर करें...', share_copy_link:'लिंक कॉपी करें', share_copy_text:'चैट टेक्स्ट कॉपी करें',
+  more_rename:'चैट का नाम बदलें', more_pin:'चैट पिन करें', more_unpin:'पिन हटाएं', more_duplicate:'चैट डुप्लिकेट करें',
+  more_clear:'मैसेज साफ़ करें', more_export:'एक्सपोर्ट करें (.txt)', more_export_pdf:'PDF के रूप में एक्सपोर्ट करें', more_delete:'चैट हटाएं',
+  camera_title:'कैमरा', camera_capture:'फोटो लें',
+  provider_connected:'कनेक्टेड सेवा: {name}', provider_unknown:'सेवा पहचानी नहीं गई — OpenAI-संगत API के रूप में कोशिश करेंगे',
+  provider_google:'Google Gemini कुंजी मिली — सीधा सपोर्ट अभी उपलब्ध नहीं है',
 }
 };
 function t(key){
   const lang = localStorage.getItem('nova_lang') || 'en';
   return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+}
+const UPDATE_I18N = {
+  en:{ available:'New version available', refresh:'Refresh' },
+  ru:{ available:'Доступна новая версия', refresh:'Обновить' },
+  es:{ available:'Nueva versión disponible', refresh:'Actualizar' },
+  de:{ available:'Neue Version verfügbar', refresh:'Aktualisieren' },
+  fr:{ available:'Nouvelle version disponible', refresh:'Actualiser' },
+  zh:{ available:'有新版本可用', refresh:'刷新' },
+  pt:{ available:'Nova versão disponível', refresh:'Atualizar' },
+  it:{ available:'Nuova versione disponibile', refresh:'Aggiorna' },
+  nl:{ available:'Nieuwe versie beschikbaar', refresh:'Vernieuwen' },
+  pl:{ available:'Dostępna nowa wersja', refresh:'Odśwież' },
+  tr:{ available:'Yeni sürüm mevcut', refresh:'Yenile' },
+  ar:{ available:'يتوفر إصدار جديد', refresh:'تحديث' },
+  ja:{ available:'新しいバージョンがあります', refresh:'更新' },
+  uk:{ available:'Доступна нова версія', refresh:'Оновити' },
+  be:{ available:'Даступная новая версія', refresh:'Абнавіць' },
+  kk:{ available:'Жаңа нұсқа қолжетімді', refresh:'Жаңарту' },
+  ko:{ available:'새 버전을 사용할 수 있습니다', refresh:'새로고침' },
+  hi:{ available:'नया वर्शन उपलब्ध है', refresh:'रीफ़्रेश करें' },
+};
+function tu(key){
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  return (UPDATE_I18N[lang] && UPDATE_I18N[lang][key]) || UPDATE_I18N.en[key] || key;
 }
 const TOASTS_I18N = {
   en:{ chat_deleted:'Chat deleted', code_copied:'Code copied', copied:'Copied', already_rated:'This message already has a rating',
@@ -1545,85 +1829,114 @@ const TOASTS_I18N = {
        chat_downloaded:'Chat downloaded', chat_duplicated:'Chat duplicated', messages_cleared:'Messages cleared',
        prompt_saved:'Prompt saved', profile_saved:'Profile saved', settings_saved:'Settings saved',
        backup_downloaded:'Backup downloaded', backup_imported:'Backup imported', chat_empty:'Chat is empty',
-       link_copied:'Link copied (local, for this browser)', provider_unsupported:'{name} is not directly supported yet. Use an OpenRouter, OpenAI, Anthropic, or Groq key.', empty_response:'Empty response from the model.', model_unavailable:'This model is not available, choose another one or select auto-select', request_error:'Request error: ', no_reply:'Could not get a reply: ' },
+       link_copied:'Link copied (local, for this browser)', provider_unsupported:'{name} is not directly supported yet. Use an OpenRouter, OpenAI, Anthropic, or Groq key.', empty_response:'Empty response from the model.', model_unavailable:'This model is not available, choose another one or select auto-select', request_error:'Request error: ', no_reply:'Could not get a reply: ' , auth_error:'Could not verify the key. Check it and re-enter it: Settings → General → the "API key" field.' },
   ru:{ chat_deleted:'Чат удалён', code_copied:'Код скопирован', copied:'Скопировано', already_rated:'Оценка уже поставлена для этого сообщения',
        message_deleted:'Сообщение удалено', add_key_first:'Добавьте API-ключ в настройках', generation_stopped:'Генерация остановлена',
        chat_downloaded:'Чат скачан', chat_duplicated:'Чат продублирован', messages_cleared:'Сообщения очищены',
        prompt_saved:'Промпт сохранён', profile_saved:'Профиль сохранён', settings_saved:'Настройки сохранены',
        backup_downloaded:'Резервная копия скачана', backup_imported:'Резервная копия импортирована', chat_empty:'Чат пока пуст',
-       link_copied:'Ссылка скопирована (локальная, для этого браузера)', provider_unsupported:'{name} пока не поддерживается напрямую. Используйте ключ OpenRouter, OpenAI, Anthropic или Groq.', empty_response:'Пустой ответ от модели.', model_unavailable:'Данная модель не доступна, выберите другую или выберите автовыбор', request_error:'Ошибка запроса: ', no_reply:'Не удалось получить ответ: ' },
+       link_copied:'Ссылка скопирована (локальная, для этого браузера)', provider_unsupported:'{name} пока не поддерживается напрямую. Используйте ключ OpenRouter, OpenAI, Anthropic или Groq.', empty_response:'Пустой ответ от модели.', model_unavailable:'Данная модель не доступна, выберите другую или выберите автовыбор', request_error:'Ошибка запроса: ', no_reply:'Не удалось получить ответ: ' , auth_error:'Не удалось идентифицировать ключ. Проверьте ключ и введите снова: Настройки → Общие → поле «API ключ».' },
   es:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Este mensaje ya tiene una valoración',
        message_deleted:'Mensaje eliminado', add_key_first:'Añade una clave API en ajustes', generation_stopped:'Generación detenida',
        chat_downloaded:'Chat descargado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensajes borrados',
        prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Ajustes guardados',
        backup_downloaded:'Copia de seguridad descargada', backup_imported:'Copia de seguridad importada', chat_empty:'El chat está vacío',
-       link_copied:'Enlace copiado (local, para este navegador)', provider_unsupported:'{name} aún no es compatible directamente. Usa una clave de OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Respuesta vacía del modelo.', model_unavailable:'Este modelo no está disponible, elige otro o selecciona la selección automática', request_error:'Error de solicitud: ', no_reply:'No se pudo obtener respuesta: ' },
+       link_copied:'Enlace copiado (local, para este navegador)', provider_unsupported:'{name} aún no es compatible directamente. Usa una clave de OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Respuesta vacía del modelo.', model_unavailable:'Este modelo no está disponible, elige otro o selecciona la selección automática', request_error:'Error de solicitud: ', no_reply:'No se pudo obtener respuesta: ' , auth_error:'No se pudo verificar la clave. Revísala y vuelve a introducirla: Ajustes → General → campo «Clave API».' },
   de:{ chat_deleted:'Chat gelöscht', code_copied:'Code kopiert', copied:'Kopiert', already_rated:'Diese Nachricht wurde bereits bewertet',
        message_deleted:'Nachricht gelöscht', add_key_first:'Füge einen API-Schlüssel in den Einstellungen hinzu', generation_stopped:'Generierung gestoppt',
        chat_downloaded:'Chat heruntergeladen', chat_duplicated:'Chat dupliziert', messages_cleared:'Nachrichten gelöscht',
        prompt_saved:'Prompt gespeichert', profile_saved:'Profil gespeichert', settings_saved:'Einstellungen gespeichert',
        backup_downloaded:'Sicherung heruntergeladen', backup_imported:'Sicherung importiert', chat_empty:'Chat ist leer',
-       link_copied:'Link kopiert (lokal, für diesen Browser)', provider_unsupported:'{name} wird noch nicht direkt unterstützt. Verwende einen OpenRouter-, OpenAI-, Anthropic- oder Groq-Schlüssel.', empty_response:'Leere Antwort vom Modell.', model_unavailable:'Dieses Modell ist nicht verfügbar, wähle ein anderes oder die automatische Auswahl', request_error:'Anfragefehler: ', no_reply:'Antwort konnte nicht abgerufen werden: ' },
+       link_copied:'Link kopiert (lokal, für diesen Browser)', provider_unsupported:'{name} wird noch nicht direkt unterstützt. Verwende einen OpenRouter-, OpenAI-, Anthropic- oder Groq-Schlüssel.', empty_response:'Leere Antwort vom Modell.', model_unavailable:'Dieses Modell ist nicht verfügbar, wähle ein anderes oder die automatische Auswahl', request_error:'Anfragefehler: ', no_reply:'Antwort konnte nicht abgerufen werden: ' , auth_error:'Der Schlüssel konnte nicht überprüft werden. Prüfe ihn und gib ihn erneut ein: Einstellungen → Allgemein → Feld „API-Schlüssel“.' },
   fr:{ chat_deleted:'Discussion supprimée', code_copied:'Code copié', copied:'Copié', already_rated:'Ce message a déjà une note',
        message_deleted:'Message supprimé', add_key_first:'Ajoutez une clé API dans les paramètres', generation_stopped:'Génération arrêtée',
        chat_downloaded:'Discussion téléchargée', chat_duplicated:'Discussion dupliquée', messages_cleared:'Messages effacés',
        prompt_saved:'Prompt enregistré', profile_saved:'Profil enregistré', settings_saved:'Paramètres enregistrés',
        backup_downloaded:'Sauvegarde téléchargée', backup_imported:'Sauvegarde importée', chat_empty:'La discussion est vide',
-       link_copied:'Lien copié (local, pour ce navigateur)', provider_unsupported:'{name} n\'est pas encore pris en charge directement. Utilisez une clé OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Réponse vide du modèle.', model_unavailable:'Ce modèle n\'est pas disponible, choisissez-en un autre ou la sélection automatique', request_error:'Erreur de requête : ', no_reply:'Impossible d\'obtenir une réponse : ' },
+       link_copied:'Lien copié (local, pour ce navigateur)', provider_unsupported:'{name} n\'est pas encore pris en charge directement. Utilisez une clé OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Réponse vide du modèle.', model_unavailable:'Ce modèle n\'est pas disponible, choisissez-en un autre ou la sélection automatique', request_error:'Erreur de requête : ', no_reply:'Impossible d\'obtenir une réponse : ' , auth_error:'Impossible de vérifier la clé. Vérifiez-la et ressaisissez-la : Paramètres → Général → champ « Clé API ».' },
   zh:{ chat_deleted:'对话已删除', code_copied:'代码已复制', copied:'已复制', already_rated:'该消息已评价过',
        message_deleted:'消息已删除', add_key_first:'请在设置中添加 API 密钥', generation_stopped:'已停止生成',
        chat_downloaded:'对话已下载', chat_duplicated:'对话已复制', messages_cleared:'消息已清空',
        prompt_saved:'提示词已保存', profile_saved:'个人资料已保存', settings_saved:'设置已保存',
        backup_downloaded:'备份已下载', backup_imported:'备份已导入', chat_empty:'对话为空',
-       link_copied:'链接已复制（仅限本浏览器本地使用）', provider_unsupported:'{name} 目前尚不支持直接使用。请使用 OpenRouter、OpenAI、Anthropic 或 Groq 的密钥。', empty_response:'模型返回了空响应。', model_unavailable:'该模型不可用，请选择其他模型或自动选择', request_error:'请求错误：', no_reply:'无法获取回复：' },
+       link_copied:'链接已复制（仅限本浏览器本地使用）', provider_unsupported:'{name} 目前尚不支持直接使用。请使用 OpenRouter、OpenAI、Anthropic 或 Groq 的密钥。', empty_response:'模型返回了空响应。', model_unavailable:'该模型不可用，请选择其他模型或自动选择', request_error:'请求错误：', no_reply:'无法获取回复：' , auth_error:'无法验证密钥。请检查并重新输入：设置 → 通用 → “API 密钥”字段。' },
   pt:{ chat_deleted:'Chat eliminado', code_copied:'Código copiado', copied:'Copiado', already_rated:'Esta mensagem já tem uma avaliação',
        message_deleted:'Mensagem eliminada', add_key_first:'Adiciona uma chave API nas definições', generation_stopped:'Geração interrompida',
        chat_downloaded:'Chat descarregado', chat_duplicated:'Chat duplicado', messages_cleared:'Mensagens apagadas',
        prompt_saved:'Prompt guardado', profile_saved:'Perfil guardado', settings_saved:'Definições guardadas',
        backup_downloaded:'Cópia de segurança descarregada', backup_imported:'Cópia de segurança importada', chat_empty:'O chat está vazio',
-       link_copied:'Link copiado (local, para este navegador)', provider_unsupported:'{name} ainda não é suportado diretamente. Usa uma chave OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Resposta vazia do modelo.', model_unavailable:'Este modelo não está disponível, escolhe outro ou a seleção automática', request_error:'Erro no pedido: ', no_reply:'Não foi possível obter resposta: ' },
+       link_copied:'Link copiado (local, para este navegador)', provider_unsupported:'{name} ainda não é suportado diretamente. Usa uma chave OpenRouter, OpenAI, Anthropic ou Groq.', empty_response:'Resposta vazia do modelo.', model_unavailable:'Este modelo não está disponível, escolhe outro ou a seleção automática', request_error:'Erro no pedido: ', no_reply:'Não foi possível obter resposta: ' , auth_error:'Não foi possível verificar a chave. Verifica-a e insere-a novamente: Definições → Geral → campo "Chave API".' },
   it:{ chat_deleted:'Chat eliminata', code_copied:'Codice copiato', copied:'Copiato', already_rated:'Questo messaggio ha già una valutazione',
        message_deleted:'Messaggio eliminato', add_key_first:'Aggiungi una chiave API nelle impostazioni', generation_stopped:'Generazione interrotta',
        chat_downloaded:'Chat scaricata', chat_duplicated:'Chat duplicata', messages_cleared:'Messaggi cancellati',
        prompt_saved:'Prompt salvato', profile_saved:'Profilo salvato', settings_saved:'Impostazioni salvate',
        backup_downloaded:'Backup scaricato', backup_imported:'Backup importato', chat_empty:'La chat è vuota',
-       link_copied:'Link copiato (locale, per questo browser)', provider_unsupported:'{name} non è ancora supportato direttamente. Usa una chiave OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Risposta vuota dal modello.', model_unavailable:'Questo modello non è disponibile, scegline un altro o la selezione automatica', request_error:'Errore richiesta: ', no_reply:'Impossibile ottenere una risposta: ' },
+       link_copied:'Link copiato (locale, per questo browser)', provider_unsupported:'{name} non è ancora supportato direttamente. Usa una chiave OpenRouter, OpenAI, Anthropic o Groq.', empty_response:'Risposta vuota dal modello.', model_unavailable:'Questo modello non è disponibile, scegline un altro o la selezione automatica', request_error:'Errore richiesta: ', no_reply:'Impossibile ottenere una risposta: ' , auth_error:'Impossibile verificare la chiave. Controllala e reinseriscila: Impostazioni → Generale → campo "Chiave API".' },
   nl:{ chat_deleted:'Chat verwijderd', code_copied:'Code gekopieerd', copied:'Gekopieerd', already_rated:'Dit bericht heeft al een beoordeling',
        message_deleted:'Bericht verwijderd', add_key_first:'Voeg een API-sleutel toe in instellingen', generation_stopped:'Generatie gestopt',
        chat_downloaded:'Chat gedownload', chat_duplicated:'Chat gedupliceerd', messages_cleared:'Berichten gewist',
        prompt_saved:'Prompt opgeslagen', profile_saved:'Profiel opgeslagen', settings_saved:'Instellingen opgeslagen',
        backup_downloaded:'Back-up gedownload', backup_imported:'Back-up geïmporteerd', chat_empty:'Chat is leeg',
-       link_copied:'Link gekopieerd (lokaal, voor deze browser)', provider_unsupported:'{name} wordt nog niet direct ondersteund. Gebruik een OpenRouter-, OpenAI-, Anthropic- of Groq-sleutel.', empty_response:'Leeg antwoord van het model.', model_unavailable:'Dit model is niet beschikbaar, kies een ander of de automatische selectie', request_error:'Verzoekfout: ', no_reply:'Kon geen antwoord krijgen: ' },
+       link_copied:'Link gekopieerd (lokaal, voor deze browser)', provider_unsupported:'{name} wordt nog niet direct ondersteund. Gebruik een OpenRouter-, OpenAI-, Anthropic- of Groq-sleutel.', empty_response:'Leeg antwoord van het model.', model_unavailable:'Dit model is niet beschikbaar, kies een ander of de automatische selectie', request_error:'Verzoekfout: ', no_reply:'Kon geen antwoord krijgen: ' , auth_error:'De sleutel kon niet worden geverifieerd. Controleer hem en voer hem opnieuw in: Instellingen → Algemeen → veld "API-sleutel".' },
   pl:{ chat_deleted:'Czat usunięty', code_copied:'Kod skopiowany', copied:'Skopiowano', already_rated:'Ta wiadomość już ma ocenę',
        message_deleted:'Wiadomość usunięta', add_key_first:'Dodaj klucz API w ustawieniach', generation_stopped:'Generowanie zatrzymane',
        chat_downloaded:'Czat pobrany', chat_duplicated:'Czat zduplikowany', messages_cleared:'Wiadomości wyczyszczone',
        prompt_saved:'Prompt zapisany', profile_saved:'Profil zapisany', settings_saved:'Ustawienia zapisane',
        backup_downloaded:'Kopia zapasowa pobrana', backup_imported:'Kopia zapasowa zaimportowana', chat_empty:'Czat jest pusty',
-       link_copied:'Link skopiowany (lokalnie, dla tej przeglądarki)', provider_unsupported:'{name} nie jest jeszcze obsługiwany bezpośrednio. Użyj klucza OpenRouter, OpenAI, Anthropic lub Groq.', empty_response:'Pusta odpowiedź od modelu.', model_unavailable:'Ten model jest niedostępny, wybierz inny lub wybór automatyczny', request_error:'Błąd żądania: ', no_reply:'Nie udało się uzyskać odpowiedzi: ' },
+       link_copied:'Link skopiowany (lokalnie, dla tej przeglądarki)', provider_unsupported:'{name} nie jest jeszcze obsługiwany bezpośrednio. Użyj klucza OpenRouter, OpenAI, Anthropic lub Groq.', empty_response:'Pusta odpowiedź od modelu.', model_unavailable:'Ten model jest niedostępny, wybierz inny lub wybór automatyczny', request_error:'Błąd żądania: ', no_reply:'Nie udało się uzyskać odpowiedzi: ' , auth_error:'Nie udało się zweryfikować klucza. Sprawdź go i wpisz ponownie: Ustawienia → Ogólne → pole „Klucz API”.' },
   tr:{ chat_deleted:'Sohbet silindi', code_copied:'Kod kopyalandı', copied:'Kopyalandı', already_rated:'Bu mesaj zaten değerlendirildi',
        message_deleted:'Mesaj silindi', add_key_first:'Ayarlardan bir API anahtarı ekle', generation_stopped:'Üretim durduruldu',
        chat_downloaded:'Sohbet indirildi', chat_duplicated:'Sohbet çoğaltıldı', messages_cleared:'Mesajlar temizlendi',
        prompt_saved:'Prompt kaydedildi', profile_saved:'Profil kaydedildi', settings_saved:'Ayarlar kaydedildi',
        backup_downloaded:'Yedek indirildi', backup_imported:'Yedek içe aktarıldı', chat_empty:'Sohbet boş',
-       link_copied:'Bağlantı kopyalandı (yerel, bu tarayıcı için)', provider_unsupported:'{name} henüz doğrudan desteklenmiyor. Bir OpenRouter, OpenAI, Anthropic veya Groq anahtarı kullan.', empty_response:'Modelden boş yanıt.', model_unavailable:'Bu model kullanılamıyor, başka birini veya otomatik seçimi seç', request_error:'İstek hatası: ', no_reply:'Yanıt alınamadı: ' },
+       link_copied:'Bağlantı kopyalandı (yerel, bu tarayıcı için)', provider_unsupported:'{name} henüz doğrudan desteklenmiyor. Bir OpenRouter, OpenAI, Anthropic veya Groq anahtarı kullan.', empty_response:'Modelden boş yanıt.', model_unavailable:'Bu model kullanılamıyor, başka birini veya otomatik seçimi seç', request_error:'İstek hatası: ', no_reply:'Yanıt alınamadı: ' , auth_error:'Anahtar doğrulanamadı. Kontrol edip yeniden gir: Ayarlar → Genel → "API anahtarı" alanı.' },
   ar:{ chat_deleted:'تم حذف المحادثة', code_copied:'تم نسخ الكود', copied:'تم النسخ', already_rated:'تم تقييم هذه الرسالة بالفعل',
        message_deleted:'تم حذف الرسالة', add_key_first:'أضف مفتاح API في الإعدادات', generation_stopped:'تم إيقاف التوليد',
        chat_downloaded:'تم تنزيل المحادثة', chat_duplicated:'تم نسخ المحادثة', messages_cleared:'تم مسح الرسائل',
        prompt_saved:'تم حفظ الأمر', profile_saved:'تم حفظ الملف الشخصي', settings_saved:'تم حفظ الإعدادات',
        backup_downloaded:'تم تنزيل النسخة الاحتياطية', backup_imported:'تم استيراد النسخة الاحتياطية', chat_empty:'المحادثة فارغة',
-       link_copied:'تم نسخ الرابط (محلي، لهذا المتصفح)', provider_unsupported:'{name} غير مدعوم مباشرة بعد. استخدم مفتاح OpenRouter أو OpenAI أو Anthropic أو Groq.', empty_response:'استجابة فارغة من النموذج.', model_unavailable:'هذا النموذج غير متاح، اختر آخر أو اختر التحديد التلقائي', request_error:'خطأ في الطلب: ', no_reply:'تعذر الحصول على رد: ' },
+       link_copied:'تم نسخ الرابط (محلي، لهذا المتصفح)', provider_unsupported:'{name} غير مدعوم مباشرة بعد. استخدم مفتاح OpenRouter أو OpenAI أو Anthropic أو Groq.', empty_response:'استجابة فارغة من النموذج.', model_unavailable:'هذا النموذج غير متاح، اختر آخر أو اختر التحديد التلقائي', request_error:'خطأ في الطلب: ', no_reply:'تعذر الحصول على رد: ' , auth_error:'تعذر التحقق من المفتاح. تحقق منه وأدخله مرة أخرى: الإعدادات → عام → حقل "مفتاح API".' },
   ja:{ chat_deleted:'チャットを削除しました', code_copied:'コードをコピーしました', copied:'コピーしました', already_rated:'このメッセージは既に評価済みです',
        message_deleted:'メッセージを削除しました', add_key_first:'設定でAPIキーを追加してください', generation_stopped:'生成を停止しました',
        chat_downloaded:'チャットをダウンロードしました', chat_duplicated:'チャットを複製しました', messages_cleared:'メッセージをクリアしました',
        prompt_saved:'プロンプトを保存しました', profile_saved:'プロフィールを保存しました', settings_saved:'設定を保存しました',
        backup_downloaded:'バックアップをダウンロードしました', backup_imported:'バックアップをインポートしました', chat_empty:'チャットは空です',
-       link_copied:'リンクをコピーしました（このブラウザのローカル用）', provider_unsupported:'{name}はまだ直接サポートされていません。OpenRouter、OpenAI、Anthropic、またはGroqのキーを使用してください。', empty_response:'モデルからの応答が空でした。', model_unavailable:'このモデルは利用できません。別のモデルか自動選択を選んでください', request_error:'リクエストエラー: ', no_reply:'返信を取得できませんでした: ' },
+       link_copied:'リンクをコピーしました（このブラウザのローカル用）', provider_unsupported:'{name}はまだ直接サポートされていません。OpenRouter、OpenAI、Anthropic、またはGroqのキーを使用してください。', empty_response:'モデルからの応答が空でした。', model_unavailable:'このモデルは利用できません。別のモデルか自動選択を選んでください', request_error:'リクエストエラー: ', no_reply:'返信を取得できませんでした: ' , auth_error:'キーを確認できませんでした。確認してもう一度入力してください：設定 → 一般 → 「APIキー」欄。' },
   uk:{ chat_deleted:'Чат видалено', code_copied:'Код скопійовано', copied:'Скопійовано', already_rated:'Це повідомлення вже оцінено',
        message_deleted:'Повідомлення видалено', add_key_first:'Додайте API-ключ у налаштуваннях', generation_stopped:'Генерацію зупинено',
        chat_downloaded:'Чат завантажено', chat_duplicated:'Чат продубльовано', messages_cleared:'Повідомлення очищено',
        prompt_saved:'Промпт збережено', profile_saved:'Профіль збережено', settings_saved:'Налаштування збережено',
        backup_downloaded:'Резервну копію завантажено', backup_imported:'Резервну копію імпортовано', chat_empty:'Чат порожній',
-       link_copied:'Посилання скопійовано (локально, для цього браузера)', provider_unsupported:'{name} поки не підтримується напряму. Використайте ключ OpenRouter, OpenAI, Anthropic або Groq.', empty_response:'Порожня відповідь від моделі.', model_unavailable:'Ця модель недоступна, виберіть іншу або автовибір', request_error:'Помилка запиту: ', no_reply:'Не вдалося отримати відповідь: ' },
+       link_copied:'Посилання скопійовано (локально, для цього браузера)', provider_unsupported:'{name} поки не підтримується напряму. Використайте ключ OpenRouter, OpenAI, Anthropic або Groq.', empty_response:'Порожня відповідь від моделі.', model_unavailable:'Ця модель недоступна, виберіть іншу або автовибір', request_error:'Помилка запиту: ', no_reply:'Не вдалося отримати відповідь: ',
+       auth_error:'Не вдалося розпізнати ключ. Перевірте його і введіть знову: Налаштування → Загальні → поле «API ключ».' },
+  be:{ chat_deleted:'Чат выдалены', code_copied:'Код скапіяваны', copied:'Скапіявана', already_rated:'Гэта паведамленне ўжо ацэнена',
+       message_deleted:'Паведамленне выдалена', add_key_first:'Дадайце API-ключ у наладах', generation_stopped:'Генерацыя спынена',
+       chat_downloaded:'Чат спампаваны', chat_duplicated:'Чат прадубляваны', messages_cleared:'Паведамленні ачышчаны',
+       prompt_saved:'Промпт захаваны', profile_saved:'Профіль захаваны', settings_saved:'Налады захаваны',
+       backup_downloaded:'Рэзервовая копія спампавана', backup_imported:'Рэзервовая копія імпартавана', chat_empty:'Чат пусты',
+       link_copied:'Спасылка скапіявана (лакальна, для гэтага браўзера)', provider_unsupported:'{name} пакуль не падтрымліваецца напрамую. Скарыстайце ключ OpenRouter, OpenAI, Anthropic або Groq.', empty_response:'Пусты адказ ад мадэлі.', model_unavailable:'Гэтая мадэль недаступная, абярыце іншую або аўтавыбар', request_error:'Памылка запыту: ', no_reply:'Не атрымалася атрымаць адказ: ',
+       auth_error:'Не атрымалася распазнаць ключ. Праверце яго і ўвядзіце зноў: Налады → Агульныя → поле «API ключ».' },
+  kk:{ chat_deleted:'Чат жойылды', code_copied:'Код көшірілді', copied:'Көшірілді', already_rated:'Бұл хабарлама бұрын бағаланған',
+       message_deleted:'Хабарлама жойылды', add_key_first:'Параметрлерде API-кілт қосыңыз', generation_stopped:'Генерация тоқтатылды',
+       chat_downloaded:'Чат жүктелді', chat_duplicated:'Чат көшірілді', messages_cleared:'Хабарламалар тазартылды',
+       prompt_saved:'Промпт сақталды', profile_saved:'Профиль сақталды', settings_saved:'Параметрлер сақталды',
+       backup_downloaded:'Сақтық көшірме жүктелді', backup_imported:'Сақтық көшірме импортталды', chat_empty:'Чат бос',
+       link_copied:'Сілтеме көшірілді (жергілікті, осы браузер үшін)', provider_unsupported:'{name} әлі тікелей қолдау көрсетілмейді. OpenRouter, OpenAI, Anthropic немесе Groq кілтін қолданыңыз.', empty_response:'Модельден бос жауап.', model_unavailable:'Бұл модель қолжетімсіз, басқасын немесе автотаңдауды таңдаңыз', request_error:'Сұрау қатесі: ', no_reply:'Жауап алу мүмкін болмады: ',
+       auth_error:'Кілтті анықтау мүмкін болмады. Оны тексеріп, қайта енгізіңіз: Параметрлер → Жалпы → «API кілті» өрісі.' },
+  ko:{ chat_deleted:'채팅이 삭제되었습니다', code_copied:'코드가 복사되었습니다', copied:'복사되었습니다', already_rated:'이 메시지는 이미 평가되었습니다',
+       message_deleted:'메시지가 삭제되었습니다', add_key_first:'설정에서 API 키를 추가하세요', generation_stopped:'생성이 중지되었습니다',
+       chat_downloaded:'채팅이 다운로드되었습니다', chat_duplicated:'채팅이 복제되었습니다', messages_cleared:'메시지가 지워졌습니다',
+       prompt_saved:'프롬프트가 저장되었습니다', profile_saved:'프로필이 저장되었습니다', settings_saved:'설정이 저장되었습니다',
+       backup_downloaded:'백업이 다운로드되었습니다', backup_imported:'백업을 가져왔습니다', chat_empty:'채팅이 비어 있습니다',
+       link_copied:'링크가 복사되었습니다 (이 브라우저 로컬용)', provider_unsupported:'{name}는 아직 직접 지원되지 않습니다. OpenRouter, OpenAI, Anthropic 또는 Groq 키를 사용하세요.', empty_response:'모델의 응답이 비어 있습니다.', model_unavailable:'이 모델은 사용할 수 없습니다. 다른 모델이나 자동 선택을 고르세요', request_error:'요청 오류: ', no_reply:'응답을 받을 수 없습니다: ',
+       auth_error:'키를 확인할 수 없습니다. 키를 확인하고 다시 입력하세요: 설정 → 일반 → "API 키" 입력란.' },
+  hi:{ chat_deleted:'चैट हटा दी गई', code_copied:'कोड कॉपी हो गया', copied:'कॉपी हो गया', already_rated:'इस मैसेज को पहले ही रेट किया जा चुका है',
+       message_deleted:'मैसेज हटा दिया गया', add_key_first:'सेटिंग्स में API कुंजी जोड़ें', generation_stopped:'जनरेशन रोक दिया गया',
+       chat_downloaded:'चैट डाउनलोड हो गई', chat_duplicated:'चैट डुप्लिकेट हो गई', messages_cleared:'मैसेज साफ़ हो गए',
+       prompt_saved:'प्रॉम्प्ट सेव हो गया', profile_saved:'प्रोफ़ाइल सेव हो गई', settings_saved:'सेटिंग्स सेव हो गईं',
+       backup_downloaded:'बैकअप डाउनलोड हो गया', backup_imported:'बैकअप इम्पोर्ट हो गया', chat_empty:'चैट खाली है',
+       link_copied:'लिंक कॉपी हो गया (लोकल, इस ब्राउज़र के लिए)', provider_unsupported:'{name} अभी सीधे सपोर्टेड नहीं है। OpenRouter, OpenAI, Anthropic या Groq की कुंजी इस्तेमाल करें।', empty_response:'मॉडल से खाली जवाब मिला।', model_unavailable:'यह मॉडल उपलब्ध नहीं है, कोई और चुनें या ऑटो-सिलेक्ट चुनें', request_error:'रिक्वेस्ट में त्रुटि: ', no_reply:'जवाब नहीं मिल सका: ',
+       auth_error:'कुंजी की पहचान नहीं हो सकी। उसे जांचें और दोबारा डालें: सेटिंग्स → सामान्य → "API कुंजी" फ़ील्ड।' },
 };
 function tt(key){
   const lang = localStorage.getItem('nova_lang') || 'en';
@@ -1959,7 +2272,7 @@ function deleteMessageAt(idx){
 
 /* -------- Text-to-speech -------- */
 let currentUtterance = null;
-const SPEECH_LOCALES = { en:'en-US', ru:'ru-RU', es:'es-ES', de:'de-DE', fr:'fr-FR', zh:'zh-CN', pt:'pt-PT', it:'it-IT', nl:'nl-NL', pl:'pl-PL', tr:'tr-TR', ar:'ar-SA', ja:'ja-JP', uk:'uk-UA' };
+const SPEECH_LOCALES = { en:'en-US', ru:'ru-RU', es:'es-ES', de:'de-DE', fr:'fr-FR', zh:'zh-CN', pt:'pt-PT', it:'it-IT', nl:'nl-NL', pl:'pl-PL', tr:'tr-TR', ar:'ar-SA', ja:'ja-JP', uk:'uk-UA', be:'be-BY', kk:'kk-KZ', ko:'ko-KR', hi:'hi-IN' };
 function speakMessage(btn, idx){
   const chat = getActiveChat();
   const msg = chat.messages[idx];
@@ -2026,6 +2339,58 @@ function detectProvider(rawKey){
   if(/^sk-/i.test(key)) return 'openai';
   return 'unknown';
 }
+/* ================= API key help modal ================= */
+const API_KEY_HELP = {
+  en: [
+    { name:'OpenRouter', icon:'fa-shuffle', prefix:'sk-or-...', url:'https://openrouter.ai/keys',
+      steps:['Go to openrouter.ai and sign in (Google/GitHub/email).', 'Open the "Keys" section from your account menu.', 'Click "Create Key", give it a name, and confirm.', 'Copy the key — it starts with sk-or- — and paste it above.'] },
+    { name:'OpenAI', icon:'fa-brain', prefix:'sk-...', url:'https://platform.openai.com/api-keys',
+      steps:['Go to platform.openai.com and sign in.', 'Open "API keys" in the left sidebar.', 'Click "Create new secret key" and confirm.', 'Copy the key immediately (it\'s shown only once) and paste it above.'] },
+    { name:'Anthropic (Claude)', icon:'fa-comment-dots', prefix:'sk-ant-...', url:'https://console.anthropic.com/settings/keys',
+      steps:['Go to console.anthropic.com and sign in.', 'Open Settings → "API Keys".', 'Click "Create Key", name it, and confirm.', 'Copy the key — it starts with sk-ant- — and paste it above.'] },
+    { name:'Groq', icon:'fa-bolt', prefix:'gsk_...', url:'https://console.groq.com/keys',
+      steps:['Go to console.groq.com and sign in.', 'Open the "API Keys" page.', 'Click "Create API Key", name it, and confirm.', 'Copy the key — it starts with gsk_ — and paste it above.'] },
+  ],
+  ru: [
+    { name:'OpenRouter', icon:'fa-shuffle', prefix:'sk-or-...', url:'https://openrouter.ai/keys',
+      steps:['Зайдите на openrouter.ai и войдите (через Google/GitHub/почту).', 'Откройте раздел "Keys" в меню аккаунта.', 'Нажмите "Create Key", дайте имя и подтвердите.', 'Скопируйте ключ (начинается с sk-or-) и вставьте выше.'] },
+    { name:'OpenAI', icon:'fa-brain', prefix:'sk-...', url:'https://platform.openai.com/api-keys',
+      steps:['Зайдите на platform.openai.com и войдите.', 'Откройте "API keys" в левом меню.', 'Нажмите "Create new secret key" и подтвердите.', 'Сразу скопируйте ключ (показывается один раз) и вставьте выше.'] },
+    { name:'Anthropic (Claude)', icon:'fa-comment-dots', prefix:'sk-ant-...', url:'https://console.anthropic.com/settings/keys',
+      steps:['Зайдите на console.anthropic.com и войдите.', 'Откройте Settings → "API Keys".', 'Нажмите "Create Key", дайте имя и подтвердите.', 'Скопируйте ключ (начинается с sk-ant-) и вставьте выше.'] },
+    { name:'Groq', icon:'fa-bolt', prefix:'gsk_...', url:'https://console.groq.com/keys',
+      steps:['Зайдите на console.groq.com и войдите.', 'Откройте страницу "API Keys".', 'Нажмите "Create API Key", дайте имя и подтвердите.', 'Скопируйте ключ (начинается с gsk_) и вставьте выше.'] },
+  ],
+};
+function renderApiKeyHelp(){
+  const lang = localStorage.getItem('nova_lang') || 'en';
+  const providers = API_KEY_HELP[lang] || API_KEY_HELP.en;
+  document.getElementById('api-key-help-providers').innerHTML = providers.map(p => `
+    <div class="provider-help-card">
+      <div class="ph-head">
+        <div class="ph-icon"><i class="fa-solid ${p.icon}"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="ph-name">${escapeHtml(p.name)}</div>
+          <div class="ph-prefix">${escapeHtml(p.prefix)}</div>
+        </div>
+      </div>
+      <ol>${p.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+      <a href="${p.url}" target="_blank" rel="noopener">${p.url.replace('https://','')}</a>
+    </div>
+  `).join('');
+}
+function openApiKeyHelp(){
+  const modal = document.getElementById('api-key-help-modal');
+  renderApiKeyHelp();
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  requestAnimationFrame(()=> modal.classList.add('show'));
+}
+function closeApiKeyHelp(){
+  const modal = document.getElementById('api-key-help-modal');
+  modal.classList.remove('show');
+  setTimeout(()=> { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+}
+
 function updateProviderDetection(){
   const el = document.getElementById('provider-detection');
   if(!el) return;
@@ -2300,7 +2665,9 @@ async function requestAIReply(chat, opts){
       let errText; try{ errText = await res.text(); }catch(_){ errText = res.statusText; }
       const lower = errText.toLowerCase();
       const isModelIssue = res.status === 404 || lower.includes('no longer available') || lower.includes('not a valid model') || lower.includes('model not found') || lower.includes('is not available') || lower.includes('does not exist');
-      const e = new Error('HTTP ' + res.status + ': ' + errText.slice(0,300)); e.isModelError = isModelIssue; throw e;
+      const isToolsIssue = (payload.tools) && (lower.includes('tool') || lower.includes('function_call') || lower.includes('function calling'));
+      const isAuthIssue = !isToolsIssue && (res.status === 401 || res.status === 403 || lower.includes('api_key') || lower.includes('api key') || lower.includes('unauthorized') || lower.includes('authentication') || lower.includes('incorrect api') || lower.includes('invalid api') || (res.status === 500 && lower.includes('key')));
+      const e = new Error('HTTP ' + res.status + ': ' + errText.slice(0,300)); e.isModelError = isModelIssue; e.isToolsUnsupported = isToolsIssue; e.isAuthIssue = isAuthIssue; throw e;
     }
 
     const reader = res.body.getReader(); const decoder = new TextDecoder(); let buffer = '';
@@ -2383,11 +2750,23 @@ async function requestAIReply(chat, opts){
     if(err.name === 'AbortError'){
       if(!accumulated){ chat.messages.pop(); } else { chat.messages[msgIndex].content = accumulated; if(liveContentEl) liveContentEl.innerHTML = renderMarkdown(accumulated); }
       persistChats(); toast(tt('generation_stopped'),'info');
+    } else if(err.isToolsUnsupported && !opts.noTools){
+      // This provider/model rejected the "tools" parameter outright — retry once
+      // silently without it instead of surfacing a confusing error to the user.
+      chat.messages.pop();
+      state.sending = false; currentAbortController = null; setSendButtonState(false);
+      await requestAIReply(chat, { ...opts, noTools:true });
+      return;
     } else if(err.isModelError){
       toast(tt('model_unavailable'), 'error');
       chat.messages[msgIndex] = { role:'assistant', content: '⚠️ ' + tt('model_unavailable') + '.' };
       persistChats(); if(liveRow) liveRow.remove(); appendMessageEl(chat.messages[msgIndex], msgIndex, true);
       openSettings(); switchTab('model');
+    } else if(err.isAuthIssue){
+      toast(tt('auth_error'), 'error');
+      chat.messages[msgIndex] = { role:'assistant', content: '⚠️ ' + tt('auth_error') };
+      persistChats(); if(liveRow) liveRow.remove(); appendMessageEl(chat.messages[msgIndex], msgIndex, true);
+      openSettings(); switchTab('general');
     } else {
       if(state.settings.errorToasts) toast(tt('request_error') + err.message, 'error');
       chat.messages[msgIndex] = { role:'assistant', content: '⚠️ ' + tt('no_reply') + err.message };
@@ -2735,6 +3114,10 @@ const MODEL_AUTO_I18N = {
   ar:{ title:'اختيار تلقائي', sub:'يختار تلقائياً نموذجاً مجانياً متاحاً' },
   ja:{ title:'自動選択', sub:'利用可能な無料モデルを自動的に選びます' },
   uk:{ title:'Автовибір', sub:'Автоматично підбирає доступну безкоштовну модель' },
+  be:{ title:'Аўтавыбар', sub:'Аўтаматычна падбірае даступную бясплатную мадэль' },
+  kk:{ title:'Автотаңдау', sub:'Қолжетімді тегін модельді автоматты түрде таңдайды' },
+  ko:{ title:'자동 선택', sub:'사용 가능한 무료 모델을 자동으로 선택합니다' },
+  hi:{ title:'ऑटो-सिलेक्ट', sub:'उपलब्ध मुफ़्त मॉडल को अपने आप चुनता है' },
 };
 function renderModelPicker(){
   const current = localStorage.getItem('nova_model') || 'openrouter/free';
@@ -2837,6 +3220,10 @@ const CATEGORY_I18N = {
   ar:{ fixes:'تم إصلاح الأخطاء', features:'ميزات جديدة', improvements:'تحسينات' },
   ja:{ fixes:'修正されたバグ', features:'新機能', improvements:'改善点' },
   uk:{ fixes:'Виправлені помилки', features:'Новини', improvements:'Покращення' },
+  be:{ fixes:'Выпраўленыя памылкі', features:'Навіны', improvements:'Паляпшэнні' },
+  kk:{ fixes:'Түзетілген қателер', features:'Жаңалықтар', improvements:'Жақсартулар' },
+  ko:{ fixes:'수정된 버그', features:'새 기능', improvements:'개선 사항' },
+  hi:{ fixes:'ठीक की गई गड़बड़ियां', features:'नई सुविधाएं', improvements:'सुधार' },
 };
 function categoryLabel(cat){
   const lang = localStorage.getItem('nova_lang') || 'en';
@@ -3016,7 +3403,7 @@ function renderLanguagePicker(){
   const current = localStorage.getItem('nova_lang') || 'en';
   const wrap = document.getElementById('language-picker');
   if(!wrap) return;
-  wrap.innerHTML = LANGUAGES.map(l => `<button type="button" class="lang-flag${l.code===current?' selected':''}" title="${l.label}" onclick="setLanguage('${l.code}')">${l.flag}</button>`).join('');
+  wrap.innerHTML = LANGUAGES.map(l => `<button type="button" class="lang-flag${l.code===current?' selected':''}" title="${escapeHtml(l.label)}" onclick="setLanguage('${l.code}')"><span class="fi fi-${l.country}"></span><span class="lang-code">${l.short}</span></button>`).join('');
 }
 function setLanguage(code){
   localStorage.setItem('nova_lang', code);
@@ -3193,9 +3580,53 @@ document.addEventListener('keydown', (e) => {
     closeAttachMenu(); closeShareMenu(); closeMoreMenu();
     if(!document.getElementById('settings-modal').classList.contains('hidden')) closeSettings();
     if(!document.getElementById('camera-modal').classList.contains('hidden')) closeCameraModal();
+    if(!document.getElementById('api-key-help-modal').classList.contains('hidden')) closeApiKeyHelp();
   }
 });
 
+
+/* ================= Update check ================= */
+// This is a static site: there's no "download" step for the person using it —
+// once you (the site owner) push a new index.html + version.json, everyone
+// gets it automatically on their next page load. This just detects when the
+// page they already have open is stale and offers a one-click refresh.
+function compareVersions(a, b){
+  const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+  for(let i = 0; i < Math.max(pa.length, pb.length); i++){
+    const na = pa[i] || 0, nb = pb[i] || 0;
+    if(na !== nb) return na - nb;
+  }
+  return 0;
+}
+async function checkForUpdates(){
+  try{
+    const res = await fetch('./version.json', { cache:'no-store' });
+    if(!res.ok) return;
+    const data = await res.json();
+    if(data.version && compareVersions(data.version, APP_VERSION) > 0){
+      showUpdateBanner(data.version);
+    }
+  }catch(e){
+    // version.json missing or unreachable — silently skip, this is optional
+  }
+}
+function showUpdateBanner(newVersion){
+  if(document.getElementById('update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.className = 'scale-in';
+  banner.style.cssText = 'position:fixed; bottom:16px; right:16px; z-index:300; max-width:300px;';
+  banner.innerHTML = `
+    <div class="glass rounded-2xl p-3.5 flex items-center gap-3" style="background:var(--bg-2); border:1px solid var(--border);">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--accent-dim); color:var(--accent)"><i class="fa-solid fa-arrow-rotate-right text-xs"></i></div>
+      <div class="flex-1 min-w-0">
+        <div class="text-xs font-medium">${tu('available')} v${escapeHtml(newVersion)}</div>
+      </div>
+      <button onclick="location.reload()" class="btn-primary rounded-lg px-3 py-1.5 text-xs font-medium shrink-0">${tu('refresh')}</button>
+      <button onclick="document.getElementById('update-banner').remove()" class="icon-btn w-6 h-6 rounded-md flex items-center justify-center shrink-0" style="color:var(--text-lo)"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+    </div>`;
+  document.body.appendChild(banner);
+}
 
 function init(){
   loadState();
@@ -3208,6 +3639,7 @@ function init(){
   renderHistory();
   renderMessages();
   loadDraftForActiveChat();
+  checkForUpdates();
 }
 init();
 </script>
